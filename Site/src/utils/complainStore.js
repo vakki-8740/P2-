@@ -13,22 +13,37 @@ export function getComplains() {
 export function saveComplain(entry) {
   const list = getComplains()
   list.unshift(entry)
-  localStorage.setItem(KEY, JSON.stringify(list))
-  // dispatch storage event for same-tab listeners (custom)
-  window.dispatchEvent(new Event('complains-updated'))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(list))
+  } catch (e) {
+    if (e && e.name === 'QuotaExceededError') {
+      // keep only last 20 to free space and retry once
+      const trimmed = list.slice(0, 20)
+      localStorage.setItem(KEY, JSON.stringify(trimmed))
+    } else throw e
+  }
+  try { window.dispatchEvent(new Event('complains-updated')) } catch {}
   return list
 }
 
 export function clearComplains() {
-  localStorage.removeItem(KEY)
-  window.dispatchEvent(new Event('complains-updated'))
+  try { localStorage.removeItem(KEY) } catch {}
+  try { window.dispatchEvent(new Event('complains-updated')) } catch {}
+}
+
+export function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 }
 
 export function fileToBase64(file) {
+  const MAX_SIZE = 4 * 1024 * 1024
+  if (file && file.size > MAX_SIZE) {
+    return Promise.reject(new Error('File too large (max 4MB): ' + file.name))
+  }
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result)
-    reader.onerror = reject
+    reader.onerror = () => reject(new Error('Failed to read file: ' + (file && file.name)))
     reader.readAsDataURL(file)
   })
 }

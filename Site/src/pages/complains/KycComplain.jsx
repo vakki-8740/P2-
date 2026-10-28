@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function KycComplain() {
   const navigate = useNavigate()
@@ -18,11 +18,12 @@ export default function KycComplain() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (!aadharFront || !aadharBack) { alert("Please upload both front/back images"); setSubmitting(false); return }
       const files = {}
       if (aadharFront) files.aadharFront = { name: aadharFront.name, data: await fileToBase64(aadharFront) }
       if (aadharBack) files.aadharBack = { name: aadharBack.name, data: await fileToBase64(aadharBack) }
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'KYC',
         title: 'KYC Complain',
         createdAt: new Date().toISOString(),
@@ -31,7 +32,8 @@ export default function KycComplain() {
       }
       saveComplain(entry)
       navigate('/all-complains')
-    } finally { setSubmitting(false) }
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
+ finally { setSubmitting(false) }
   }
 
   return (

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function UnlockWithdrawalComplain() {
   const navigate = useNavigate()
@@ -19,12 +19,13 @@ export default function UnlockWithdrawalComplain() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (!issueImage || !aadharFront || !aadharBack) { alert("Please upload all required images"); setSubmitting(false); return }
       const files = {}
       if (issueImage) files.issueImage = { name: issueImage.name, data: await fileToBase64(issueImage) }
       if (aadharFront) files.aadharFront = { name: aadharFront.name, data: await fileToBase64(aadharFront) }
       if (aadharBack) files.aadharBack = { name: aadharBack.name, data: await fileToBase64(aadharBack) }
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'Withdrawal Unlock',
         title: 'Withdrawal Unlock Complain',
         createdAt: new Date().toISOString(),
@@ -33,7 +34,8 @@ export default function UnlockWithdrawalComplain() {
       }
       saveComplain(entry)
       navigate('/all-complains')
-    } finally { setSubmitting(false) }
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
+ finally { setSubmitting(false) }
   }
 
   return (

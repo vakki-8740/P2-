@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
-import { saveComplain } from '../../utils/complainStore'
+import { saveComplain, generateId } from '../../utils/complainStore'
 
 export default function LiveChatComplain() {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ export default function LiveChatComplain() {
     setSubmitting(true)
     try {
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'Live Chat',
         title: 'Live Chat Complain',
         createdAt: new Date().toISOString(),
@@ -26,7 +26,8 @@ export default function LiveChatComplain() {
       }
       saveComplain(entry)
       navigate('/all-complains')
-    } finally { setSubmitting(false) }
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
+ finally { setSubmitting(false) }
   }
 
   return (

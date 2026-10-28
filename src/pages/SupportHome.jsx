@@ -1,13 +1,14 @@
+import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
 const problems = [
-  { title: 'Withdrawal Problem', icon: '/site/icons-options/withdrawal.svg' },
-  { title: 'Bonus Problem', icon: '/site/icons-options/bonus.svg' },
-  { title: 'Deposit Problem', icon: '/site/icons-options/deposit.svg' },
-  { title: 'Bank Statement Problem', icon: '/site/icons-options/bank-statement.svg' },
-  { title: 'Unlock Withdrawal', icon: '/site/icons-options/unlock-withdrawal.svg' },
-  { title: 'Live Chat', icon: '/site/icons-options/live-chat.svg' },
-  { title: 'KYC Problem', icon: '/site/icons-options/kyc.svg' },
+  { title: 'Withdrawal Problem', icon: '/site/icons-options/withdrawal.svg', to: '/site/withdrawal-complain' },
+  { title: 'Bonus Problem', icon: '/site/icons-options/bonus.svg', to: '/site/bonus-complain' },
+  { title: 'Deposit Problem', icon: '/site/icons-options/deposit.svg', to: '/site/deposit-complain' },
+  { title: 'Bank Statement Problem', icon: '/site/icons-options/bank-statement.svg', to: '/site/bank-statement-complain' },
+  { title: 'Unlock Withdrawal', icon: '/site/icons-options/unlock-withdrawal.svg', to: '/site/unlock-withdrawal-complain' },
+  { title: 'Live Chat', icon: '/site/icons-options/live-chat.svg', to: '/site/live-chat' },
+  { title: 'KYC Problem', icon: '/site/icons-options/kyc.svg', to: '/site/kyc-complain' },
 ]
 
 export default function SupportHome() {
@@ -25,7 +26,7 @@ export default function SupportHome() {
           <div key={p.title} className="card problem-card">
             <img className="problem-icon" src={p.icon} alt={p.title} />
             <div className="problem-title">{p.title}</div>
-            <a className="btn primary" href="#">Complain Now</a>
+            <Link className="btn primary" to={p.to}>Complain Now</Link>
           </div>
         ))}
       </main>

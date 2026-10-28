@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function BankStatementComplain() {
   const navigate = useNavigate()
@@ -17,10 +17,11 @@ export default function BankStatementComplain() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (!bankStatement) { alert("Please upload Bank Statement"); setSubmitting(false); return }
       const files = {}
       if (bankStatement) files.bankStatement = { name: bankStatement.name, data: await fileToBase64(bankStatement) }
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'Bank Statement',
         title: 'Bank Statement Complain',
         createdAt: new Date().toISOString(),
@@ -29,7 +30,8 @@ export default function BankStatementComplain() {
       }
       saveComplain(entry)
       navigate('/all-complains')
-    } finally { setSubmitting(false) }
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
+ finally { setSubmitting(false) }
   }
 
   return (

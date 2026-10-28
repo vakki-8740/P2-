@@ -17,7 +17,7 @@ export default function FileUpload({ label, accept = 'image/*', required = false
     <div className="form-group">
       <label>{label}</label>
       <div className="file-upload-simple" onClick={() => inputRef.current?.click()}>
-        <input ref={inputRef} type="file" accept={accept} required={required && !file} onChange={onChange} hidden />
+        <input ref={inputRef} type="file" accept={accept} onChange={onChange} hidden aria-hidden="true" tabIndex={-1} />
         <span className="file-upload-icon-simple">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
         </span>

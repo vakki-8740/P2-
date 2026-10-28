@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function DepositComplain() {
   const navigate = useNavigate()
@@ -18,10 +18,11 @@ export default function DepositComplain() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (!paymentImage) { alert("Please upload Payment Image"); setSubmitting(false); return }
       const files = {}
       if (paymentImage) files.paymentImage = { name: paymentImage.name, data: await fileToBase64(paymentImage) }
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'Deposit',
         title: 'Deposit Complain',
         createdAt: new Date().toISOString(),

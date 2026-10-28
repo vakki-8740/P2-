@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function WithdrawalComplain() {
   const navigate = useNavigate()
@@ -18,10 +18,11 @@ export default function WithdrawalComplain() {
     e.preventDefault()
     setSubmitting(true)
     try {
+      if (!issueImage) { alert("Please upload Issue Image"); setSubmitting(false); return }
       const files = {}
       if (issueImage) files.issueImage = { name: issueImage.name, data: await fileToBase64(issueImage) }
       const entry = {
-        id: Date.now().toString(),
+        id: generateId(),
         type: 'Withdrawal',
         title: 'Withdrawal Complain',
         createdAt: new Date().toISOString(),
@@ -30,7 +31,8 @@ export default function WithdrawalComplain() {
       }
       saveComplain(entry)
       navigate('/all-complains')
-    } finally { setSubmitting(false) }
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
+ finally { setSubmitting(false) }
   }
 
   return (
