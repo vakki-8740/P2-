@@ -1,4 +1,5 @@
 import Header from '../../components/Header'
+import FileUpload from '../../components/FileUpload'
 export default function KycComplain() {
   return (
     <>
@@ -12,8 +13,8 @@ export default function KycComplain() {
               <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" required /></div>
               <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" required /></div>
               <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" required /></div>
-              <div className="form-group"><label>Upload Aadhar / Pan Card Front</label><input type="file" accept="image/*" required /></div>
-              <div className="form-group"><label>Upload Aadhar / Pan Card Back</label><input type="file" accept="image/*" required /></div>
+              <FileUpload label="Upload Aadhar / Pan Card Front" required />
+              <FileUpload label="Upload Aadhar / Pan Card Back" required />
             </div>
             <div className="form-actions" style={{justifyContent:'center', marginTop:'24px'}}>
               <button className="btn primary" type="submit">Submit Now</button>
