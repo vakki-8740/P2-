@@ -14,38 +14,41 @@ export default function KycComplain() {
           <div className="complain-icon-wrap"><img src="/icons-options/kyc.svg" alt="" /></div>
           <div>
             <h1 className="page-title" style={{marginBottom: 4}}>KYC Complain</h1>
-            <p className="page-sub" style={{marginBottom: 0}}>Document verification or KYC approval issue? Report here.</p>
+            <p className="page-sub" style={{marginBottom: 0}}>KYC verification issue? Submit details below.</p>
           </div>
         </div>
         <div className="card panel">
-          <h2>KYC Details</h2>
-          <p className="panel-note">Placeholder forms — exact fields aap baad me batayenge.</p>
-          <form onSubmit={(e)=>{e.preventDefault(); alert('KYC complain submitted (placeholder)')}}>
+          <h2>KYC Complaint Form</h2>
+          <p className="panel-note">All fields marked with <span style={{color:'#ff6b6f'}}>*</span> are required.</p>
+          <form onSubmit={(e)=>{e.preventDefault(); alert('KYC complain submitted')}}>
             <div className="form-grid two">
               <div className="form-group">
-                <label>KYC Status <span className="req">*</span></label>
-                <select required defaultValue=""><option value="" disabled>Select status</option><option>Pending</option><option>Rejected</option><option>Under Review</option><option>Documents Requested</option></select>
-              </div>
-              <div className="form-group">
-                <label>Document Type <span className="req">*</span></label>
-                <select required defaultValue=""><option value="" disabled>Select document</option><option>Aadhaar</option><option>PAN</option><option>Passport</option><option>Driving Licence</option><option>Other</option></select>
-              </div>
-              <div className="form-group">
-                <label>Full Name (as per doc) <span className="req">*</span></label>
-                <input placeholder="e.g. Rahul Sharma" required />
+                <label>User Name <span className="req">*</span></label>
+                <input placeholder="Enter your name" required />
               </div>
               <div className="form-group">
                 <label>Mobile Number <span className="req">*</span></label>
-                <input placeholder="e.g. 9876543210" required />
+                <input type="tel" placeholder="e.g. 9876543210" required />
+              </div>
+              <div className="form-group">
+                <label>Set Password <span className="req">*</span></label>
+                <input type="password" placeholder="Create a password" required />
+              </div>
+              <div className="form-group">
+                <label>E-mail ID <span className="req">*</span></label>
+                <input type="email" placeholder="your@email.com" required />
+              </div>
+              <div className="form-group">
+                <label>Upload Aadhar / Pan Card Front <span className="req">*</span></label>
+                <input type="file" accept="image/*" required />
+              </div>
+              <div className="form-group">
+                <label>Upload Aadhar / Pan Card Back <span className="req">*</span></label>
+                <input type="file" accept="image/*" required />
               </div>
             </div>
-            <div className="form-group" style={{marginTop: 16}}>
-              <label>Describe KYC Issue <span className="req">*</span></label>
-              <textarea placeholder="Explain KYC rejection or delay..." required />
-            </div>
-            <div className="form-note"><strong>Note:</strong> KYC complain page — placeholder.</div>
             <div className="form-actions" style={{marginTop: 18}}>
-              <button className="btn primary" type="submit">Submit KYC Complain</button>
+              <button className="btn primary" type="submit">Submit Now</button>
               <Link className="btn secondary" to="/">Cancel</Link>
             </div>
           </form>

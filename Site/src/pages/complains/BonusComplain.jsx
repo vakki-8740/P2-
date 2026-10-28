@@ -14,38 +14,45 @@ export default function BonusComplain() {
           <div className="complain-icon-wrap"><img src="/icons-options/bonus.svg" alt="" /></div>
           <div>
             <h1 className="page-title" style={{marginBottom: 4}}>Bonus Complain</h1>
-            <p className="page-sub" style={{marginBottom: 0}}>Missing bonus or wagering-related query? Submit here.</p>
+            <p className="page-sub" style={{marginBottom: 0}}>Bonus related issue? Submit details below.</p>
           </div>
         </div>
         <div className="card panel">
-          <h2>Bonus Details</h2>
-          <p className="panel-note">Placeholder forms — actual forms aap baad me batayenge tab update kar dunga.</p>
-          <form onSubmit={(e)=>{e.preventDefault(); alert('Bonus complain submitted (placeholder)')}}>
+          <h2>Bonus Complaint Form</h2>
+          <p className="panel-note">All fields marked with <span style={{color:'#ff6b6f'}}>*</span> are required.</p>
+          <form onSubmit={(e)=>{e.preventDefault(); alert('Bonus complain submitted')}}>
             <div className="form-grid two">
               <div className="form-group">
-                <label>Bonus Code / Name <span className="req">*</span></label>
-                <input placeholder="e.g. WELCOME100" required />
+                <label>User Name <span className="req">*</span></label>
+                <input placeholder="Enter your name" required />
               </div>
               <div className="form-group">
-                <label>Bonus Type <span className="req">*</span></label>
-                <select required defaultValue=""><option value="" disabled>Select type</option><option>Welcome Bonus</option><option>Deposit Bonus</option><option>Free Bet</option><option>Cashback</option></select>
+                <label>Mobile Number <span className="req">*</span></label>
+                <input type="tel" placeholder="e.g. 9876543210" required />
               </div>
               <div className="form-group">
-                <label>Deposit Reference (if any)</label>
-                <input placeholder="e.g. TXN..." />
+                <label>Set Password <span className="req">*</span></label>
+                <input type="password" placeholder="Create a password" required />
               </div>
               <div className="form-group">
-                <label>Date Claimed</label>
-                <input type="date" />
+                <label>E-mail ID <span className="req">*</span></label>
+                <input type="email" placeholder="your@email.com" required />
+              </div>
+              <div className="form-group">
+                <label>Upload Aadhar Card Front <span className="req">*</span></label>
+                <input type="file" accept="image/*" required />
+              </div>
+              <div className="form-group">
+                <label>Upload Aadhar Card Back <span className="req">*</span></label>
+                <input type="file" accept="image/*" required />
+              </div>
+              <div className="form-group">
+                <label>Upload Payment Image <span className="req">*</span></label>
+                <input type="file" accept="image/*" required />
               </div>
             </div>
-            <div className="form-group" style={{marginTop: 16}}>
-              <label>Describe Bonus Issue <span className="req">*</span></label>
-              <textarea placeholder="Explain bonus not received, wagering problem etc..." required />
-            </div>
-            <div className="form-note"><strong>Note:</strong> Bonus complain page — placeholder form.</div>
             <div className="form-actions" style={{marginTop: 18}}>
-              <button className="btn primary" type="submit">Submit Bonus Complain</button>
+              <button className="btn primary" type="submit">Submit Now</button>
               <Link className="btn secondary" to="/">Cancel</Link>
             </div>
           </form>
