@@ -31,8 +31,33 @@ export default function SupportHome() {
         ))}
       </main>
 
-      <footer>
-        <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
+            <footer>
+        <div className="footer-prof">
+          <span className="fp-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Secure & Encrypted
+          </span>
+          <span className="fp-dot">·</span>
+          <span className="fp-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            24/7 Support
+          </span>
+          <span className="fp-dot">·</span>
+          <span className="fp-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Verified Help Center
+          </span>
+        </div>
+        <div className="footer-main">
+          <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
+          <nav className="footer-nav">
+            <Link to="/about">About</Link>
+            <span className="sep">·</span>
+            <Link to="/terms">Terms</Link>
+            <span className="sep">·</span>
+            <Link to="/all-complains">My Complains</Link>
+          </nav>
+        </div>
       </footer>
     </>
   )
