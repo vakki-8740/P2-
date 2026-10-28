@@ -13,7 +13,7 @@ export default function BonusComplain() {
           </Link>
         </div>
         <div className="card panel">
-          <h1 className="page-title" style={{textAlign:'center', marginBottom:'20px'}}>Bonus Complain Page</h1>
+          <h1 className="page-title" style={{textAlign:'center', marginBottom:'20px'}}>Complain Page</h1>
           <form onSubmit={(e)=>{e.preventDefault(); alert('Submitted')}}>
             <div className="form-grid two">
               <div className="form-group"><label>User Name</label><input placeholder="User Name" required /></div>
