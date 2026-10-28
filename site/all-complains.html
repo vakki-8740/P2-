@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Complains — Parimatch Support</title>
+  <link rel="icon" type="image/png" href="logo/logo.png" />
+  <link rel="stylesheet" href="lib/own-library.css" />
+  <style>
+    body { background: #0a0b0f; }
+    .page-header {
+      background: #16181e;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon { width: 28px; height: 28px; flex-shrink: 0; }
+    .logo-text { flex: 1; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+
+    .menu-btn {
+      width: 42px; height: 42px;
+      border: 1px solid var(--border);
+      background: #1e2128;
+      border-radius: var(--radius);
+      color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .menu-btn:hover { background: #242833; }
+    .menu-btn svg { width: 20px; height: 20px; }
+
+    .menu-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 200;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    .menu-overlay.open { opacity: 1; visibility: visible; }
+
+    .side-menu {
+      position: fixed; top: 0; left: 0; height: 100%;
+      width: min(300px, 85vw);
+      background: #16181e;
+      border-right: 1px solid var(--border);
+      z-index: 201;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; flex-direction: column;
+      padding: 18px 14px; overflow-y: auto;
+    }
+    .side-menu.open { transform: translateX(0); }
+    .side-menu-head {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 14px; margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .side-menu-head img { width: 26px; height: 26px; }
+    .side-menu-head span { flex: 1; font-weight: 700; font-size: 1.05rem; }
+    .side-close {
+      width: 34px; height: 34px;
+      border: 1px solid var(--border);
+      background: #1e2128; border-radius: var(--radius);
+      color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .side-close:hover { background: #242833; }
+    .side-close svg { width: 16px; height: 16px; }
+    .side-menu a.side-link {
+      display: block; padding: 13px 14px;
+      color: var(--text); text-decoration: none;
+      font-size: 0.95rem; font-weight: 600;
+      border-radius: var(--radius);
+      transition: background 0.15s, color 0.15s;
+    }
+    .side-menu a.side-link:hover { background: #1e2128; color: #F5FF00; }
+    .side-menu a.side-link.active { background: #1e2128; color: #F5FF00; }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+    .card, .panel { background: #16181e; }
+    .page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .page-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 44px 24px;
+      text-align: center;
+    }
+    .empty-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #1e2128;
+      display: flex; align-items: center; justify-content: center;
+      color: #c8ccd6;
+    }
+    .empty-icon svg { width: 28px; height: 28px; }
+    .empty-state h2 { font-size: 1.15rem; font-weight: 700; }
+    .empty-state p { color: var(--muted); font-size: 0.9rem; max-width: 420px; line-height: 1.6; }
+    .btn.primary { background: #F5FF00; color: #1c1f28; text-decoration: none; }
+    .btn.primary:hover:not(:disabled) { background: #E8F100; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 16px; text-align: center;
+      background: #16181e; color: var(--muted); font-size: 0.85rem;
+    }
+
+    @media (min-width: 768px) {
+      .header-inner { padding: 18px 24px; }
+      .logo-text { font-size: 22px; }
+      .container { padding: 32px 24px 64px; }
+      .page-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="header-inner">
+      <img class="logo-icon" src="logo/logo.png" alt="Parimatch Support logo" />
+      <div class="logo-text">Parimatch Support</div>
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="sideMenu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <nav class="side-menu" id="sideMenu" aria-label="Menu">
+    <div class="side-menu-head">
+      <img src="logo/logo.png" alt="" />
+      <span>Parimatch Support</span>
+      <button class="side-close" id="menuClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <a class="side-link" href="index.html">Home</a>
+    <a class="side-link active" href="all-complains.html">All Complains</a>
+    <a class="side-link" href="terms.html">Terms &amp; Conditions</a>
+    <a class="side-link" href="about.html">About Us</a>
+  </nav>
+
+  <main class="container">
+
+    <div class="card panel">
+      <h1 class="page-title">All Complains</h1>
+      <p class="page-sub">Track and manage all complaints submitted from this portal.</p>
+    </div>
+
+    <div class="card empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <h2>No Complains Yet</h2>
+      <p>You haven't submitted any complains yet. Once you submit a complain, it will appear here with its full status and updates.</p>
+      <a class="btn primary" href="index.html">Go to Home</a>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var btn = document.getElementById("menuBtn");
+      var menu = document.getElementById("sideMenu");
+      var overlay = document.getElementById("menuOverlay");
+      var closeBtn = document.getElementById("menuClose");
+      var body = document.body;
+
+      function openMenu() {
+        menu.classList.add("open");
+        overlay.classList.add("open");
+        body.classList.add("no-scroll");
+        btn.setAttribute("aria-expanded", "true");
+      }
+      function closeMenu() {
+        menu.classList.remove("open");
+        overlay.classList.remove("open");
+        body.classList.remove("no-scroll");
+        btn.setAttribute("aria-expanded", "false");
+      }
+
+      btn.addEventListener("click", openMenu);
+      closeBtn.addEventListener("click", closeMenu);
+      overlay.addEventListener("click", closeMenu);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeMenu();
+      });
+    })();
+  </script>
+
+</body>
+</html>
