@@ -624,3 +624,49 @@ body.intro-active { overflow: hidden; }
   font-size: 0.75rem;
   color: var(--muted);
 }
+
+/* ---------- Swap Loader (universal loading animation) ---------- */
+.swap-loader-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.swap-loader-overlay,
+.swap-loader-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.swap-loader {
+  width: min(40vw, 160px);
+  height: auto;
+  overflow: visible;
+}
+.swap-loader polygon { fill: #faff00; }
+.swap-loader-t { animation: swapR 1.4s ease-in-out infinite; }
+.swap-loader-b { animation: swapL 1.4s ease-in-out infinite; }
+@keyframes swapR { 0%,100%{transform:translateX(0)} 50%{transform:translateX(90px)} }
+@keyframes swapL { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-90px)} }
+@media (prefers-reduced-motion:reduce){ .swap-loader-t,.swap-loader-b{animation-duration:3s} }
+.swap-loader-text {
+  color: #faff00;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+/* inline variant for forms */
+.swap-loader-inline .swap-loader { width: min(32vw, 110px); }
+/* page transition loader bg slightly translucent */
+.swap-loader-backdrop.is-page {
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(2px);
+}
+

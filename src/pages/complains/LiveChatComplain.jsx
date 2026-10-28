@@ -33,6 +33,7 @@ export default function LiveChatComplain() {
   return (
     <>
       <Header showMenu />
+      {submitting && <SwapLoader fullScreen />}
       <main className="container">
         <div className="card" style={{padding:'14px 16px'}}>
           <Link className="back-link" to="/site" style={{marginBottom:'0'}}>

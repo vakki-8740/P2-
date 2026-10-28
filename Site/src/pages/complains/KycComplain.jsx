@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
+import SwapLoader from '../../components/SwapLoader'
 import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function KycComplain() {
@@ -39,6 +40,7 @@ export default function KycComplain() {
   return (
     <>
       <Header showMenu />
+      {submitting && <SwapLoader fullScreen />}
       <main className="container">
         <div className="card" style={{padding:'14px 16px'}}>
           <Link className="back-link" to="/" style={{marginBottom:'0'}}>
