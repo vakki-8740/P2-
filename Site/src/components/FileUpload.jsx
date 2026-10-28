@@ -1,16 +1,15 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 
-export default function FileUpload({ label, accept = 'image/*', required = false }) {
-  const [file, setFile] = useState(null)
+export default function FileUpload({ label, accept = 'image/*', required = false, file, onFileChange }) {
   const inputRef = useRef(null)
 
   const onChange = (e) => {
     const f = e.target.files[0]
-    if (f) setFile(f)
+    if (f) onFileChange?.(f)
   }
   const onRemove = (e) => {
     e.stopPropagation()
-    setFile(null)
+    onFileChange?.(null)
     if (inputRef.current) inputRef.current.value = ''
   }
 

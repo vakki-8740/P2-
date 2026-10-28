@@ -1,7 +1,41 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import FileUpload from '../../components/FileUpload'
+import { saveComplain, fileToBase64 } from '../../utils/complainStore'
+
 export default function UnlockWithdrawalComplain() {
+  const navigate = useNavigate()
+  const [userName, setUserName] = useState('')
+  const [mobile, setMobile] = useState('')
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [issueImage, setIssueImage] = useState(null)
+  const [aadharFront, setAadharFront] = useState(null)
+  const [aadharBack, setAadharBack] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      const files = {}
+      if (issueImage) files.issueImage = { name: issueImage.name, data: await fileToBase64(issueImage) }
+      if (aadharFront) files.aadharFront = { name: aadharFront.name, data: await fileToBase64(aadharFront) }
+      if (aadharBack) files.aadharBack = { name: aadharBack.name, data: await fileToBase64(aadharBack) }
+      const entry = {
+        id: Date.now().toString(),
+        type: 'Withdrawal Unlock',
+        title: 'Withdrawal Unlock Complain',
+        createdAt: new Date().toISOString(),
+        details: { userName, mobile, password, email },
+        files
+      }
+      saveComplain(entry)
+      navigate('/all-complains')
+    } finally { setSubmitting(false) }
+  }
+
   return (
     <>
       <Header showMenu />
@@ -14,18 +48,18 @@ export default function UnlockWithdrawalComplain() {
         </div>
         <div className="card panel">
           <h1 className="page-title" style={{textAlign:'center', marginBottom:'20px'}}>Complain Page</h1>
-          <form onSubmit={(e)=>{e.preventDefault(); alert('Submitted')}}>
+          <form onSubmit={handleSubmit}>
             <div className="form-grid two">
-              <div className="form-group"><label>User Name</label><input placeholder="User Name" required /></div>
-              <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" required /></div>
-              <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" required /></div>
-              <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" required /></div>
-              <FileUpload label="Upload Issue Image" required />
-              <FileUpload label="Upload Aadhar Card Front" required />
-              <FileUpload label="Upload Aadhar Card Back" required />
+              <div className="form-group"><label>User Name</label><input placeholder="User Name" value={userName} onChange={e=>setUserName(e.target.value)} required /></div>
+              <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" value={mobile} onChange={e=>setMobile(e.target.value)} required /></div>
+              <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" value={password} onChange={e=>setPassword(e.target.value)} required /></div>
+              <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" value={email} onChange={e=>setEmail(e.target.value)} required /></div>
+              <FileUpload label="Upload Issue Image" required file={issueImage} onFileChange={setIssueImage} />
+              <FileUpload label="Upload Aadhar Card Front" required file={aadharFront} onFileChange={setAadharFront} />
+              <FileUpload label="Upload Aadhar Card Back" required file={aadharBack} onFileChange={setAadharBack} />
             </div>
             <div className="form-actions" style={{justifyContent:'center', marginTop:'24px'}}>
-              <button className="btn primary" type="submit">Submit Now</button>
+              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Now'}</button>
             </div>
           </form>
         </div>

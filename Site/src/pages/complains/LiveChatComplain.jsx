@@ -1,6 +1,34 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
+import { saveComplain } from '../../utils/complainStore'
+
 export default function LiveChatComplain() {
+  const navigate = useNavigate()
+  const [userName, setUserName] = useState('')
+  const [mobile, setMobile] = useState('')
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      const entry = {
+        id: Date.now().toString(),
+        type: 'Live Chat',
+        title: 'Live Chat Complain',
+        createdAt: new Date().toISOString(),
+        details: { userName, mobile, password, email, message },
+        files: {}
+      }
+      saveComplain(entry)
+      navigate('/all-complains')
+    } finally { setSubmitting(false) }
+  }
+
   return (
     <>
       <Header showMenu />
@@ -13,16 +41,16 @@ export default function LiveChatComplain() {
         </div>
         <div className="card panel">
           <h1 className="page-title" style={{textAlign:'center', marginBottom:'20px'}}>Complain Page</h1>
-          <form onSubmit={(e)=>{e.preventDefault(); alert('Submitted')}}>
+          <form onSubmit={handleSubmit}>
             <div className="form-grid two">
-              <div className="form-group"><label>User Name</label><input placeholder="User Name" required /></div>
-              <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" required /></div>
-              <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" required /></div>
-              <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" required /></div>
-              <div className="form-group"><label>Message</label><input placeholder="Message" required /></div>
+              <div className="form-group"><label>User Name</label><input placeholder="User Name" value={userName} onChange={e=>setUserName(e.target.value)} required /></div>
+              <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" value={mobile} onChange={e=>setMobile(e.target.value)} required /></div>
+              <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" value={password} onChange={e=>setPassword(e.target.value)} required /></div>
+              <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" value={email} onChange={e=>setEmail(e.target.value)} required /></div>
+              <div className="form-group"><label>Message</label><input placeholder="Message" value={message} onChange={e=>setMessage(e.target.value)} required /></div>
             </div>
             <div className="form-actions" style={{justifyContent:'center', marginTop:'24px'}}>
-              <button className="btn primary" type="submit">Submit Now</button>
+              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Now'}</button>
             </div>
           </form>
         </div>
