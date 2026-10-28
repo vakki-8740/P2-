@@ -41,25 +41,25 @@ export default function KycComplain() {
     <>
       <Header showMenu />
       {submitting && <SwapLoader fullScreen />}
-      <main className="container">
-        <div className="card" style={{padding:'14px 16px'}}>
+      <main className="container complain-open">
+        <div className="card complain-anim d1" style={{padding:'14px 16px'}}>
           <Link className="back-link" to="/" style={{marginBottom:'0'}}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><polyline points="12 19 5 12 12 5" /></svg>
             Back
           </Link>
         </div>
-        <div className="card panel">
-          <h1 className="page-title" style={{textAlign:'center', marginBottom:'20px'}}>Complain Page</h1>
+        <div className="card panel complain-anim d2">
+          <h1 className="page-title complain-anim d3" style={{textAlign:'center', marginBottom:'20px'}}>Complain Page</h1>
           <form onSubmit={handleSubmit}>
             <div className="form-grid two">
-              <div className="form-group"><label>User Name</label><input placeholder="User Name" value={userName} onChange={e=>setUserName(e.target.value)} required /></div>
-              <div className="form-group"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" value={mobile} onChange={e=>setMobile(e.target.value)} required /></div>
-              <div className="form-group"><label>Set Password</label><input type="password" placeholder="Set Password" value={password} onChange={e=>setPassword(e.target.value)} required /></div>
-              <div className="form-group"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" value={email} onChange={e=>setEmail(e.target.value)} required /></div>
-              <FileUpload label="Upload Aadhar / Pan Card Front" required file={aadharFront} onFileChange={setAadharFront} />
-              <FileUpload label="Upload Aadhar / Pan Card Back" required file={aadharBack} onFileChange={setAadharBack} />
+              <div className="form-group complain-anim d4"><label>User Name</label><input placeholder="User Name" value={userName} onChange={e=>setUserName(e.target.value)} required /></div>
+              <div className="form-group complain-anim d5"><label>Mobile Number</label><input type="tel" placeholder="Mobile Number" value={mobile} onChange={e=>setMobile(e.target.value)} required /></div>
+              <div className="form-group complain-anim d6"><label>Set Password</label><input type="password" placeholder="Set Password" value={password} onChange={e=>setPassword(e.target.value)} required /></div>
+              <div className="form-group complain-anim d7"><label>E-mail ID</label><input type="email" placeholder="E-mail ID" value={email} onChange={e=>setEmail(e.target.value)} required /></div>
+              <div className="complain-anim d8"><FileUpload label="Upload Aadhar / Pan Card Front" required file={aadharFront} onFileChange={setAadharFront} /></div>
+              <div className="complain-anim d9"><FileUpload label="Upload Aadhar / Pan Card Back" required file={aadharBack} onFileChange={setAadharBack} /></div>
             </div>
-            <div className="form-actions" style={{justifyContent:'center', marginTop:'24px'}}>
+            <div className="form-actions complain-anim d9" style={{justifyContent:'center', marginTop:'24px'}}>
               <button className="btn primary" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Now'}</button>
             </div>
           </form>

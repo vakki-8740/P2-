@@ -669,4 +669,30 @@ body.intro-active { overflow: hidden; }
   background: rgba(12, 30, 138, 0.92);
   backdrop-filter: blur(2px);
 }
+/* ---------- Complaint Page Opening Animation — line by line left -> right ---------- */
+@keyframes complainSlideIn {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.complain-open {
+  /* container keeps overflow visible for slide */
+  overflow-x: clip;
+}
+.complain-anim {
+  opacity: 0;
+  animation: complainSlideIn 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+.complain-anim.d1 { animation-delay: 0.06s; }
+.complain-anim.d2 { animation-delay: 0.14s; }
+.complain-anim.d3 { animation-delay: 0.22s; }
+.complain-anim.d4 { animation-delay: 0.30s; }
+.complain-anim.d5 { animation-delay: 0.38s; }
+.complain-anim.d6 { animation-delay: 0.46s; }
+.complain-anim.d7 { animation-delay: 0.54s; }
+.complain-anim.d8 { animation-delay: 0.62s; }
+.complain-anim.d9 { animation-delay: 0.70s; }
 
+@media (prefers-reduced-motion: reduce) {
+  .complain-anim { animation: none; opacity: 1; transform: none; }
+}
