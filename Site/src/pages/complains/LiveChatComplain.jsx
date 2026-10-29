@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
+import SubmitSuccessPopup from '../../components/SubmitSuccessPopup'
 import { saveComplain, generateId } from '../../utils/complainStore'
 
 export default function LiveChatComplain() {
@@ -11,6 +12,7 @@ export default function LiveChatComplain() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,7 +27,8 @@ export default function LiveChatComplain() {
         files: {}
       }
       saveComplain(entry)
-      navigate('/all-complains')
+      await new Promise(r => setTimeout(r, 4000))
+      setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
  finally { setSubmitting(false) }
   }
@@ -33,7 +36,6 @@ export default function LiveChatComplain() {
   return (
     <>
       <Header showMenu />
-      {submitting && <SwapLoader fullScreen />}
       <main className="container complain-open">
         <div className="card complain-anim d1" style={{padding:'14px 16px'}}>
           <Link className="back-link" to="/" style={{marginBottom:'0'}}>
@@ -52,11 +54,12 @@ export default function LiveChatComplain() {
               <div className="form-group complain-anim d8"><label>Message</label><input placeholder="Message" value={message} onChange={e=>setMessage(e.target.value)} required /></div>
             </div>
             <div className="form-actions complain-anim d9" style={{justifyContent:'center', marginTop:'24px'}}>
-              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Now'}</button>
+              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? <><span className="spin"></span> Submitting...</> : 'Submit Now'}</button>
             </div>
           </form>
         </div>
       </main>
+      <SubmitSuccessPopup open={showSuccess} onClose={() => setShowSuccess(false)} onViewAll={() => navigate('/all-complains')} />
       <footer><p>&copy; 2026 Parimatch Support. All rights reserved.</p></footer>
     </>
   )

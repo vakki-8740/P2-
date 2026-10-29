@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
+import SubmitSuccessPopup from '../../components/SubmitSuccessPopup'
 import FileUpload from '../../components/FileUpload'
-import SwapLoader from '../../components/SwapLoader'
 import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
 
 export default function BonusComplain() {
@@ -15,6 +15,7 @@ export default function BonusComplain() {
   const [aadharBack, setAadharBack] = useState(null)
   const [paymentImage, setPaymentImage] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,7 +35,8 @@ export default function BonusComplain() {
         files
       }
       saveComplain(entry)
-      navigate('/all-complains')
+      await new Promise(r => setTimeout(r, 4000))
+      setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
  finally { setSubmitting(false) }
   }
@@ -42,7 +44,6 @@ export default function BonusComplain() {
   return (
     <>
       <Header showMenu />
-      {submitting && <SwapLoader fullScreen />}
       <main className="container complain-open">
         <div className="card complain-anim d1" style={{padding:'14px 16px'}}>
           <Link className="back-link" to="/site" style={{marginBottom:'0'}}>
@@ -63,11 +64,12 @@ export default function BonusComplain() {
               <div className="complain-anim d9"><FileUpload label="Upload Payment Image" required file={paymentImage} onFileChange={setPaymentImage} /></div>
             </div>
             <div className="form-actions complain-anim d9" style={{justifyContent:'center', marginTop:'24px'}}>
-              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Now'}</button>
+              <button className="btn primary" type="submit" disabled={submitting}>{submitting ? <><span className="spin"></span> Submitting...</> : 'Submit Now'}</button>
             </div>
           </form>
         </div>
       </main>
+      <SubmitSuccessPopup open={showSuccess} onClose={() => setShowSuccess(false)} onViewAll={() => navigate('/all-complains')} />
       <footer><p>&copy; 2026 Parimatch Support. All rights reserved.</p></footer>
     </>
   )
