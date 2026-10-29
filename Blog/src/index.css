@@ -336,7 +336,7 @@ body.intro-active { overflow: hidden; }
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: transparent;
+  background: rgba(10, 11, 15, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -372,8 +372,9 @@ body.intro-active { overflow: hidden; }
 .swap-loader-inline .swap-loader { width: min(32vw, 110px); }
 /* page transition loader bg slightly translucent */
 .swap-loader-backdrop.is-page {
-  background: transparent;
-  backdrop-filter: none;
+  background: rgba(10, 11, 15, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .swap-loader-card {
