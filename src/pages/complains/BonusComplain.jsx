@@ -34,7 +34,7 @@ export default function BonusComplain() {
         details: { userName, mobile, password, email },
         files
       }
-      saveComplain(entry)
+      await saveComplain(entry)
       await new Promise(r => setTimeout(r, 4000))
       setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }

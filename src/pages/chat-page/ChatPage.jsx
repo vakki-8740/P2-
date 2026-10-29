@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../../components/Header'
-import { getMessages, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, fileToBase64, formatTime, formatDateChat } from '../../utils/chatStore'
+import { getMessages, getMessagesAsync, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, fileToBase64, formatTime, formatDateChat } from '../../utils/chatStore'
 
 const SUPPORT_REPLIES = [
   "Thanks for reaching out! Our team is reviewing your message.",
@@ -29,7 +29,7 @@ export default function ChatPage(){
   const listRef = useRef(null)
   const fileRef = useRef(null)
 
-  const load = ()=> setMessages(getMessages())
+  const load = async ()=>{ try{ const d=await getMessagesAsync(); setMessages(d) }catch{ setMessages(getMessages()) } }
   useEffect(()=>{
     load()
     const h = ()=> load()
@@ -69,8 +69,8 @@ export default function ChatPage(){
     const text = input.trim()
     if(!text && !attach) return
     if(editingId){
-      updateMessage(editingId, text || "(file)")
-      setMessages(getMessages())
+      await updateMessage(editingId, text || "(file)")
+      try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
       setEditingId(null)
       setInput("")
       setAttach(null); setAttachPreview(null)
@@ -85,12 +85,12 @@ export default function ChatPage(){
       createdAt: new Date().toISOString(),
       edited: false
     }
-    saveMessage(msg)
-    setMessages(getMessages())
+    await saveMessage(msg)
+    try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
     setInput("")
     setAttach(null); setAttachPreview(null)
 
-    setTimeout(()=>{
+    setTimeout(async ()=>{
       const rep = SUPPORT_REPLIES[Math.floor(Math.random()*SUPPORT_REPLIES.length)]
       const bot = {
         id: generateChatId(),
@@ -100,8 +100,8 @@ export default function ChatPage(){
         createdAt: new Date().toISOString(),
         edited:false
       }
-      saveMessage(bot)
-      setMessages(getMessages())
+      await saveMessage(bot)
+      try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
     }, 1100 + Math.random()*600)
   }
 
@@ -112,10 +112,10 @@ export default function ChatPage(){
   }
   const cancelEdit = ()=>{ setEditingId(null); setInput(""); setAttach(null); setAttachPreview(null) }
 
-  const handleDelete = (id)=>{
+  const handleDelete = async (id)=>{
     if(!confirm("Delete this message?")) return
-    deleteMessage(id)
-    setMessages(getMessages())
+    await deleteMessage(id)
+    try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
     setOpenMenu(null)
     showToast("Deleted")
   }
@@ -125,9 +125,9 @@ export default function ChatPage(){
     setOpenMenu(null)
   }
 
-  const handleClear = ()=>{
+  const handleClear = async ()=>{
     if(!confirm("Clear all chat history?")) return
-    clearMessages()
+    await clearMessages()
     setMessages([])
     showToast("Chat cleared")
   }

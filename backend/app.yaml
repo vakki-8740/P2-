@@ -1,0 +1,27 @@
+kind: wasmer.io/App.v0
+name: parimatch-backend
+owner: vakki-8740
+
+package:
+  name: vakki-8740/parimatch-backend
+  version: 0.2.0
+
+domains:
+  - parimatch-backend.wasmer.app
+
+scaling:
+  mode: single_concurrency
+
+env:
+  DB_HOST: ""          # set to your MySQL host (e.g. freedb.tech, planetscale, railway)
+  DB_NAME: ""          # database name
+  DB_USER: ""          # username
+  DB_PASS: ""          # password  (set via: wasmer secret create DB_PASS --value=xxx)
+  DB_PORT: "3306"
+  # For SQLite fallback (Wasmer), no env needed — uses /tmp/parimatch_app.db
+
+capabilities:
+  instaboot:
+    requests:
+      - path: /
+      - path: /api/health

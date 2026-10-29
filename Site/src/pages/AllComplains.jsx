@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
-import { getComplains, clearComplains, formatDate } from '../utils/complainStore'
+import { getComplains, getComplainsAsync, clearComplains, formatDate } from '../utils/complainStore'
 
 export default function AllComplains() {
   const [complains, setComplains] = useState([])
 
-  const load = () => setComplains(getComplains())
+  const load = async () => {
+    try {
+      const data = await getComplainsAsync()
+      setComplains(data)
+    } catch {
+      setComplains(getComplains())
+    }
+  }
 
   useEffect(() => {
     load()
@@ -30,7 +37,7 @@ export default function AllComplains() {
               <p className="page-sub" style={{marginBottom:'0'}}>Track and manage all complaints submitted from this portal.</p>
             </div>
             {complains.length > 0 && (
-              <button className="btn secondary sm" onClick={()=>{ if(confirm('Clear all complains?')) { clearComplains(); load() } }}>Clear</button>
+              <button className="btn secondary sm" onClick={async ()=>{ if(confirm('Clear all complains?')) { await clearComplains(); load() } }}>Clear</button>
             )}
           </div>
         </div>
@@ -54,7 +61,7 @@ export default function AllComplains() {
             <div key={c.id} className="card complain-item">
               <div className="complain-item-head">
                 <span className="badge info">{c.type}</span>
-                <span className="complain-item-date">{formatDate(c.createdAt)}</span>
+                <span className="complain-item-date">{formatDate(c.createdAt || c.created_at)}</span>
               </div>
               <h3 className="complain-item-title">{c.title}</h3>
 
@@ -91,8 +98,8 @@ export default function AllComplains() {
               )}
 
               <div className="complain-item-foot">
-                <span className="badge warning">Pending</span>
-                <span className="complain-item-id">ID: {c.id.slice(-6)}</span>
+                <span className="badge warning">{c.status || 'Pending'}</span>
+                <span className="complain-item-id">ID: {String(c.id).slice(-6)}</span>
               </div>
             </div>
           ))

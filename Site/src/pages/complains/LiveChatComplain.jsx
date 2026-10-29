@@ -26,7 +26,7 @@ export default function LiveChatComplain() {
         details: { userName, mobile, password, email, message },
         files: {}
       }
-      saveComplain(entry)
+      await saveComplain(entry)
       await new Promise(r => setTimeout(r, 4000))
       setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }

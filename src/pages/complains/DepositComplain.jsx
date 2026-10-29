@@ -31,7 +31,7 @@ export default function DepositComplain() {
         details: { userName, mobile, password, email, depositAmount },
         files
       }
-      saveComplain(entry)
+      await saveComplain(entry)
       await new Promise(r => setTimeout(r, 4000))
       setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') } finally {

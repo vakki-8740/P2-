@@ -1,32 +1,64 @@
+import { hasApi, apiGet, apiPost, apiDelete } from './api.js'
+
 const KEY = 'parimatch_complains'
 
-export function getComplains() {
+// --- Local helpers (fallback / offline) ---
+function getLocal() {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return []
     return JSON.parse(raw)
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
-
-export function saveComplain(entry) {
-  const list = getComplains()
+function saveLocal(entry) {
+  const list = getLocal()
   list.unshift(entry)
   try {
     localStorage.setItem(KEY, JSON.stringify(list))
   } catch (e) {
     if (e && e.name === 'QuotaExceededError') {
-      // keep only last 20 to free space and retry once
       const trimmed = list.slice(0, 20)
-      localStorage.setItem(KEY, JSON.stringify(trimmed))
+      try { localStorage.setItem(KEY, JSON.stringify(trimmed)) } catch {}
     } else throw e
   }
   try { window.dispatchEvent(new Event('complains-updated')) } catch {}
   return list
 }
 
-export function clearComplains() {
+export function getComplains() {
+  // sync — local only (for instant render)
+  return getLocal()
+}
+
+// async — tries backend first, falls back to local
+export async function getComplainsAsync() {
+  if (hasApi()) {
+    try {
+      const res = await apiGet('/api/complains?limit=200')
+      if (res && res.data) return res.data
+    } catch {}
+  }
+  return getLocal()
+}
+
+export async function saveComplain(entry) {
+  // try backend (best-effort, non-blocking failure)
+  if (hasApi()) {
+    try {
+      // map to backend expected shape (snake_case + flat)
+      await apiPost('/api/complains', entry)
+    } catch (e) {
+      console.warn('Backend save failed, using localStorage:', e.message)
+    }
+  }
+  // always save locally for offline + instant UI
+  return saveLocal(entry)
+}
+
+export async function clearComplains() {
+  if (hasApi()) {
+    try { await apiDelete('/api/complains') } catch {}
+  }
   try { localStorage.removeItem(KEY) } catch {}
   try { window.dispatchEvent(new Event('complains-updated')) } catch {}
 }

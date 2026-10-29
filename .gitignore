@@ -1,3 +1,9 @@
 node_modules
 dist
 .env
+backend/data
+backend/storage
+backend/vendor
+*.db
+*.sqlite
+.DS_Store

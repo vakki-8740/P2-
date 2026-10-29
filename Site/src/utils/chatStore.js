@@ -1,49 +1,71 @@
+import { hasApi, apiGet, apiPost, apiPut, apiDelete } from './api.js'
+
 const KEY = 'parimatch_chat_messages'
 
-export function getMessages() {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return []
-    return JSON.parse(raw)
-  } catch { return [] }
+function getLocal() {
+  try { const raw = localStorage.getItem(KEY); if (!raw) return []; return JSON.parse(raw) } catch { return [] }
 }
-
-export function saveMessage(msg) {
-  const list = getMessages()
-  list.push(msg)
-  try {
-    localStorage.setItem(KEY, JSON.stringify(list))
-  } catch (e) {
+function saveLocal(msg) {
+  const list = getLocal(); list.push(msg)
+  try { localStorage.setItem(KEY, JSON.stringify(list)) } catch (e) {
     if (e && e.name === 'QuotaExceededError') {
       const trimmed = list.slice(-50)
-      localStorage.setItem(KEY, JSON.stringify(trimmed))
+      try { localStorage.setItem(KEY, JSON.stringify(trimmed)) } catch {}
     } else throw e
   }
   try { window.dispatchEvent(new Event('chat-updated')) } catch {}
   return list
 }
 
-export function updateMessage(id, newText) {
-  const list = getMessages()
+export function getMessages() { return getLocal() }
+
+export async function getMessagesAsync() {
+  if (hasApi()) {
+    try {
+      const res = await apiGet('/api/chat/messages?limit=200')
+      if (res && res.data) return res.data
+    } catch {}
+  }
+  return getLocal()
+}
+
+export async function saveMessage(msg) {
+  if (hasApi()) {
+    try { await apiPost('/api/chat/messages', msg) } catch (e) {
+      console.warn('Backend chat save failed, local fallback:', e.message)
+    }
+  }
+  return saveLocal(msg)
+}
+
+export async function updateMessage(id, newText) {
+  if (hasApi()) {
+    try { await apiPut('/api/chat/messages/' + encodeURIComponent(id), { text: newText }) } catch {}
+  }
+  const list = getLocal()
   const idx = list.findIndex(m => m.id === id)
   if (idx !== -1) {
     list[idx].text = newText
     list[idx].edited = true
     list[idx].editedAt = new Date().toISOString()
-    localStorage.setItem(KEY, JSON.stringify(list))
+    try { localStorage.setItem(KEY, JSON.stringify(list)) } catch {}
     try { window.dispatchEvent(new Event('chat-updated')) } catch {}
   }
   return list
 }
 
-export function deleteMessage(id) {
-  const list = getMessages().filter(m => m.id !== id)
+export async function deleteMessage(id) {
+  if (hasApi()) {
+    try { await apiDelete('/api/chat/messages/' + encodeURIComponent(id)) } catch {}
+  }
+  const list = getLocal().filter(m => m.id !== id)
   try { localStorage.setItem(KEY, JSON.stringify(list)) } catch {}
   try { window.dispatchEvent(new Event('chat-updated')) } catch {}
   return list
 }
 
-export function clearMessages() {
+export async function clearMessages() {
+  if (hasApi()) { try { await apiDelete('/api/chat/messages') } catch {} }
   try { localStorage.removeItem(KEY) } catch {}
   try { window.dispatchEvent(new Event('chat-updated')) } catch {}
 }

