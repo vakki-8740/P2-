@@ -12,7 +12,7 @@ import BonusComplain from './pages/complains/BonusComplain'
 import BankStatementComplain from './pages/complains/BankStatementComplain'
 import UnlockWithdrawalComplain from './pages/complains/UnlockWithdrawalComplain'
 import KycComplain from './pages/complains/KycComplain'
-import LiveChatComplain from './pages/complains/LiveChatComplain'
+import ChatPage from './pages/chat-page/ChatPage'
 
 
 function RouteLoader() {
@@ -57,7 +57,7 @@ export default function App() {
       <Route path="/site/bank-statement-complain" element={<BankStatementComplain />} />
       <Route path="/site/unlock-withdrawal-complain" element={<UnlockWithdrawalComplain />} />
       <Route path="/site/kyc-complain" element={<KycComplain />} />
-      <Route path="/site/live-chat" element={<LiveChatComplain />} />
+      <Route path="/site/live-chat" element={<ChatPage />} />
       <Route path="/site/deposit-complain.html" element={<Navigate to="/site/deposit-complain" replace />} />
       <Route path="/site/withdrawal-complain.html" element={<Navigate to="/site/withdrawal-complain" replace />} />
       <Route path="/site/bonus-complain.html" element={<Navigate to="/site/bonus-complain" replace />} />

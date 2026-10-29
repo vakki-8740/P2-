@@ -26,7 +26,7 @@ export default function SupportHome() {
           <div key={p.title} className="card problem-card">
             <img className="problem-icon" src={p.icon} alt={p.title} />
             <div className="problem-title">{p.title}</div>
-            <Link className="btn primary" to={p.to}>Complain Now</Link>
+            <Link className="btn primary" to={p.to}>{p.title === "Live Chat" ? "Live Chat" : "Complain Now"}</Link>
           </div>
         ))}
       </main>

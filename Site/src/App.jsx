@@ -10,7 +10,7 @@ import BonusComplain from './pages/complains/BonusComplain'
 import DepositComplain from './pages/complains/DepositComplain'
 import BankStatementComplain from './pages/complains/BankStatementComplain'
 import UnlockWithdrawalComplain from './pages/complains/UnlockWithdrawalComplain'
-import LiveChatComplain from './pages/complains/LiveChatComplain'
+import ChatPage from './pages/chat-page/ChatPage'
 import KycComplain from './pages/complains/KycComplain'
 
 
@@ -57,7 +57,7 @@ export default function App() {
       <Route path="/bank-statement-complain" element={<BankStatementComplain />} />
       <Route path="/unlock-withdrawal-complain" element={<UnlockWithdrawalComplain />} />
       <Route path="/kyc-complain" element={<KycComplain />} />
-      <Route path="/live-chat" element={<LiveChatComplain />} />
+      <Route path="/live-chat" element={<ChatPage />} />
 
       {/* legacy .html redirects for complain pages */}
       <Route path="/deposit-complain.html" element={<Navigate to="/deposit-complain" replace />} />
