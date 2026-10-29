@@ -138,23 +138,25 @@ export default function ChatPage(){
   return (
     <>
       <Header showMenu />
-      <main className="container chat-page complain-open">
-        <div className="card chat-header complain-anim d1">
-          <Link className="back-link" to="/" style={{marginBottom:0}}>
+      <main className="container chat-page chat-fullpage complain-open">
+        <div className="card chat-back-card complain-anim d1" style={{padding:'14px 16px'}}>
+          <Link className="back-link" to="/site" style={{marginBottom:0}}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
             Back
           </Link>
-          <div className="chat-head-info">
-            <div className="chat-avatar">P</div>
-            <div>
-              <div className="chat-title">Parimatch Live Support</div>
-              <div className="chat-sub"><span className="online-dot"></span> Online • Typically replies in 2 min</div>
-            </div>
-          </div>
-          <button className="btn ghost small" onClick={handleClear} title="Clear chat">Clear</button>
         </div>
 
         <div className="card chat-shell complain-anim d2">
+          <div className="chat-topbar">
+            <div className="chat-topbar-left">
+              <div className="chat-avatar">P</div>
+              <div className="chat-head-text">
+                <span className="chat-title">Parimatch Live Support</span>
+                <span className="chat-sub"><span className="online-dot"></span> Online • Typically replies in 2 min</span>
+              </div>
+            </div>
+            <button className="btn ghost small" onClick={handleClear} title="Clear chat">Clear</button>
+          </div>
           <div className="chat-list" ref={listRef}>
             {messages.length===0 ? (
               <div className="chat-empty">
@@ -262,9 +264,6 @@ export default function ChatPage(){
       </main>
 
       {toast && <div className="chat-toast">{toast}</div>}
-
-      <footer>        <div className="footer-main"><p>&copy; 2026 Parimatch Support. All rights reserved.</p><nav className="footer-nav"><Link to="/about">About</Link><span className="sep">·</span><Link to="/terms">Terms</Link><span className="sep">·</span><Link to="/all-complains">My Complains</Link></nav></div>
-      </footer>
     </>
   )
 }
