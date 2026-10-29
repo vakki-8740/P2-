@@ -66,7 +66,7 @@ export default function DepositComplain() {
           </form>
         </div>
       </main>
-      <SubmitSuccessPopup open={showSuccess} onClose={() => setShowSuccess(false)} onViewAll={() => navigate('/all-complains')} />
+      <SubmitSuccessPopup open={showSuccess} onClose={() => { setShowSuccess(false); setUserName(''); setMobile(''); setPassword(''); setEmail(''); setDepositAmount(''); setPaymentImage(null) }} />
       <footer><p>&copy; 2026 Parimatch Support. All rights reserved.</p></footer>
     </>
   )
