@@ -219,7 +219,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #000;
+  background: transparent;
   opacity: 1;
   transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -612,7 +612,7 @@ body.intro-active { overflow: hidden; }
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: #0c1e8a;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -648,8 +648,8 @@ body.intro-active { overflow: hidden; }
 .swap-loader-inline .swap-loader { width: min(32vw, 110px); }
 /* page transition loader bg slightly translucent */
 .swap-loader-backdrop.is-page {
-  background: rgba(12, 30, 138, 0.92);
-  backdrop-filter: blur(2px);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 
