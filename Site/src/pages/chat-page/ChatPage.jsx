@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../../components/Header'
-import { getMessages, getMessagesAsync, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, fileToBase64, formatTime, formatDateChat } from '../../utils/chatStore'
+import { getMessages, getMessagesAsync, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, chatFileSrc, formatTime, formatDateChat } from '../../utils/chatStore'
+import { MAX_UPLOAD_BYTES } from '../../utils/api'
+import { withBase } from '../../utils/base'
 
 const SUPPORT_REPLIES = [
   "Thanks for reaching out! Our team is reviewing your message.",
@@ -28,6 +30,7 @@ export default function ChatPage(){
   const [toast, setToast] = useState("")
   const listRef = useRef(null)
   const fileRef = useRef(null)
+  const previewRef = useRef(null)
 
   const load = async ()=>{ try{ const d=await getMessagesAsync(); setMessages(d) }catch{ setMessages(getMessages()) } }
   useEffect(()=>{
@@ -52,19 +55,32 @@ export default function ChatPage(){
 
   const showToast = (msg)=> setToast(msg)
 
-  const onFileSelect = async (e)=>{
+  const revokePreview = (url)=>{
+    if(!url) return
+    if(url.startsWith('blob:')) { try{ URL.revokeObjectURL(url) }catch{} }
+    if(previewRef.current === url) previewRef.current = null
+  }
+
+  const onFileSelect = (e)=>{
     const f = e.target.files && e.target.files[0]
     if(!f) return
-    try{
-      const data = await fileToBase64(f)
-      setAttach({name:f.name, type:f.type, size:f.size, data})
-      if(f.type.startsWith('image/')) setAttachPreview(data)
-      else setAttachPreview(null)
-    }catch(err){ alert(err.message) }
+    if(f.size > MAX_UPLOAD_BYTES){
+      alert(`File too large: ${f.name} (max ${Math.round(MAX_UPLOAD_BYTES/1024/1024)} MB)`)
+      e.target.value=""
+      return
+    }
+    revokePreview(previewRef.current)
+    const preview = f.type.startsWith('image/') ? URL.createObjectURL(f) : null
+    previewRef.current = preview
+    setAttach({ name:f.name, type:f.type || '', size:f.size, raw:f })
+    setAttachPreview(preview)
     e.target.value=""
   }
 
-  const removeAttach = ()=>{ setAttach(null); setAttachPreview(null) }
+  const removeAttach = ()=>{ revokePreview(attachPreview); setAttach(null); setAttachPreview(null) }
+
+  // Revoke the preview URL when leaving the page (Safe under StrictMode).
+  useEffect(()=> ()=> revokePreview(previewRef.current), [])
 
   const handleSend = async ()=>{
     const text = input.trim()
@@ -75,6 +91,7 @@ export default function ChatPage(){
       try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
       setEditingId(null)
       setInput("")
+      revokePreview(attachPreview)
       setAttach(null); setAttachPreview(null)
       showToast("Edited ✓")
       return
@@ -83,13 +100,14 @@ export default function ChatPage(){
       id: generateChatId(),
       sender: 'user',
       text: text,
-      file: attach ? { ...attach } : null,
+      file: attach ? { name: attach.name, type: attach.type, size: attach.size, raw: attach.raw } : null,
       createdAt: new Date().toISOString(),
       edited: false
     }
     await saveMessage(msg)
     try{ setMessages(await getMessagesAsync()) }catch{ setMessages(getMessages()) }
     setInput("")
+    revokePreview(attachPreview)
     setAttach(null); setAttachPreview(null)
 
     // auto support reply simulation
@@ -140,7 +158,7 @@ export default function ChatPage(){
       <Header showMenu />
       <main className="container chat-page chat-fullpage complain-open">
         <div className="card chat-back-card complain-anim d1" style={{padding:'14px 16px'}}>
-          <Link className="back-link" to="/" style={{marginBottom:0}}>
+          <Link className="back-link" to={withBase('/')} style={{marginBottom:0}}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
             Back
           </Link>
@@ -172,6 +190,7 @@ export default function ChatPage(){
                 const curDate = formatDateChat(m.createdAt)
                 const showDate = prevDate !== curDate
                 const isUser = m.sender==='user'
+                const fileHref = m.file ? chatFileSrc(m.file) : ''
                 return (
                   <div key={m.id}>
                     {showDate && <div className="chat-date-sep"><span>{curDate}</span></div>}
@@ -180,8 +199,8 @@ export default function ChatPage(){
                         {m.file && (
                           <div className="chat-file">
                             {m.file.type && m.file.type.startsWith('image/') ? (
-                              <a href={m.file.data} target="_blank" rel="noopener">
-                                <img src={m.file.data} alt={m.file.name} className="chat-img" />
+                              <a href={fileHref} target="_blank" rel="noopener">
+                                <img src={fileHref} alt={m.file.name} className="chat-img" />
                               </a>
                             ) : (
                               <div className="chat-file-card">
@@ -190,9 +209,9 @@ export default function ChatPage(){
                                 </div>
                                 <div className="chat-file-meta">
                                   <div className="chat-file-name">{m.file.name}</div>
-                                  <div className="chat-file-size">{fileSizeStr(m.file.size)} {m.file.type.includes('pdf')?'• PDF':''}</div>
+                                  <div className="chat-file-size">{fileSizeStr(m.file.size)} {(m.file.type || '').includes('pdf')?'• PDF':''}</div>
                                 </div>
-                                <a className="chat-file-dl" href={m.file.data} download={m.file.name} target="_blank" rel="noopener">Download</a>
+                                <a className="chat-file-dl" href={fileHref} download={m.file.name} target="_blank" rel="noopener">Download</a>
                               </div>
                             )}
                           </div>

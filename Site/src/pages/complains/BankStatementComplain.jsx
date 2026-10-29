@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Header from '../../components/Header'
 import SubmitSuccessPopup from '../../components/SubmitSuccessPopup'
 import FileUpload from '../../components/FileUpload'
-import { saveComplain, fileToBase64, generateId } from '../../utils/complainStore'
+import { saveComplain, generateId } from '../../utils/complainStore'
+import { withBase } from '../../utils/base'
 
 export default function BankStatementComplain() {
-  const navigate = useNavigate()
   const [userName, setUserName] = useState('')
   const [mobile, setMobile] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +21,7 @@ export default function BankStatementComplain() {
     try {
       if (!bankStatement) { alert("Please upload Bank Statement"); setSubmitting(false); return }
       const files = {}
-      if (bankStatement) files.bankStatement = { name: bankStatement.name, data: await fileToBase64(bankStatement) }
+      if (bankStatement) files.bankStatement = bankStatement
       const entry = {
         id: generateId(),
         type: 'Bank Statement',
@@ -42,7 +42,7 @@ export default function BankStatementComplain() {
       <Header showMenu />
       <main className="container complain-open">
         <div className="card complain-anim d1" style={{padding:'14px 16px'}}>
-          <Link className="back-link" to="/" style={{marginBottom:'0'}}>
+          <Link className="back-link" to={withBase('/')} style={{marginBottom:'0'}}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><polyline points="12 19 5 12 12 5" /></svg>
             Back
           </Link>

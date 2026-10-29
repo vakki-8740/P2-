@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import { withBase } from '../utils/base'
 
 export default function About() {
   return (
@@ -55,11 +56,11 @@ export default function About() {
             <footer>        <div className="footer-main">
           <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
           <nav className="footer-nav">
-            <Link to="/about">About</Link>
+            <Link to={withBase('/about')}>About</Link>
             <span className="sep">·</span>
-            <Link to="/terms">Terms</Link>
+            <Link to={withBase('/terms')}>Terms</Link>
             <span className="sep">·</span>
-            <Link to="/all-complains">My Complains</Link>
+            <Link to={withBase('/all-complains')}>My Complains</Link>
           </nav>
         </div>
       </footer>

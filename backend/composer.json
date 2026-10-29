@@ -1,23 +1,23 @@
 {
   "name": "vakki-8740/parimatch-backend",
-  "description": "Parimatch Support Center — PHP backend (SQL + Wasmer)",
+  "description": "Parimatch Support Center — PHP + SQL backend (Wasmer Edge)",
   "type": "project",
   "license": "MIT",
   "require": {
     "php": ">=8.1",
     "ext-pdo": "*",
-    "ext-pdo_mysql": "*",
-    "ext-pdo_sqlite": "*",
     "ext-json": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
   },
-  "autoload": {
-    "psr-4": {
-      "App\\": "app/src/"
-    }
+  "suggest": {
+    "ext-pdo_mysql": "Required when using MySQL instead of the SQLite fallback",
+    "ext-pdo_sqlite": "Required for the SQLite fallback",
+    "ext-fileinfo": "Used to validate uploaded file types"
   },
   "scripts": {
-    "serve": "php -t app -S localhost:8080 -d upload_max_filesize=100M -d post_max_size=300M app/index.php",
-    "migrate": "mysql -h $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME < sql/schema.sql"
+    "serve": "php -S 0.0.0.0:8080 -t app -d upload_max_filesize=100M -d post_max_size=300M -d memory_limit=512M app/index.php",
+    "lint": "find app config -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "migrate": "mysql -h ${DB_HOST} -u ${DB_USER} -p${DB_PASS} ${DB_NAME} < sql/schema.sql"
   }
 }

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import Header from '../components/Header'
+import Header from '../../Site/src/components/Header'
 import IntroOverlay from '../components/IntroOverlay'
+import { withBase } from '../../Site/src/utils/base'
 
 export default function Landing() {
   return (
@@ -11,7 +12,7 @@ export default function Landing() {
         <div className="card banner-wrapper">
           <img
             id="bannerImg"
-            src="/banner/file_00000000c5c08211a860dc7a22339a1f.png"
+            src={withBase('/banner/file_00000000c5c08211a860dc7a22339a1f.png')}
             alt="Parimatch Support banner"
             onError={(e) => {
               e.target.hidden = true
@@ -25,7 +26,7 @@ export default function Landing() {
         </div>
 
         <section className="panel content">
-          <h1>Were Here to Help You</h1>
+          <h1>We’re Here to Help You</h1>
 
           <ul className="feature-list">
             <li>
@@ -60,12 +61,12 @@ export default function Landing() {
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </span>
-              <span>Fast response were just a click away</span>
+              <span>Fast response — we’re just a click away</span>
             </li>
           </ul>
 
           <div className="actions">
-            <Link className="btn primary" to="/site">
+            <Link className="btn primary" to={withBase('/')}>
               Support Center
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
@@ -78,11 +79,11 @@ export default function Landing() {
             <footer>        <div className="footer-main">
           <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
           <nav className="footer-nav">
-            <Link to="/site/about">About</Link>
+            <Link to={withBase('/about')}>About</Link>
             <span className="sep">·</span>
-            <Link to="/site/terms">Terms</Link>
+            <Link to={withBase('/terms')}>Terms</Link>
             <span className="sep">·</span>
-            <Link to="/site">Support</Link>
+            <Link to={withBase('/')}>Support</Link>
           </nav>
         </div>
       </footer>

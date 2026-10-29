@@ -1,17 +1,27 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { withBase } from '../utils/base'
+
+const LOGO = withBase('/logo/logo.png')
+
+const MENU = [
+  { label: 'Home', path: '/' },
+  { label: 'All Complains', path: '/all-complains' },
+  { label: 'Terms & Conditions', path: '/terms' },
+  { label: 'About Us', path: '/about' },
+]
 
 export default function Header({ showMenu = false }) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === withBase(path)
 
   if (!showMenu) {
     return (
       <header className="page-header">
         <div className="header-inner">
-          <img className="logo-icon" src="/logo/logo.png" alt="Parimatch Support logo" />
+          <img className="logo-icon" src={LOGO} alt="Parimatch Support logo" />
           <div className="logo-text">Parimatch Support</div>
         </div>
       </header>
@@ -22,7 +32,7 @@ export default function Header({ showMenu = false }) {
     <>
       <header className="page-header">
         <div className="header-inner">
-          <img className="logo-icon" src="/logo/logo.png" alt="Parimatch Support logo" />
+          <img className="logo-icon" src={LOGO} alt="Parimatch Support logo" />
           <div className="logo-text">Parimatch Support</div>
           <button
             className="menu-btn"
@@ -43,7 +53,7 @@ export default function Header({ showMenu = false }) {
       <div className={`menu-overlay ${open ? 'open' : ''}`} onClick={() => setOpen(false)} />
       <nav className={`side-menu ${open ? 'open' : ''}`} aria-label="Menu">
         <div className="side-menu-head">
-          <img src="/logo/logo.png" alt="" />
+          <img src={LOGO} alt="" />
           <span>Parimatch Support</span>
           <button className="side-close" type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -52,10 +62,16 @@ export default function Header({ showMenu = false }) {
             </svg>
           </button>
         </div>
-        <Link className={`side-link ${isActive('/') ? 'active' : ''}`} to="/" onClick={() => setOpen(false)}>Home</Link>
-        <Link className={`side-link ${isActive('/all-complains') ? 'active' : ''}`} to="/all-complains" onClick={() => setOpen(false)}>All Complains</Link>
-        <Link className={`side-link ${isActive('/terms') ? 'active' : ''}`} to="/terms" onClick={() => setOpen(false)}>Terms &amp; Conditions</Link>
-        <Link className={`side-link ${isActive('/about') ? 'active' : ''}`} to="/about" onClick={() => setOpen(false)}>About Us</Link>
+        {MENU.map((item) => (
+          <Link
+            key={item.path}
+            className={`side-link ${isActive(item.path) ? 'active' : ''}`}
+            to={withBase(item.path)}
+            onClick={() => setOpen(false)}
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </>
   )

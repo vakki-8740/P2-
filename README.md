@@ -1,99 +1,133 @@
 # P2 — Parimatch Support (React + PHP + SQL)
 
-Same UI same-to-same React conversion — ab **backend + database** ke saath.
-
-## Structure
+Support portal with a marketing landing page, 7 complaint flows, live chat,
+and a **PHP + SQL** backend deployable to **Wasmer.io**.
 
 ```
 P2-/
-├── Blog/          # 1. Blog — Landing (outer project) → https://parimatch-blog.vercel.app
-│   ├── src/App.jsx ("/" only)
-│   └── vercel.json → Root Directory = Blog
-├── Site/          # 2. Site — Support Center → https://parimatch-senter-center.vercel.app
-│   ├── src/App.jsx (/, /about, /terms, /all-complains, /withdrawal-complain ... /live-chat)
-│   └── vercel.json → Root Directory = Site
-├── backend/       # 3. Backend — PHP + SQL (Wasmer.io)
-│   ├── app/index.php        ← REST API (complains + chat)
-│   ├── config/database.php   ← PDO MySQL / SQLite fallback
-│   ├── config/php.ini        ← 100M / 300M limits
-│   ├── sql/schema.sql        ← MySQL schema (3 tables)
-│   ├── wasmer.toml + app.yaml
-│   └── README.md            ← deploy guide
-├── public/ + src/            # Root combined legacy ("/" + "/site") — same as Site but at repo root
-├── vercel.json + vite.config.js + package.json  # Root project
-└── README.md
+├── Blog/          # 1. Landing (outer project)      → parimatch-blog.vercel.app
+├── Site/          # 2. Support Center + shared code → parimatch-senter-center.vercel.app
+├── backend/       # 3. PHP 8.3 + MySQL/SQLite API   → Wasmer Edge
+└── root src/      # 4. Combined local build: "/" landing + "/site" support center
 ```
 
-> **Admin Panel:** Purana wala **delete kar diya** hai (aapke kehne pe). Naya Admin Panel jab bologe, backend ke `admin_users` table pe fresh banayenge.
+> The root project no longer contains a copy of the Site. It imports
+> `Site/src/*` with `VITE_BASE_PATH=/site`, so **there is one source of truth**
+> for every page, component, style and store.
 
 ---
 
-## Features (frontend)
+## Projects
 
-- **Complain Pages (7):** Deposit, Withdrawal, Bonus, Bank Statement, KYC, Unlock Withdrawal, Live Chat — har page pe **Submit Now 4 sec inside-button loading + popup** (small, clean, no buttons, 3 sec auto-close + auto-clear)
-- **Upload limits:** images **100MB**, chat fields **300MB** (frontend + php.ini)
-- **All Complains:** list + badge/date/details/files + Clear
-- **Live Chat:** send/edit/delete/copy, image/PDF, auto support reply
-- **Backend aware:** `VITE_API_URL` set hai toh SQL backend pe save, nahi toh localStorage fallback (offline bhi kaam kare)
+| # | Project | Folder | Dev | Routes |
+|---|---------|--------|-----|--------|
+| 1 | **Blog / Landing** | `Blog/` | `npm run dev -- --port 5175` | `/` (everything else redirects to `/`) |
+| 2 | **Support Center** | `Site/` | `npm run dev -- --port 5174` | `/`, `/about`, `/terms`, `/all-complains`, `/deposit-complain`, `/withdrawal-complain`, `/bonus-complain`, `/bank-statement-complain`, `/unlock-withdrawal-complain`, `/kyc-complain`, `/live-chat` (+ legacy `.html` redirects) |
+| 3 | **Backend API** | `backend/` | `composer serve` → `:8080` | `/api/*` — see [`backend/README.md`](backend/README.md) |
+| 4 | **Root combined** | `src/` + `public/` | `npm run dev -- --port 5173` | `/` landing + `/site/*` support center |
 
-## Database (SQL) — `backend/sql/schema.sql`
+---
 
-- `complains` — id, type, title, user_name, mobile, password, email, amount, message, extra (JSON), files (LONGTEXT base64), status, ip, created_at
-- `chat_messages` — id, sender, text, file_name/type/size/data, reply_to, edited, created_at
-- `admin_users` — for future admin (default `admin / Admin@123` hash included)
-- `settings` — key-value
+## Features
 
-MySQL 8 / MariaDB compatible. SQLite fallback auto (Wasmer demo).
+- **7 complaint forms** — Deposit, Withdrawal, Bonus, Bank Statement, KYC,
+  Unlock Withdrawal, Live Chat. Each has a 4-second in-button submitting state
+  and a popup that auto-closes after 3 seconds and clears the form.
+- **Attachments** — images/PDF/DOC/XLS/TXT/ZIP up to **100 MB per file**
+  (300 MB per request). Files are uploaded to the backend and only their
+  metadata is stored with the complaint, so lists stay fast.
+- **All Complains** — list, status badge, date, details grid, file previews,
+  per-complaint delete and "Clear" (own complaints only).
+- **Live Chat** — send / edit / delete / copy, attachments with preview,
+  auto support reply, clear history.
+- **Offline-safe** — every write also lands in `localStorage`; with no
+  `VITE_API_URL` the whole app works without a backend (small files only).
+- **Privacy** — each browser gets a `client_id`; the API only returns that
+  browser's complaints/chat. Complaint passwords are encrypted at rest and
+  never sent back to the client (UI shows `••••••••`).
 
-## Backend (PHP) — `backend/`
+---
 
-**Endpoints:** `GET/POST /api/complains`, `GET/POST/PUT/DELETE /api/chat/messages`, `GET /api/health` — see `backend/README.md`.
+## Environment
 
-**Local:**
 ```bash
-cd backend
-php -S localhost:8080 -t app -d upload_max_filesize=100M -d post_max_size=300M app/index.php
-curl http://localhost:8080/api/health
-```
-
-**Wasmer.io Deploy:** `cd backend && wasmer deploy` — then set `VITE_API_URL=https://parimatch-backend-*.wasmer.app` in frontend `.env` and redeploy Vercel. Full steps in `backend/README.md`.
-
-## Frontend — Env
-
-Create `.env` from `.env.example`:
-```
+# Site/.env  (required for the backend connection)
 VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
 # empty = localStorage only
+
+# root .env (same variable; VITE_BASE_PATH=/site is set in vite.config.js)
+VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
+
+# Blog/.env (optional)
+VITE_SITE_URL=https://parimatch-senter-center.vercel.app
 ```
 
-## Dev
+No trailing slash on `VITE_API_URL`. Restart the dev server after editing.
+
+---
+
+## Local development
 
 ```bash
-# Root (combined)
-npm install; npm run dev # http://localhost:5173
+# backend (creates SQLite automatically, no DB server needed)
+cd backend
+export APP_KEY=$(openssl rand -hex 32)
+composer serve                    # http://localhost:8080/api/health
 
-# Site
-cd Site; npm install; npm run dev # http://localhost:5174
+# support center
+cd Site && npm install && npm run dev -- --port 5174
 
-# Blog
-cd Blog; npm install; npm run dev # http://localhost:5175
+# landing
+cd Blog && npm install && npm run dev -- --port 5175
+
+# combined (landing "/" + support center "/site")
+npm install && npm run dev        # http://localhost:5173
 ```
 
-## Deploy — Vercel (frontend)
+`npm run build` works in the root, `Site/` and `Blog/`.
 
-| Folder | Vercel Project | URL | Root Directory |
-|--------|----------------|-----|----------------|
-| `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` |
-| `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` |
+---
 
-Root Directory + Env (`VITE_API_URL`) set karo → Save → Redeploy.
+## Backend (PHP + SQL)
+
+Endpoints: `GET /api/health`, `GET|POST /api/complains`,
+`GET|DELETE /api/complains/{id}`, `DELETE /api/complains`,
+`GET|POST /api/chat/messages`, `PUT|DELETE /api/chat/messages/{id}`,
+`DELETE /api/chat/messages`, `POST /api/uploads`, `GET /api/uploads/{id}`.
+
+Database: MySQL 8 / MariaDB (`backend/sql/schema.sql`) with an automatic
+SQLite fallback. Tables: `complains`, `chat_messages`, `uploads`,
+`admin_users`, `settings`, `rate_limits`.
+
+Full API docs, env vars, security notes and the Wasmer deploy guide live in
+[`backend/README.md`](backend/README.md).
+
+---
+
+## Deploy — Vercel (frontend) + Wasmer (backend)
+
+| Folder | Vercel Project | URL | Root Directory | Env |
+|--------|----------------|-----|----------------|-----|
+| `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` | `VITE_SITE_URL` (optional) |
+| `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` | `VITE_API_URL` |
+| `backend` | Wasmer Edge | https://parimatch-backend-vakki-8740.wasmer.app | — | DB / keys as Wasmer secrets |
+
+Order: deploy `backend/` to Wasmer → copy its URL into `Site/.env`
+(`VITE_API_URL`) → redeploy `Site` on Vercel. Both `vercel.json` files rewrite
+all paths to `/` so client-side routing works on refresh.
+
+---
 
 ## Tech
 
-- Vite + React 18 + React Router 6
-- Backend: PHP 8.3 + PDO (MySQL/SQLite), Wasmer Edge (`wasmer.toml` + `app.yaml`)
-- DB: MySQL (SQL)
+- Vite 5 + React 18 + React Router 6
+- PHP 8.3 + PDO (MySQL / SQLite), Wasmer Edge (`wasmer.toml`, `app.yaml`)
+- Storage: MySQL `utf8mb4`, files on disk or `uploads` blob fallback
 
-## Wasmer
+---
 
-CLI: `curl https://get.wasmer.io -sSfL | sh` → `wasmer login` → `wasmer deploy` (inside `backend/`). Docs: https://docs.wasmer.io/edge/guides/php/
+## Not built yet
+
+**Admin Panel** — removed on request and intentionally not recreated. The
+backend already ships the `admin_users` table plus `X-Admin-Token` /
+`?scope=all` access, ready for the new panel when you ask for it.
