@@ -235,6 +235,49 @@ Dashboard: `https://wasmer.io/apps/vakki-8740/parimatch-backend` → **Deploymen
 | `app name already exists` / `forbidden` | naam ya permission | `app.yaml` me `name:` change karo, ya `wasmer login` dobara |
 | `build failed` | file mount missing | `backend/` ke andar se deploy karo (root directory = `backend`) |
 
+### Variant B — sabse minimal config (agar logs config/mount ki taraf point karein)
+
+`backend/wasmer.toml` ko is se replace kar do (config `app/` ke andar mount hota hai,
+`PHPRC` ki zarurat nahi kyunki limits `-d` flags se aa rahi hain):
+
+```toml
+[package]
+entrypoint = "run"
+
+[dependencies]
+"php/php" = "=8.3.4"
+
+[fs]
+"/app" = "app"
+"/app/config" = "config"
+
+[[command]]
+name = "run"
+module = "php/php:php"
+runner = "wasi"
+
+[command.annotations.wasi]
+main-args = ["-t", "/app", "-S", "localhost:8080", "-d", "upload_max_filesize=100M", "-d", "post_max_size=300M", "-d", "memory_limit=512M", "/app/index.php"]
+env = ["DB_PATH=/tmp/parimatch_app.db", "UPLOAD_DIR=/tmp/parimatch_uploads"]
+```
+
+Aur `app.yaml` me `owner:` line hata do (Wasmer khud aapka namespace use karega):
+
+```yaml
+kind: wasmer.io/App.v0
+name: parimatch-backend
+package: .
+scaling:
+  mode: single_concurrency
+capabilities:
+  instaboot:
+    requests:
+      - path: /api/health
+```
+
+> `owner:` me **Wasmer ka username/namespace** hona chahiye, GitHub username nahi
+> (dono same ho sakte hain, zaroori nahi). Galat owner = deploy fail.
+
 ### Plan B (agar phir bhi na chale)
 
 Bilkul official scaffold banake usme apna code daal do:
