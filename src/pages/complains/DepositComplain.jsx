@@ -34,7 +34,7 @@ export default function DepositComplain() {
       saveComplain(entry)
       await new Promise(r => setTimeout(r, 4000))
       setShowSuccess(true)
-    } finally {
+    } catch (err) { alert(err && err.message ? err.message : 'Submit failed') } finally {
       setSubmitting(false)
     }
   }

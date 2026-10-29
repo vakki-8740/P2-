@@ -78,11 +78,11 @@ export default function Landing() {
             <footer>        <div className="footer-main">
           <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
           <nav className="footer-nav">
-            <a href="/site/about">About</a>
+            <Link to="/site/about">About</Link>
             <span className="sep">·</span>
-            <a href="/site/terms">Terms</a>
+            <Link to="/site/terms">Terms</Link>
             <span className="sep">·</span>
-            <a href="/site">Support</a>
+            <Link to="/site">Support</Link>
           </nav>
         </div>
       </footer>
