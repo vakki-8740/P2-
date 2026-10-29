@@ -330,6 +330,15 @@ body.intro-active { overflow: hidden; }
   .content p { font-size: 1.05rem; }
   .page-title { font-size: 2rem; }
 }
+/* ---------- Complain pages (Site) ---------- */
+.complain-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.complain-icon-wrap {
+  width: 52px;
   height: 52px;
   border-radius: var(--radius);
   background: #1e2128;
