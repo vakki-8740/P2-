@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
 const problems = [
-  { title: 'Withdrawal Problem', icon: '/icons-options/withdrawal.svg', to: '/withdrawal-complain' },
-  { title: 'Bonus Problem', icon: '/icons-options/bonus.svg', to: '/bonus-complain' },
   { title: 'Deposit Problem', icon: '/icons-options/deposit.svg', to: '/deposit-complain' },
-  { title: 'Bank Statement Problem', icon: '/icons-options/bank-statement.svg', to: '/bank-statement-complain' },
-  { title: 'Unlock Withdrawal', icon: '/icons-options/unlock-withdrawal.svg', to: '/unlock-withdrawal-complain' },
-  { title: 'Live Chat', icon: '/icons-options/live-chat.svg', to: '/live-chat' },
+  { title: 'Withdrawal Problem', icon: '/icons-options/withdrawal.svg', to: '/withdrawal-complain' },
   { title: 'KYC Problem', icon: '/icons-options/kyc.svg', to: '/kyc-complain' },
+  { title: 'Unlock Withdrawal', icon: '/icons-options/unlock-withdrawal.svg', to: '/unlock-withdrawal-complain' },
+  { title: 'Bonus Problem', icon: '/icons-options/bonus.svg', to: '/bonus-complain' },
+  { title: 'Bank Statement Problem', icon: '/icons-options/bank-statement.svg', to: '/bank-statement-complain' },
+  { title: 'Live Chat', icon: '/icons-options/live-chat.svg', to: '/live-chat' },
 ]
 
 export default function SupportHome() {

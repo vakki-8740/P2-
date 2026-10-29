@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
 const problems = [
-  { title: 'Withdrawal Problem', icon: '/site/icons-options/withdrawal.svg', to: '/site/withdrawal-complain' },
-  { title: 'Bonus Problem', icon: '/site/icons-options/bonus.svg', to: '/site/bonus-complain' },
   { title: 'Deposit Problem', icon: '/site/icons-options/deposit.svg', to: '/site/deposit-complain' },
-  { title: 'Bank Statement Problem', icon: '/site/icons-options/bank-statement.svg', to: '/site/bank-statement-complain' },
-  { title: 'Unlock Withdrawal', icon: '/site/icons-options/unlock-withdrawal.svg', to: '/site/unlock-withdrawal-complain' },
-  { title: 'Live Chat', icon: '/site/icons-options/live-chat.svg', to: '/site/live-chat' },
+  { title: 'Withdrawal Problem', icon: '/site/icons-options/withdrawal.svg', to: '/site/withdrawal-complain' },
   { title: 'KYC Problem', icon: '/site/icons-options/kyc.svg', to: '/site/kyc-complain' },
+  { title: 'Unlock Withdrawal', icon: '/site/icons-options/unlock-withdrawal.svg', to: '/site/unlock-withdrawal-complain' },
+  { title: 'Bonus Problem', icon: '/site/icons-options/bonus.svg', to: '/site/bonus-complain' },
+  { title: 'Bank Statement Problem', icon: '/site/icons-options/bank-statement.svg', to: '/site/bank-statement-complain' },
+  { title: 'Live Chat', icon: '/site/icons-options/live-chat.svg', to: '/site/live-chat' },
 ]
 
 export default function SupportHome() {
