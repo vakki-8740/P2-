@@ -181,13 +181,75 @@ Repo root pe landing + `/site` dono chalta hai local ke liye. Vercel pe sirf
 
 | Problem | Wajah / fix |
 |---|---|
-| `wasmer deploy` fail: package/permission | `wasmer login` dobara; `wasmer.toml` ka name `vakki-8740/parimatch-backend` hona chahiye |
+| **"Deployment failed. Review the logs and update your configuration."** | Config format galat tha — ab fix hai (neeche section 6 dekho). Repo pull karke `cd backend && wasmer deploy` dobara chalao |
+| `wasmer deploy` fail: package/permission | `wasmer login` dobara |
+| App name already taken | `backend/app.yaml` me `name:` badal do (e.g. `parimatch-backend-api`) |
 | Site pe "No Complains" lekin data tha | `VITE_API_URL` set nahi / redeploy nahi kiya (build-time var) |
 | `db_driver: sqlite` | `DB_*` secrets missing ya galat; `wasmer secret list` se check karo |
 | CORS error browser console me | `CORS_ORIGINS` ko `*` ya exact Vercel domain do, phir redeploy |
 | 413 / upload fail | Edge ka request limit; `MAX_UPLOAD_MB` kam karo + php.ini limit already 100M |
 | 404 on `/api/...` | App root directory galat (repo root deploy ho gaya) — `backend` hona chahiye |
 | Data restart pe gayab | SQLite `/tmp` use ho raha hai, MySQL lagao |
+
+---
+
+## 6. "Deployment failed. Review the logs..." — kya hua tha
+
+Repo me pehle jo config tha wo **purane/deprecated format** me tha, isliye
+Wasmer ne deploy reject kiya. Ab official starters ke saath match kar diya hai:
+
+| Pehle (galat) | Ab (verified) |
+|---|---|
+| `wasmer.toml` me `[package] name = "vakki-8740/..."` + `version` | `[package]` me sirf `entrypoint = "run"` (naam Wasmer khud banata hai) |
+| `wasmer.toml` me `[capabilities]` aur `[capabilities.net]` | Ye `wasmer.toml` me **nahi** jaate — capabilities sirf `app.yaml` me |
+| `wasmer.toml` me `[capabilities.instaboot]` | `app.yaml` → `capabilities.instaboot` |
+| `app.yaml` me `package: {name, version}` (deprecated) | `app.yaml` me `package: .` |
+| `-S 0.0.0.0:8080` | `-t /app -S localhost:8080 ... /app/index.php` (official order) |
+
+### Ab kya karo
+
+```bash
+git pull                      # ya latest branch checkout
+cd backend
+wasmer deploy
+```
+
+### Phir bhi fail ho to logs nikaalo
+
+```bash
+# CLI se live logs
+wasmer app logs parimatch-backend
+
+# ya detail ke saath deploy
+wasmer deploy --verbose
+```
+
+Dashboard: `https://wasmer.io/apps/vakki-8740/parimatch-backend` → **Deployments**
+→ failed deployment → **Logs**. Usme 3 me se koi ek cheez milegi:
+
+| Log me kya dikhega | Matlab | Fix |
+|---|---|---|
+| `unknown field` / `failed to parse manifest` | config schema | latest repo use karo (ab fix hai) |
+| `package not found: php/php` | dependency version | `wasmer.toml` me `"php/php" = "=8.3.4"` hi rakho |
+| `health check failed` / `connection refused` | app start nahi hua ya port galat | port `8080` hona chahiye (config me hai) |
+| `app name already exists` / `forbidden` | naam ya permission | `app.yaml` me `name:` change karo, ya `wasmer login` dobara |
+| `build failed` | file mount missing | `backend/` ke andar se deploy karo (root directory = `backend`) |
+
+### Plan B (agar phir bhi na chale)
+
+Bilkul official scaffold banake usme apna code daal do:
+
+```bash
+cd /tmp
+wasmer deploy --template=php-starter     # ye poochhega owner/name
+cd php-starter
+cp -r /path/to/P2-/backend/app/* app/    # app/index.php + helpers.php
+cp -r /path/to/P2-/backend/config config/
+# wasmer.toml me [fs] me add karo:  "/config" = "config"
+# main-args ke last me add karo:    "/app/index.php"
+# env me add karo:                  "PHPRC=/config/"
+wasmer deploy
+```
 
 ---
 

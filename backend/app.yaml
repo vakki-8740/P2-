@@ -2,21 +2,15 @@ kind: wasmer.io/App.v0
 name: parimatch-backend
 owner: vakki-8740
 
-package:
-  name: vakki-8740/parimatch-backend
-  version: 1.1.0
-
-# No custom domain here: Wasmer assigns
-#   https://parimatch-backend.wasmer.app        (if the name is free)
-#   https://parimatch-backend-vakki-8740.wasmer.app   (if it is taken)
-# Copy the URL printed by `wasmer deploy` into the frontend VITE_API_URL.
-# Add a custom domain from the dashboard (wasmer.io/apps/...) if needed.
+# "." = build/deploy the local package described by wasmer.toml
+# (the old `package: {name, version}` form is deprecated).
+package: .
 
 scaling:
   mode: single_concurrency
 
 # Non-secret defaults only. Database credentials, APP_KEY and ADMIN_API_TOKEN
-# MUST be created as secrets so they are not baked into the repo:
+# must be created as secrets so they never live in the repo:
 #   wasmer secret create DB_HOST --value=...
 #   wasmer secret create DB_NAME --value=...
 #   wasmer secret create DB_USER --value=...
@@ -29,8 +23,6 @@ env:
   UPLOAD_DIR: "/tmp/parimatch_uploads"
   MAX_UPLOAD_MB: "100"
   MAX_REQUEST_MB: "300"
-  # "*" = any origin. Tighten once the Vercel domains are final:
-  # CORS_ORIGINS: "https://parimatch-senter-center.vercel.app,https://*.vercel.app"
   CORS_ORIGINS: "*"
 
 capabilities:
