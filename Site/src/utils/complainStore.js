@@ -36,9 +36,9 @@ export function generateId() {
 }
 
 export function fileToBase64(file) {
-  const MAX_SIZE = 4 * 1024 * 1024
+  const MAX_SIZE = 100 * 1024 * 1024
   if (file && file.size > MAX_SIZE) {
-    return Promise.reject(new Error('File too large (max 4MB): ' + file.name))
+    return Promise.reject(new Error('File too large (max 100MB): ' + file.name))
   }
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

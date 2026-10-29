@@ -53,8 +53,8 @@ export function generateChatId() {
 }
 
 export function fileToBase64(file) {
-  const MAX = 8 * 1024 * 1024
-  if (file && file.size > MAX) return Promise.reject(new Error('File too large (max 8MB): '+file.name))
+  const MAX = 300 * 1024 * 1024
+  if (file && file.size > MAX) return Promise.reject(new Error('File too large (max 300MB): '+file.name))
   return new Promise((resolve,reject)=>{
     const r = new FileReader()
     r.onload = () => resolve(r.result)
