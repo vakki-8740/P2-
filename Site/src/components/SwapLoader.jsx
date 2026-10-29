@@ -11,9 +11,7 @@ export default function SwapLoader({ fullScreen = false, message = '' }) {
   if (fullScreen) {
     return (
       <div className="swap-loader-backdrop" role="status" aria-live="polite" aria-busy="true">
-        <div className="swap-loader-card">
-          {inner}
-        </div>
+        {inner}
       </div>
     )
   }
