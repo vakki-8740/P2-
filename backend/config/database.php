@@ -32,6 +32,8 @@ function getPDO(): PDO
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
+            // Never let an unreachable DB hang a request (Wasmer health checks).
+            PDO::ATTR_TIMEOUT            => 5,
         ]);
         // Keep large rows (file metadata only, but be safe) working.
         try {
