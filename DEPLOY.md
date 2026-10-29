@@ -193,7 +193,7 @@ Repo root pe landing + `/site` dono chalta hai local ke liye. Vercel pe sirf
 
 ---
 
-## 6. "Deployment failed. Review the logs..." — kya hua tha
+## 5. "Deployment failed. Review the logs..." — kya hua tha
 
 Repo me pehle jo config tha wo **purane/deprecated format** me tha, isliye
 Wasmer ne deploy reject kiya. Ab official starters ke saath match kar diya hai:
@@ -253,7 +253,7 @@ wasmer deploy
 
 ---
 
-## 5. Ek line me summary
+## 6. Ek line me summary
 
 ```
 Wasmer root dir  = backend        (wasmer deploy yahin se)
