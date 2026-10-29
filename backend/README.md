@@ -226,13 +226,14 @@ wasmer secret create APP_KEY   --value=$(openssl rand -hex 32)
 wasmer secret create ADMIN_API_TOKEN --value=$(openssl rand -hex 24)
 
 wasmer deploy
-# → https://parimatch-backend-vakki-8740.wasmer.app/api/health
+# → copy the URL it prints, then check: <URL>/api/health
 ```
 
 Then set `VITE_API_URL` in `Site/.env` (and the root `.env`), redeploy the
 frontend to Vercel, and reload the site.
 
-Docs: https://docs.wasmer.io/edge/guides/php/
+Step-by-step deploy checklist (with Vercel settings): [`../DEPLOY.md`](../DEPLOY.md).
+Wasmer PHP guide: https://docs.wasmer.io/edge/guides/php/
 
 ---
 

@@ -6,35 +6,32 @@ package:
   name: vakki-8740/parimatch-backend
   version: 1.1.0
 
-# Keep this in sync with the URLs used in the frontend .env files:
-#   VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
-domains:
-  - parimatch-backend-vakki-8740.wasmer.app
+# No custom domain here: Wasmer assigns
+#   https://parimatch-backend.wasmer.app        (if the name is free)
+#   https://parimatch-backend-vakki-8740.wasmer.app   (if it is taken)
+# Copy the URL printed by `wasmer deploy` into the frontend VITE_API_URL.
+# Add a custom domain from the dashboard (wasmer.io/apps/...) if needed.
 
 scaling:
   mode: single_concurrency
 
+# Non-secret defaults only. Database credentials, APP_KEY and ADMIN_API_TOKEN
+# MUST be created as secrets so they are not baked into the repo:
+#   wasmer secret create DB_HOST --value=...
+#   wasmer secret create DB_NAME --value=...
+#   wasmer secret create DB_USER --value=...
+#   wasmer secret create DB_PASS --value=...
+#   wasmer secret create APP_KEY  --value=$(openssl rand -hex 32)
+#   wasmer secret create ADMIN_API_TOKEN --value=$(openssl rand -hex 24)
 env:
-  # MySQL (recommended for production). Leave empty to use the SQLite
-  # fallback at /tmp/parimatch_app.db (demo only — wiped on redeploy).
-  DB_HOST: ""
-  DB_NAME: ""
-  DB_USER: ""
-  DB_PASS: ""        # set via: wasmer secret create DB_PASS --value=xxx
   DB_PORT: "3306"
   DB_PATH: "/tmp/parimatch_app.db"
   UPLOAD_DIR: "/tmp/parimatch_uploads"
   MAX_UPLOAD_MB: "100"
   MAX_REQUEST_MB: "300"
-  # Browser origins allowed to call the API ("*" = any). Example:
+  # "*" = any origin. Tighten once the Vercel domains are final:
   # CORS_ORIGINS: "https://parimatch-senter-center.vercel.app,https://*.vercel.app"
   CORS_ORIGINS: "*"
-  # Optional: token that enables cross-visitor reads (future admin panel).
-  # Set with: wasmer secret create ADMIN_API_TOKEN --value=xxx
-  ADMIN_API_TOKEN: ""
-  # Optional: 32+ char secret used to encrypt complaint passwords at rest.
-  # When empty a random key is generated once and stored in the settings table.
-  APP_KEY: ""
 
 capabilities:
   instaboot:

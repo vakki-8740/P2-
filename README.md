@@ -110,10 +110,12 @@ Full API docs, env vars, security notes and the Wasmer deploy guide live in
 |--------|----------------|-----|----------------|-----|
 | `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` | `VITE_SITE_URL` (optional) |
 | `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` | `VITE_API_URL` |
-| `backend` | Wasmer Edge | https://parimatch-backend-vakki-8740.wasmer.app | — | DB / keys as Wasmer secrets |
+| `backend` | Wasmer Edge | URL printed by `wasmer deploy` | — | DB / keys as Wasmer secrets |
 
 Order: deploy `backend/` to Wasmer → copy its URL into `Site/.env`
-(`VITE_API_URL`) → redeploy `Site` on Vercel. Both `vercel.json` files rewrite
+(`VITE_API_URL`) → redeploy `Site` on Vercel.
+Full settings (root directories, secrets, MySQL, troubleshooting):
+[`DEPLOY.md`](DEPLOY.md). Both `vercel.json` files rewrite
 all paths to `/` so client-side routing works on refresh.
 
 ---

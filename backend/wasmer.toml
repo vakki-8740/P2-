@@ -7,11 +7,11 @@ license = "MIT"
 [dependencies]
 "php/php" = "=8.3.4"
 
-# Everything the app needs, mounted where the code expects it.
+# Documented Wasmer layout: app/ at /app, config/ at /config, sql/ at /sql.
 [fs]
 "/app" = "app"
-"/app/config" = "config"
-"/app/sql" = "sql"
+"/config" = "config"
+"/sql" = "sql"
 
 [[command]]
 name = "run"
@@ -19,7 +19,7 @@ module = "php/php:php"
 runner = "wasi"
 
 [command.annotations.wasi]
-# /app/index.php is the router script for PHP's built-in server.
+# Equivalent to: php -t /app -S 0.0.0.0:8080 /app/index.php
 main-args = [
   "-S", "0.0.0.0:8080",
   "-t", "/app",
@@ -29,7 +29,8 @@ main-args = [
   "-d", "max_execution_time=60",
   "/app/index.php",
 ]
-env = ["PHPRC=/app/config", "DB_PATH=/tmp/parimatch_app.db", "UPLOAD_DIR=/tmp/parimatch_uploads"]
+# PHPRC points at the mounted config dir -> /config/php.ini
+env = ["PHPRC=/config/", "DB_PATH=/tmp/parimatch_app.db", "UPLOAD_DIR=/tmp/parimatch_uploads"]
 
 [capabilities]
 [capabilities.net]
