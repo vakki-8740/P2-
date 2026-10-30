@@ -1,23 +1,46 @@
 # Deploy Guide — Wasmer (backend) + Vercel (frontend)
 
 **Status: backend LIVE ✓** — <https://parimatch-backend.wasmer.app>
-(health: `ok:true`, PHP 8.3.4, `db_driver:sqlite` — MySQL pending, dekho §5)
+(health: `ok:true`, PHP 8.3.4, `db_driver:sqlite`)
 
 Sab kuch ready hai. Do deployments hain: **backend → Wasmer Edge**, aur
 **frontend → Vercel** (Site + Blog). Neeche exact settings di hain.
 
 ---
 
+## MySQL chahiye ya nahi? — **nahi, zaroori nahi**
+
+Backend plain **PDO + SQL** hai (koi MySQL-specific SQL nahi). Driver khud chunta hai:
+
+| Condition | Driver |
+|---|---|
+| `DB_HOST` + `DB_NAME` + `DB_USER` set | MySQL |
+| warna | **SQLite** (default) |
+
+SQLite ko **persistent** rakhne ke liye `backend/app.yaml` me Wasmer Volume mount hai:
+
+```yaml
+volumes:
+  - name: data
+    mount: /data
+env:
+  DB_PATH: "/data/app.db"
+  UPLOAD_DIR: "/data/uploads"
+```
+
+Volume ke bina (ya `/tmp` path ke saath) DB + uploads **har redeploy pe wipe** ho jaate hain.
+
+**MySQL tab chuno jab:** multiple instances, bahar se data padhna ho, ya bada data ho.
+Warna SQLite + volume poora kaam karta hai — koi DB server nahi banana padta.
+
+---
+
 ## 0. Order (isko follow karo)
 
-1. **MySQL database** banao (Railway / Aiven / Filsh / apna hosting)
-2. **Backend Wasmer pe deploy** karo → URL milega
-3. Us URL ko **Vercel** me `VITE_API_URL` me daalo → **Site redeploy**
-4. `https://your-site.vercel.app/all-complains` pe test karo
-
-> ⚠️ Step 1 skip mat karo. Wasmer pe SQLite `/tmp` me banti hai jo
-> **har redeploy/restart pe udd jati hai** (data loss). Production ke liye
-> MySQL zaroori hai.
+1. **Backend Wasmer pe deploy** karo → URL milega (`bash backend/deploy.sh`)
+2. Us URL ko **Vercel** me `VITE_API_URL` me daalo → **Site redeploy**
+3. `https://your-site.vercel.app/all-complains` pe test karo
+4. *(Optional)* MySQL chahiye to §5 dekho — warna kuch nahi karna
 
 ---
 

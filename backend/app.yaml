@@ -9,6 +9,13 @@ package: .
 scaling:
   mode: single_concurrency
 
+# Persistent disk (Wasmer Edge Volumes). Without this, the SQLite file and the
+# uploaded files live in /tmp and are wiped on every redeploy/restart.
+# Remove this block (and restore the /tmp paths below) to go back to ephemeral.
+volumes:
+  - name: data
+    mount: /data
+
 # Non-secret defaults only. Database credentials, APP_KEY and ADMIN_API_TOKEN
 # must be created as secrets so they never live in the repo:
 #   wasmer secret create DB_HOST --value=...
@@ -19,8 +26,8 @@ scaling:
 #   wasmer secret create ADMIN_API_TOKEN --value=$(openssl rand -hex 24)
 env:
   DB_PORT: "3306"
-  DB_PATH: "/tmp/parimatch_app.db"
-  UPLOAD_DIR: "/tmp/parimatch_uploads"
+  DB_PATH: "/data/app.db"
+  UPLOAD_DIR: "/data/uploads"
   MAX_UPLOAD_MB: "100"
   MAX_REQUEST_MB: "300"
   CORS_ORIGINS: "*"

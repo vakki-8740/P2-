@@ -27,8 +27,9 @@ P2-/
 
 `GET /api/health` → `{"ok":true,"php":"8.3.4","db":"connected","db_driver":"sqlite", ...}`
 
-> ⚠️ Abhi **SQLite** chal raha hai (`/tmp`) — redeploy pe data wipe ho jayega.
-> MySQL secrets set karte hi `db_driver` `mysql` ho jayega (DEPLOY.md §1).
+> **DB:** plain PDO + SQL — MySQL server ki zarurat nahi. SQLite use hota hai
+> (`DB_PATH=/data/app.db`) aur `/data` Wasmer **Volume** hai, isliye redeploy ke
+> baad bhi data bacha rehta hai. MySQL sirf optional hai (DEPLOY.md §5).
 
 ## Projects
 

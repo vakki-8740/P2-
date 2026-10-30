@@ -45,11 +45,21 @@ function getPDO(): PDO
         $driver = 'mysql';
     } else {
         $sqlitePath = env_str('DB_PATH') ?: sqlite_default_path();
+        $sqliteDir = dirname($sqlitePath);
+        if (!is_dir($sqliteDir)) {
+            @mkdir($sqliteDir, 0777, true);
+        }
         $pdo = new PDO('sqlite:' . $sqlitePath, null, null, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
-        $pdo->exec('PRAGMA journal_mode = WAL');
+        // WAL is fastest, but it needs shared-memory support: on a network
+        // volume (Wasmer Volumes are S3-backed) it can fail -> fall back.
+        try {
+            $pdo->exec('PRAGMA journal_mode = WAL');
+        } catch (Throwable $e) {
+            try { $pdo->exec('PRAGMA journal_mode = DELETE'); } catch (Throwable $e2) {}
+        }
         $pdo->exec('PRAGMA busy_timeout = 5000');
         $pdo->exec('PRAGMA foreign_keys = ON');
     }

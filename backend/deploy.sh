@@ -179,16 +179,18 @@ if [ -n "${URL:-}" ]; then
   echo
 
   case "$HEALTH" in
-    *'"db_driver":"sqlite"'*)
-      yellow "  ⚠  SQLite chal raha hai — redeploy pe data wipe ho jayega."
-      info "     Production ke liye MySQL secrets set karo, phir dobara deploy:"
+    *'"db_persistent":false'*)
+      yellow "  ⚠  DB /tmp me hai — redeploy pe data wipe ho jayega."
+      info "     Fix: app.yaml me volume + DB_PATH=/data/app.db (repo me already hai)"
+      info "     ya MySQL secrets:"
       info "       wasmer secret create DB_HOST --value=<host>"
       info "       wasmer secret create DB_NAME --value=<db>"
       info "       wasmer secret create DB_USER --value=<user>"
       info "       wasmer secret create DB_PASS --value=<pass>"
       info "       wasmer secret create APP_KEY  --value=\$(openssl rand -hex 32)"
-      info "       wasmer secret create ADMIN_API_TOKEN --value=\$(openssl rand -hex 24)"
-      info "       wasmer deploy"
+      ;;
+    *'"db_persistent":true'*)
+      green "  DB persistent (volume) ✓"
       ;;
   esac
   case "$HEALTH" in

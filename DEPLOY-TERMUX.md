@@ -116,7 +116,7 @@ curl -s https://<YOUR-URL>/api/health
 ```
 Expected: `"ok":true ... "db":"connected"` (ya `"db":"sqlite"` agar MySQL abhi nahi lagaya).
 
-### Step 9 — MySQL secrets (production ke liye zaroori)
+### Step 9 — MySQL secrets (**optional** — sirf agar MySQL chahiye)
 
 ```bash
 cd ~/P2-/backend
@@ -165,8 +165,12 @@ cd ~/P2- && git pull && cd backend && bash deploy.sh
 
 ---
 
-## MySQL kahan se (phone se hi)
+## MySQL — optional (zaroori nahi)
 
-Wasmer Edge pe SQLite `/tmp` me banti hai → **redeploy pe data khatam**.
-Production ke liye free MySQL: **Railway**, **Aiven**, **Filsh**, **FreeSQL**.
-Host/user/password leke Step 9 ke secrets bhar do, phir `wasmer deploy`.
+Backend plain **PDO + SQL** hai. SQLite default hai aur ab `app.yaml` me
+Wasmer **Volume** (`/data`) mount hai, isliye redeploy ke baad bhi data bacha rehta hai.
+Pehli deploy pe volume khud ban jata hai — koi MySQL server nahi chahiye.
+
+MySQL tabhi chahiye jab multiple instances / external tools use karne ho:
+**Railway**, **Aiven**, **Filsh** se host/user/password lo → Step 9 secrets
+(`DB_HOST/DB_NAME/DB_USER/DB_PASS`) → `wasmer deploy`.

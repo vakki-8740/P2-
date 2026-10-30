@@ -91,6 +91,14 @@ if ($uri === '/' || $uri === '/api' || $uri === '/api/health' || $uri === '/heal
     $uploadDir = upload_dir();
     $storage = is_dir($uploadDir) && is_writable($uploadDir) ? 'writable' : 'not-writable';
 
+    // /tmp is wiped on every redeploy; a mounted volume (e.g. /data) is not.
+    $dbPersistent = null;
+    if ($driver === 'sqlite') {
+        $dbFile = (string) (env_str('DB_PATH') ?: sqlite_default_path());
+        $dbPersistent = strpos($dbFile, '/tmp/') !== 0;
+    }
+    $uploadPersistent = strpos($uploadDir, '/tmp/') !== 0;
+
     json_response([
         'ok' => true,
         'service' => APP_NAME,
@@ -109,6 +117,8 @@ if ($uri === '/' || $uri === '/api' || $uri === '/api/health' || $uri === '/heal
             'php_post_max_size' => ini_get('post_max_size'),
         ],
         'admin_scope_enabled' => admin_token() !== '',
+        'db_persistent' => $dbPersistent,
+        'upload_persistent' => $uploadPersistent,
     ]);
 }
 
