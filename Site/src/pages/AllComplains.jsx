@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import FileViewer from '../components/FileViewer'
 import { withBase } from '../utils/base'
 import {
   getComplainsAsync,
@@ -16,10 +17,19 @@ import {
 } from '../utils/complainStore'
 import { isFirebaseConfigured } from '../firebase-config'
 
+/** paymentImage → "Payment Image", aadharFront → "Aadhar Front" */
+function prettyFileLabel(key) {
+  return String(key || 'File')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (ch) => ch.toUpperCase())
+}
+
 export default function AllComplains() {
   const [complains, setComplains] = useState([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [viewer, setViewer] = useState(null) // { src, name } — image popup
 
   const load = async () => {
     try {
@@ -126,7 +136,12 @@ export default function AllComplains() {
               <div key={c.id} className="card complain-item">
                 <div className="complain-item-head">
                   <span className="badge info">{c.type || 'Complain'}</span>
-                  <span className="complain-item-date">{formatDate(c.createdAt)}</span>
+                  <div className="complain-item-head-right">
+                    <span className={`badge ${c.status === 'resolved' ? 'success' : 'warning'}`}>
+                      {c.status || 'Pending'}
+                    </span>
+                    <span className="complain-item-date">{formatDate(c.createdAt)}</span>
+                  </div>
                 </div>
                 <h3 className="complain-item-title">{c.title}</h3>
 
@@ -154,28 +169,46 @@ export default function AllComplains() {
                 {files.length > 0 && (
                   <div className="complain-files">
                     <div className="complain-files-title">Uploaded Files</div>
-                    <div className="complain-files-grid">
+                    <div className="complain-file-list">
                       {files.map(([key, f]) => {
                         const src = fileSrc(f)
+                        const label = prettyFileLabel(key)
                         return (
-                          <div key={key} className="complain-file">
-                            <div className="complain-file-label">{f.name || key}</div>
+                          <div key={key} className="complain-file-row">
+                            <span className="complain-file-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="3" />
+                                <circle cx="8.5" cy="9" r="1.6" />
+                                <path d="M21 15l-5-5L5 21" />
+                              </svg>
+                            </span>
+                            <span className="complain-file-meta">
+                              <span className="complain-file-name">{label}</span>
+                              <span className="complain-file-sub">
+                                {f.name}{f.size ? ` • ${formatFileSize(f.size)}` : ''}
+                              </span>
+                            </span>
                             {src ? (
                               isImageFile(f) ? (
-                                <a href={src} target="_blank" rel="noopener">
-                                  <img src={src} alt={f.name || key} className="complain-file-thumb" loading="lazy" />
-                                </a>
+                                <button
+                                  type="button"
+                                  className="btn secondary sm complain-file-btn"
+                                  onClick={() => setViewer({ src, name: f.name || label })}
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                  </svg>
+                                  View
+                                </button>
                               ) : (
-                                <a href={src} download={f.name} target="_blank" rel="noopener" className="complain-file-link">
-                                  Open file
+                                <a className="btn secondary sm complain-file-btn" href={src} download={f.name} target="_blank" rel="noopener">
+                                  Open
                                 </a>
                               )
                             ) : (
-                              <span className="complain-detail-value">{f.name}</span>
+                              <span className="muted" style={{ fontSize: '0.75rem' }}>Not available</span>
                             )}
-                            <div className="complain-file-name">
-                              {f.name}{f.size ? ` • ${formatFileSize(f.size)}` : ''}
-                            </div>
                           </div>
                         )
                       })}
@@ -184,7 +217,6 @@ export default function AllComplains() {
                 )}
 
                 <div className="complain-item-foot">
-                  <span className={`badge ${c.status === 'resolved' ? 'success' : 'warning'}`}>{c.status || 'Pending'}</span>
                   <span className="complain-item-id">ID: {String(c.id).slice(-6)}</span>
                   <button
                     className="btn ghost small"
@@ -200,6 +232,14 @@ export default function AllComplains() {
           })
         )}
       </main>
+
+      <FileViewer
+        open={Boolean(viewer)}
+        src={viewer?.src}
+        name={viewer?.name}
+        onClose={() => setViewer(null)}
+      />
+
       <footer>
         <div className="footer-main">
           <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
