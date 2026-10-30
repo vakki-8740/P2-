@@ -1,0 +1,17 @@
+.own-select { position: relative; max-width: 380px; }
+.own-select select {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-base);
+  border-radius: var(--radius);
+  min-height: var(--control-h-md);
+  padding: 0 38px 0 12px;
+  cursor: pointer;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.own-select select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.own-select__chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }

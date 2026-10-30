@@ -1,0 +1,36 @@
+.own-btn-group, .own-seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+}
+.own-btn-group__btn, .own-seg__btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.own-btn-group__btn + .own-btn-group__btn,
+.own-seg__btn + .own-seg__btn { border-left: 1px solid var(--border); }
+.own-btn-group__btn:hover, .own-seg__btn:hover { color: var(--text); }
+.own-btn-group__btn.is-active, .own-seg__btn.is-active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.own-btn-group { border-radius: var(--radius); overflow: visible; gap: 8px; border: 0; background: transparent; }
+.own-btn-group__btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: var(--radius);
+}
+.own-btn-group__btn + .own-btn-group__btn { border-left: 1px solid var(--border); }
+.own-btn-group__btn.is-active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }

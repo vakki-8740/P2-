@@ -1,0 +1,48 @@
+.own-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--t-fast), background var(--t-fast),
+    color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.own-btn:active:not(:disabled) { transform: translateY(1px); }
+.own-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.own-btn svg { flex: 0 0 auto; }
+
+.own-btn--sm { min-height: var(--control-h-sm); padding: 0 12px; font-size: var(--fs-sm); }
+.own-btn--md { min-height: var(--control-h-md); padding: 0 16px; font-size: var(--fs-base); }
+.own-btn--lg { min-height: var(--control-h-lg); padding: 0 22px; font-size: var(--fs-md); }
+.own-btn--block { width: 100%; }
+
+.own-btn--primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.own-btn--primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+.own-btn--secondary { background: var(--card); border-color: var(--border); color: var(--text); }
+.own-btn--secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+.own-btn--outline { background: transparent; border-color: var(--accent); color: var(--accent); }
+.own-btn--outline:hover:not(:disabled) { background: var(--accent-soft); }
+
+.own-btn--ghost { background: transparent; color: var(--text); }
+.own-btn--ghost:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent); }
+
+.own-btn--danger { background: var(--no); border-color: var(--no); color: var(--on-accent); }
+.own-btn--danger:hover:not(:disabled) { filter: brightness(0.94); }
+
+.own-btn--success { background: var(--yes); border-color: var(--yes); color: var(--on-accent); }
+.own-btn--success:hover:not(:disabled) { filter: brightness(0.95); }
+
+.own-btn--loading { pointer-events: none; }
+.own-btn__spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: own-spin 0.8s linear infinite;
+}
+@keyframes own-spin { to { transform: rotate(360deg); } }

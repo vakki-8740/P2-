@@ -1,0 +1,13 @@
+.own-accordion { max-width: 560px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); }
+.own-accordion__item + .own-accordion__item { border-top: 1px solid var(--border); }
+.own-accordion__head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 15px 17px; border: 0; background: transparent;
+  color: var(--text); font: inherit; font-weight: 600; font-size: var(--fs-base);
+  text-align: left; cursor: pointer;
+}
+.own-accordion__head:hover { color: var(--accent); }
+.own-accordion__chev { transition: transform var(--t-fast); color: var(--muted); }
+.own-accordion__chev.is-open { transform: rotate(180deg); color: var(--accent); }
+.own-accordion__panel { padding: 0 17px 16px; color: var(--muted); font-size: var(--fs-sm); }
+.own-accordion__panel p { margin: 0; }

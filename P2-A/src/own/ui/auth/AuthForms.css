@@ -1,0 +1,28 @@
+.own-auth { width: 100%; max-width: 400px; }
+.own-auth__card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  padding: 28px 26px;
+}
+.own-auth__brand { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 20px; }
+.own-auth__mark {
+  width: 28px; height: 28px; border-radius: var(--radius);
+  background: var(--accent); color: var(--on-accent);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.own-auth__title { font-size: var(--fs-xl); margin-bottom: 6px; }
+.own-auth__subtitle { color: var(--muted); font-size: var(--fs-sm); margin-bottom: 20px; }
+.own-auth__form { display: flex; flex-direction: column; gap: 15px; }
+.own-auth__form .own-field { max-width: none; }
+.own-auth__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: var(--fs-sm); }
+.own-auth__row a, .own-auth__footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.own-auth__footer { text-align: center; margin: 18px 0 0; font-size: var(--fs-sm); color: var(--muted); }
+.own-auth__success {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  padding: 22px 10px; color: var(--yes);
+}
+.own-auth__success p { color: var(--muted); font-size: var(--fs-sm); }
+.own-auth__linkbtn {
+  border: 0; background: transparent; color: var(--accent);
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; padding: 4px;
+}

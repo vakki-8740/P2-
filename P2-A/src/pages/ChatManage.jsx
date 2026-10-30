@@ -1,61 +1,51 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import Layout from '../components/Layout.jsx'
-import { Avatar, Empty } from '../components/ui.jsx'
-import { IconChat, IconChevron } from '../components/Icons.jsx'
+import AppShell from '../components/AppShell.jsx'
+import { initialsOf } from '../components/status.js'
+import { Avatar } from '../own/ui/data/Avatar.jsx'
+import { Badge } from '../own/ui/feedback/Alert.jsx'
+import EmptyState from '../own/ui/feedback/EmptyState.jsx'
+import { Skeleton } from '../own/ui/feedback/Loaders.jsx'
+import { Icon } from '../own/ui/icons/Icons.jsx'
 import { useData } from '../App.jsx'
-import { chatUsers, formatDateTime } from '../lib/data.js'
+import { chatUsers, formatStamp } from '../lib/data.js'
 
 export default function ChatManage() {
-  const { complaints, messages, loading } = useData()
-  const [q, setQ] = useState('')
-
-  const users = useMemo(() => {
-    const all = chatUsers(messages, complaints)
-    const term = q.trim().toLowerCase()
-    if (!term) return all
-    return all.filter((u) =>
-      [u.name, u.lastText].filter(Boolean).some((v) => String(v).toLowerCase().includes(term))
-    )
-  }, [messages, complaints, q])
+  const { messages, complaints, loading } = useData()
+  const rows = useMemo(() => chatUsers(messages, complaints), [messages, complaints])
 
   return (
-    <Layout title="Chat Manage" subtitle={`${users.length} chats`}>
-      <input
-        className="input search"
-        placeholder="User ya message se search…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
-
+    <AppShell title="Chat Manage" subtitle={`${rows.length} chats`}>
       {loading ? (
-        <div className="loading">Load ho raha hai…</div>
-      ) : users.length === 0 ? (
-        <Empty
-          title="Koi chat nahi"
-          text="Jab koi user live chat me message bhejega, wo yahan dikhega."
-          icon={<IconChat width="22" height="22" />}
-        />
+        <div className="own-card pa-card"><Skeleton lines={4} /></div>
+      ) : rows.length === 0 ? (
+        <EmptyState icon="message" title="Koi chat nahi" text="Jab user message bhejega, uska chat yahan dikhega." />
       ) : (
-        <div className="list">
-          {users.map((u) => (
-            <Link key={u.clientId} className="user-row" to={`/chat/${u.clientId}`}>
-              <Avatar />
-              <span className="user-row-text">
-                <span className="user-row-name">{u.name}</span>
-                <span className="user-row-meta">
-                  <span className="chat-preview">
-                    {u.lastSender === 'user' ? '' : 'You: '}
-                    {u.lastText || '—'}
-                  </span>
-                </span>
-                <span className="user-row-sub">{formatDateTime(u.lastAt)}</span>
-              </span>
-              <IconChevron className="chev" width="16" height="16" />
-            </Link>
-          ))}
+        <div className="own-list pa-list">
+          {rows.map((u) => {
+            const stamp = formatStamp(u.lastAt)
+            const mine = u.lastSender !== 'user'
+            return (
+              <Link key={u.clientId} className="own-list__row pa-userrow" to={`/chat/${u.clientId}`}>
+                <Avatar initials={initialsOf(u.name)} tone="accent" size="md" />
+                <div className="own-list__meta">
+                  <strong>{u.name}</strong>
+                  <span>{mine ? 'You: ' : ''}{u.lastText || 'Attachment'}</span>
+                  <span className="pa-userrow__time">{stamp.date} • {stamp.time}</span>
+                </div>
+                <div className="pa-stack" style={{ alignItems: 'flex-end', gap: 4 }}>
+                  <span className="pa-userrow__time">{stamp.time}</span>
+                  <Badge tone={mine ? 'neutral' : 'accent'}>{u.count}</Badge>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
-    </Layout>
+
+      <p className="pa-muted pa-center pa-mt">
+        <Icon name="info" size={13} /> Chat khulte hi messages turant live update hote hain.
+      </p>
+    </AppShell>
   )
 }

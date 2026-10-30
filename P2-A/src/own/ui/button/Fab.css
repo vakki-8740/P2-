@@ -1,0 +1,23 @@
+.own-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+  transition: transform var(--t-fast), filter var(--t-fast);
+}
+.own-fab:hover { filter: brightness(1.06); }
+.own-fab:active { transform: scale(0.96); }
+.own-fab--sm { width: 40px; height: 40px; justify-content: center; }
+.own-fab--md { width: 52px; height: 52px; justify-content: center; }
+.own-fab--md span { display: none; }
+.own-fab--lg { height: 52px; padding: 0 22px; }
+.own-fab--success { background: var(--yes); color: var(--on-accent); }
+.own-fab--danger { background: var(--no); color: var(--on-accent); }
+.own-fab--soft { background: var(--accent-soft); color: var(--accent); box-shadow: none; }

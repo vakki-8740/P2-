@@ -1,0 +1,24 @@
+.own-tabs__list { display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.own-tabs__tab {
+  appearance: none; border: 0; background: transparent;
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--muted);
+  padding: 10px 15px; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.own-tabs__tab:hover { color: var(--text); }
+.own-tabs__tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+.own-tabs__panel {
+  padding: 16px 4px; font-size: var(--fs-sm); color: var(--muted);
+  border: 1px solid var(--border); border-top: 0; border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--card); padding: 18px;
+}
+
+.own-tabs--pill .own-tabs__list { border-bottom: 0; gap: 6px; }
+.own-tabs--pill .own-tabs__tab {
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+  background: var(--card); margin-bottom: 0;
+}
+.own-tabs--pill .own-tabs__tab.is-active {
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+}
+.own-tabs--pill .own-tabs__panel { border: 1px solid var(--border); border-radius: var(--radius); }

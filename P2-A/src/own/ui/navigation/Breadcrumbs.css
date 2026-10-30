@@ -1,0 +1,6 @@
+.own-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; list-style: none; padding: 0; margin: 0; }
+.own-crumbs__item { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-sm); }
+.own-crumbs__item a { color: var(--muted); text-decoration: none; }
+.own-crumbs__item a:hover { color: var(--accent); }
+.own-crumbs__item span[aria-current] { color: var(--text); font-weight: 600; }
+.own-crumbs__sep { color: var(--muted); }

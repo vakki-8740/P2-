@@ -1,0 +1,42 @@
+.own-product {
+  max-width: 280px; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  transition: transform var(--t-fast), border-color var(--t-fast);
+}
+.own-product:hover { transform: translateY(-3px); border-color: var(--accent); }
+.own-product__media {
+  position: relative; height: 150px;
+  background: linear-gradient(150deg, var(--accent-soft), var(--bg));
+  display: flex; align-items: center; justify-content: center; color: var(--muted);
+}
+.own-product__badge { position: absolute; top: 10px; left: 10px; }
+.own-product__wish {
+  position: absolute; top: 10px; right: 10px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.own-product__wish.is-on { color: var(--no); border-color: var(--no); }
+.own-product__body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.own-product__title { font-size: var(--fs-base); }
+.own-product__price { display: flex; align-items: baseline; gap: 8px; }
+.own-product__price strong { font-size: var(--fs-md); }
+.own-product__old { color: var(--muted); text-decoration: line-through; font-size: var(--fs-sm); }
+
+.own-price { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; max-width: 380px; }
+.own-price__row { display: flex; justify-content: space-between; padding: 6px 0; font-size: var(--fs-sm); color: var(--muted); }
+.own-price__accent { color: var(--yes); font-weight: 600; }
+.own-price__divider { border: 0; border-top: 1px solid var(--border); margin: 8px 0; }
+.own-price__total { color: var(--text); font-size: var(--fs-md); }
+
+.own-coupon { max-width: 380px; }
+.own-coupon__row {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--border); background: var(--card);
+  border-radius: var(--radius); padding: 6px 8px 6px 13px;
+}
+.own-coupon__row svg { color: var(--muted); flex: 0 0 auto; }
+.own-coupon__row input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; outline: none; }
+.own-coupon__msg { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: var(--fs-sm); font-weight: 600; }
+.own-coupon__msg--ok { color: var(--yes); }
+.own-coupon__msg--bad { color: var(--no); }

@@ -1,0 +1,25 @@
+.own-avatar {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-weight: 700; flex: 0 0 auto;
+  border: 2px solid var(--card);
+}
+.own-avatar--sm { width: 32px; height: 32px; font-size: var(--fs-xs); }
+.own-avatar--md { width: 42px; height: 42px; font-size: var(--fs-sm); }
+.own-avatar--lg { width: 56px; height: 56px; font-size: var(--fs-md); }
+.own-avatar--accent { background: var(--accent-soft); color: var(--accent); }
+.own-avatar--success { background: var(--yes-soft); color: var(--yes); }
+.own-avatar--warning { background: var(--warn-soft); color: var(--warn); }
+.own-avatar--neutral { background: var(--bg); color: var(--muted); }
+.own-avatar__status {
+  position: absolute; right: -1px; bottom: -1px;
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 2px solid var(--card);
+}
+.own-avatar__status--online { background: var(--yes); }
+.own-avatar__status--away { background: var(--warn); }
+.own-avatar__status--offline { background: var(--track-off); }
+
+.own-avatar-group { display: inline-flex; align-items: center; }
+.own-avatar-group .own-avatar { margin-left: -8px; }
+.own-avatar-group .own-avatar:first-child { margin-left: 0; }
+.own-avatar--extra { font-size: 0.68rem; }

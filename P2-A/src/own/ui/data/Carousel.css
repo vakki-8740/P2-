@@ -1,0 +1,33 @@
+.own-carousel { max-width: 460px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); }
+.own-carousel__viewport { overflow: hidden; }
+.own-carousel__track { display: flex; transition: transform 0.35s ease; }
+.own-carousel__slide {
+  flex: 0 0 100%; padding: 34px 28px; min-height: 180px;
+  display: flex; flex-direction: column; gap: 8px; justify-content: center;
+}
+.own-carousel__slide h3 { font-size: var(--fs-xl); }
+.own-carousel__slide p { color: var(--muted); font-size: var(--fs-sm); max-width: 320px; }
+.own-carousel__blob { width: 46px; height: 46px; border-radius: var(--radius-lg); opacity: 0.9; margin-bottom: 8px; }
+.own-carousel__controls { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border); }
+.own-carousel__controls > button {
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  width: 32px; height: 32px; border-radius: var(--radius); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.own-carousel__controls > button:hover { color: var(--accent); border-color: var(--accent); }
+.own-carousel__dots { display: flex; gap: 6px; }
+.own-carousel__dots button {
+  width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--track-off); cursor: pointer;
+}
+.own-carousel__dots button.is-active { background: var(--accent); width: 20px; border-radius: var(--radius-pill); }
+
+.own-rating-readout { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-sm); }
+.own-rating-readout__stars { position: relative; display: inline-flex; line-height: 0; }
+.own-rating-readout__bg, .own-rating-readout__fg { display: inline-flex; gap: 2px; }
+.own-rating-readout__bg { color: var(--track-off); }
+.own-rating-readout__fg {
+  color: var(--warn); position: absolute; inset: 0; overflow: hidden;
+  width: var(--pct); white-space: nowrap;
+}
+.own-rating-readout__count { color: var(--muted); }
