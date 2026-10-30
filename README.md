@@ -41,6 +41,18 @@ Setup: `script.new` → Code.gs paste → Deploy as Web app (Anyone) → `/exec`
 
 ---
 
+## Admin page (saari complaints)
+
+`admin/index.html` — ek single-file page, koi build nahi. Vercel pe
+**Root Directory = `admin`** se deploy karo.
+
+- Saari complaints (har browser ki), search + type/status filter
+- Attachments inline (images) / links (PDF, DOC)
+- Auto-refresh + Export JSON
+- Setup: page kholne pe Apps Script `/exec` URL + `ADMIN_API_TOKEN` daalo (browser me save)
+
+Details: [`admin/README.md`](admin/README.md)
+
 ## Projects
 
 | # | Project | Folder | Dev | Routes |
