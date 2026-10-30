@@ -1,0 +1,95 @@
+name: Deploy backend (Wasmer)
+
+# Backend ko Wasmer Edge pe deploy karta hai GitHub ke runner se
+# (runner ke paas internet hota hai; is sandbox se wasmer.io blocked hai).
+#
+# Setup (ek baar):
+#   1. https://wasmer.io/settings/access-tokens  ->  naya token banao
+#   2. GitHub repo -> Settings -> Secrets and variables -> Actions
+#      -> New repository secret  ->  Name: WASMER_TOKEN  ->  Value: <token>
+#   3. Actions tab -> "Deploy backend (Wasmer)" -> Run workflow
+#
+# ⚠️ Token kabhi chat me paste mat karna — sirf yahan secret me daalna.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Naya package version auto-bump karo (agar 'version already exists' error aaye)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasmer-backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: wasmer deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WASMER_TOKEN: ${{ secrets.WASMER_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check WASMER_TOKEN secret
+        run: |
+          if [ -z "${WASMER_TOKEN}" ]; then
+            echo "::error title=WASMER_TOKEN missing::Repo → Settings → Secrets and variables → Actions → New repository secret → Name: WASMER_TOKEN. Token yahan se: https://wasmer.io/settings/access-tokens"
+            exit 1
+          fi
+          echo "token present (length ${#WASMER_TOKEN})"
+
+      - name: Install Wasmer CLI
+        run: |
+          curl https://get.wasmer.io -sSfL | sh
+          echo "$HOME/.wasmer/bin" >> "$GITHUB_PATH"
+
+      - name: Wasmer CLI version
+        run: wasmer --version
+
+      - name: Deploy backend/
+        working-directory: backend
+        run: |
+          set -o pipefail
+          if [ "${{ inputs.bump }}" = "true" ]; then
+            wasmer deploy --non-interactive --bump 2>&1 | tee deploy.log
+          else
+            wasmer deploy --non-interactive 2>&1 | tee deploy.log
+          fi
+
+      - name: Show deploy summary
+        if: always()
+        working-directory: backend
+        run: |
+          echo "### Wasmer deploy log (tail)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -40 deploy.log 2>/dev/null >> "$GITHUB_STEP_SUMMARY" || echo "no log" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -oE 'https://[a-z0-9-]+\.wasmer\.app' deploy.log 2>/dev/null | tail -1 \
+            | sed 's/^/Deployed URL: /' >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Health check
+        if: success()
+        run: |
+          URL="$(grep -oE 'https://[a-z0-9-]+\.wasmer\.app' backend/deploy.log | tail -1)"
+          URL="${URL:-https://parimatch-backend-vakki-8740.wasmer.app}"
+          echo "Checking $URL/api/health"
+          for i in $(seq 1 20); do
+            if curl -fsS -m 10 "$URL/api/health" -o health.json; then
+              cat health.json
+              echo "VITE_API_URL=$URL" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 6
+          done
+          echo "::warning title=Health check failed::Backend deploy hua par /api/health respond nahi kiya. Logs dekho."
+          exit 0
