@@ -1,36 +1,44 @@
-# Data check page
+# Live data check — Firebase
 
-Ek hi file: `index.html`. Koi build nahi, koi dependency nahi.
-Bas ye dekhne ke liye ki Apps Script se **data aa raha hai ya nahi**.
+Ek single-file page (koi build nahi). Ye **Firebase Realtime Database** se data
+live padhta hai — refresh button nahi, data aate hi screen pe.
 
-## Vercel pe deploy (3 step)
-
-1. vercel.com → **Add New… → Project** → repo import
-2. **Root Directory** = `check`
-3. Framework Preset: **Other** → **Deploy**
+Deploy: Vercel pe naya project → **Root Directory = `check`** → Framework preset
+**Other** → Deploy.
 
 ## Use kaise karo
 
-Page kholne pe do field:
+1. Kholo `check/index.html`
+2. Firebase console → ⚙️ Project settings → Your apps → **`</>`** → `firebaseConfig` block copy karo
+3. Wahi block page ke box me paste karo → **Connect**
+4. Bas — 🟢 **LIVE** badge aa jayega
 
-| Field | Value |
+Config browser me yaad reh jata hai, agli baar page kholne pe khud connect ho
+jata hai. Disconnect karna ho to **Disconnect** dabao.
+
+## Kya dikhata hai
+
+| Cheez | Matlab |
 |---|---|
-| Web App URL | Apps Script ka `…/exec` link |
-| Admin password | `Code.gs` ki pehli line `ADMIN_PASSWORD` me jo likha |
+| 🟢 LIVE | Firebase se connection chal raha hai |
+| Total complaints | Sabhi browsers (sab client id) ki complaints |
+| Naam + type + time | Deposit / withdrawal / bonus / kyc … |
+| Raw JSON | Poora data, copy-paste ke liye |
+| Last update | Aakhri change ka time |
+| **Test complaint bhejo** | Ek sample complaint likhta hai — write bhi check ho jata hai |
 
-- Page khulte hi data **apne aap load** ho jata hai (button dabane ki zarurat nahi)
-- **Real-time** checkbox ON (default) → har **10 second** me khud refresh hota hai,
-  nayi complaint apne aap list me aa jati hai
-- **"Ab check karo"** button = manual refresh
-- **"Test complaint bhejo"** → ek sample complaint Drive me daal ke verify kar sakte ho
-- Neeche **Last update** ki time dikhti hai (pata chale refresh chal raha hai)
+## Website se test
 
-## Error ka matlab
+1. Ye page khula rakho
+2. Support center → koi complaint submit karo
+3. **Bina refresh** usi second page pe dikhegi
 
-| Message | Fix |
+## Errors
+
+| Message | Matlab |
 |---|---|
-| `Admin token required` | password galat, ya `Code.gs` me `ADMIN_PASSWORD` set nahi + naya version deploy nahi hua |
-| `Failed to fetch` | URL galat, ya Apps Script deployment "Anyone" pe nahi |
-| `JSON nahi aaya` | URL ke aage `/exec` missing, ya Google login page khul raha hai |
+| `databaseURL` nahi mila | Realtime Database banao (Firebase setup Step 2), phir config dobara copy karo |
+| `Firebase SDK load nahi hua` | internet/CDN block — page reload karke try karo |
+| `Read fail: permission_denied` | Realtime Database → Rules → test mode ya `FIREBASE-SETUP.md` ke rules lagao |
 
-Values browser me save ho jati hain (localStorage) — dobara nahi daalni padti.
+Full setup: [`../FIREBASE-SETUP.md`](../FIREBASE-SETUP.md)

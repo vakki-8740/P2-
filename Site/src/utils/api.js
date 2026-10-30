@@ -1,17 +1,42 @@
-// api.js — central data client. Talks to a Google Apps Script web app
-// (VITE_API_URL) that stores everything in Google Drive. No server, no DB.
-// Configure with VITE_API_URL. When it is empty the app runs in
-// localStorage-only mode (offline) and every store falls back gracefully.
+/**
+ * api.js — data layer, now backed by **Firebase Realtime Database**.
+ *
+ * Isi file ne pehle PHP/Wasmer backend (phir Apps Script/Drive) se baat ki thi.
+ * Ab yahi functions Firebase ke saath kaam karte hain, isliye stores/pages me
+ * bada change nahi karna pada.
+ *
+ * Real-time: `subscribeComplains()` / `subscribeMessages()` — data badalte hi
+ * browser ko turant naya data mil jata hai (koi polling/refresh nahi).
+ *
+ * Data shape (Realtime DB me):
+ *   parimatch/complains/{clientId}/{id} → { id, type, title, status,
+ *                                           createdAt, updatedAt, details,
+ *                                           hasPassword, files }
+ *   parimatch/chat/{clientId}/{id}       → { id, sender, text, createdAt,
+ *                                           edited, file }
+ *
+ * Config `Site/src/firebase-config.js` me — khaali ho to app localStorage
+ * mode me chalta hai (kuch tootta nahi).
+ */
+import { get, ref, remove, set, update, onValue } from 'firebase/database'
+import { getDb, isFirebaseReady } from './firebase.js'
 
-const RAW_BASE = import.meta.env.VITE_API_URL || ''
-export const API_BASE = RAW_BASE.replace(/\/+$/, '')
-export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024 // 100 MB client ceiling
-export const MAX_DRIVE_UPLOAD_BYTES = 15 * 1024 * 1024 // Apps Script POST limit (base64 ~+33%)
-// NOTE: Drive mode me file base64 hoke Apps Script ko jaati hai — bade files slow.
-
+const ROOT = 'parimatch'
 const CLIENT_KEY = 'parimatch_client_id'
 
-/** Stable per-browser id — the backend scopes complaints/chat to it. */
+// Aap kitni badi file chun sakte ho (uske baad browser me compress hoti hai)
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+// Compress ke baad Firebase me jane wali limit (base64 data URL)
+export const MAX_STORED_FILE_BYTES = 400 * 1024
+
+/* ------------------------------------------------------------------ */
+/* Client id + basic helpers                                          */
+/* ------------------------------------------------------------------ */
+
+export function hasApi() {
+  return isFirebaseReady()
+}
+
 export function getClientId() {
   try {
     let id = localStorage.getItem(CLIENT_KEY)
@@ -32,123 +57,217 @@ function newClientId() {
   return `c_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`
 }
 
-export function hasApi() {
-  return !!API_BASE
-}
-
-/** Absolute URL for a backend-relative path (upload links, file previews). */
+/** Absolute URL for a stored path; data:, http:, blob: pass through unchanged. */
 export function resolveApiUrl(path) {
   if (!path) return ''
-  if (/^(https?:|data:|blob:)/i.test(path)) return path
-  return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
+  return path // Firebase me URLs (ya base64 data:) already absolute hote hain
 }
 
-const ADMIN_TOKEN_KEY = 'parimatch_admin_token'
-
-/** Optional admin token (Drive mode me ?scope=all ke liye). */
-export function getAdminToken() {
-  try {
-    return import.meta.env.VITE_ADMIN_TOKEN || localStorage.getItem(ADMIN_TOKEN_KEY) || ''
-  } catch {
-    return ''
-  }
+function db() {
+  const d = getDb()
+  if (!d) throw new Error('Firebase configure nahi hai (Site/src/firebase-config.js)')
+  return d
 }
+
+function clean(value) {
+  return JSON.parse(JSON.stringify(value === undefined ? null : value))
+}
+
+/** RTDB object → sorted array. */
+function toList(val, order = 'desc') {
+  if (!val || typeof val !== 'object') return []
+  const rows = Object.keys(val).map((key) => {
+    const row = val[key] && typeof val[key] === 'object' ? val[key] : {}
+    return { ...row, id: row.id || key }
+  })
+  rows.sort((a, b) => {
+    const av = String(a.createdAt || '')
+    const bv = String(b.createdAt || '')
+    return order === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+  })
+  return rows
+}
+
+const complaintsRef = (clientId) => ref(db(), `${ROOT}/complaints/${clientId}`)
+const chatRef = (clientId) => ref(db(), `${ROOT}/chat/${clientId}`)
+
+/* ------------------------------------------------------------------ */
+/* Real-time subscriptions                                            */
+/* ------------------------------------------------------------------ */
 
 /**
- * All traffic goes to ONE Google Apps Script /exec URL.
- *
- * Apps Script CORS preflight (OPTIONS) ka jawab nahi de sakta, isliye:
- *  - GET  : sab kuch query params me (client_id bhi)
- *  - POST : Content-Type text/plain (simple request = koi preflight nahi) aur
- *           asli method + payload body ke andar JSON me
+ * Live complaints for this browser.
+ * @returns {() => void} unsubscribe
  */
-async function request(path, options = {}, timeoutMs = 25000) {
-  if (!API_BASE) throw new Error('no-api')
-
-  const method = (options.method || 'GET').toUpperCase()
-  const clientId = getClientId()
-
-  let target
-  let init
-
-  if (method === 'GET') {
-    const sep = path.indexOf('?') >= 0 ? '&' : '?'
-    target = `${API_BASE}${path}${sep}client_id=${encodeURIComponent(clientId)}`
-    init = { method: 'GET' }
-  } else {
-    target = API_BASE
-    init = {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        path,
-        method,
-        clientId,
-        adminToken: getAdminToken(),
-        body: options.json === undefined ? {} : options.json,
-      }),
-    }
-  }
-
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  let res
+export function subscribeComplains(onData) {
+  if (!hasApi()) return () => {}
   try {
-    res = await fetch(target, { ...init, signal: controller.signal })
+    const r = complaintsRef(getClientId())
+    return onValue(
+      r,
+      (snap) => onData(toList(snap.val())),
+      (err) => console.warn('[firebase] complains:', err && err.message)
+    )
   } catch (err) {
-    clearTimeout(timer)
-    if (err && err.name === 'AbortError') throw new Error('Server took too long to respond')
-    throw new Error('Cannot reach the server')
+    console.warn('[firebase] subscribe failed:', err && err.message)
+    return () => {}
   }
-  clearTimeout(timer)
-
-  const text = await res.text()
-  let data = null
-  try {
-    data = text ? JSON.parse(text) : null
-  } catch {
-    data = null
-  }
-
-  if (!res.ok) {
-    throw new Error((data && data.error) || `Request failed (HTTP ${res.status})`)
-  }
-  // Apps Script hamesha HTTP 200 deta hai — error JSON ke andar aata hai.
-  if (data && data.ok === false) {
-    throw new Error(data.error || 'Request failed')
-  }
-
-  return data === null ? text : data
 }
 
+/** Live chat messages for this browser. */
+export function subscribeMessages(onData) {
+  if (!hasApi()) return () => {}
+  try {
+    const r = chatRef(getClientId())
+    return onValue(
+      r,
+      (snap) => onData(toList(snap.val(), 'asc')),
+      (err) => console.warn('[firebase] chat:', err && err.message)
+    )
+  } catch (err) {
+    console.warn('[firebase] subscribe failed:', err && err.message)
+    return () => {}
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* REST-ish API used by the stores                                    */
+/* ------------------------------------------------------------------ */
+
 export async function apiGet(path) {
-  return request(path, { method: 'GET' })
+  const p = String(path).split('?')[0]
+  if (p === '/api/health') return healthPayload()
+  if (!hasApi()) throw new Error('no-api')
+
+  const clientId = getClientId()
+
+  if (p === '/api/complains') {
+    const snap = await get(complaintsRef(clientId))
+    const data = toList(snap.val())
+    return { ok: true, data, count: data.length }
+  }
+
+  const one = p.match(/^\/api\/complains\/([^/]+)$/)
+  if (one) {
+    const snap = await get(ref(db(), `${ROOT}/complaints/${clientId}/${one[1]}`))
+    if (!snap.exists()) throw new Error('Complain not found')
+    return { ok: true, data: { ...snap.val(), id: one[1] } }
+  }
+
+  if (p === '/api/chat/messages') {
+    const snap = await get(chatRef(clientId))
+    const data = toList(snap.val(), 'asc')
+    return { ok: true, data, count: data.length }
+  }
+
+  throw new Error('Unknown path: ' + p)
 }
 
 export async function apiPost(path, body) {
-  return request(path, { method: 'POST', json: body })
+  const p = String(path).split('?')[0]
+  if (!hasApi()) throw new Error('no-api')
+
+  const clientId = getClientId()
+  const now = new Date().toISOString()
+
+  if (p === '/api/complains') {
+    const id = String((body && body.id) || `cmp_${Date.now().toString(36)}`)
+    const details = { ...((body && body.details) || {}) }
+    const hasPassword = Boolean(details.password)
+    delete details.password // password kabhi store nahi karte
+
+    const row = clean({
+      id,
+      type: body.type || 'complain',
+      title: body.title || `${body.type || 'Complain'} Complain`,
+      status: 'pending',
+      createdAt: body.createdAt || now,
+      updatedAt: now,
+      details,
+      hasPassword,
+      files: body.files || {},
+    })
+
+    await set(ref(db(), `${ROOT}/complaints/${clientId}/${id}`), row)
+    return { ok: true, data: row }
+  }
+
+  if (p === '/api/chat/messages') {
+    const id = String((body && body.id) || `msg_${Date.now().toString(36)}`)
+    const row = clean({
+      id,
+      sender: body.sender === 'support' || body.sender === 'admin' ? body.sender : 'user',
+      text: body.text || '',
+      file: body.file || null,
+      edited: false,
+      createdAt: body.createdAt || now,
+      updatedAt: now,
+    })
+    await set(ref(db(), `${ROOT}/chat/${clientId}/${id}`), row)
+    return { ok: true, data: row }
+  }
+
+  throw new Error('Unknown path: ' + p)
 }
 
 export async function apiPut(path, body) {
-  return request(path, { method: 'PUT', json: body })
+  const p = String(path).split('?')[0]
+  if (!hasApi()) throw new Error('no-api')
+
+  const clientId = getClientId()
+
+  const msg = p.match(/^\/api\/chat\/messages\/([^/]+)$/)
+  if (msg) {
+    const id = msg[1]
+    const patch = clean({ text: body && body.text, edited: true, updatedAt: new Date().toISOString() })
+    await update(ref(db(), `${ROOT}/chat/${clientId}/${id}`), patch)
+    return { ok: true, data: { id, ...patch } }
+  }
+
+  throw new Error('Unknown path: ' + p)
 }
 
 export async function apiDelete(path) {
-  return request(path, { method: 'DELETE' })
+  const p = String(path).split('?')[0]
+  if (!hasApi()) throw new Error('no-api')
+
+  const clientId = getClientId()
+
+  if (p === '/api/complains') {
+    await remove(complaintsRef(clientId))
+    return { ok: true }
+  }
+  const cmp = p.match(/^\/api\/complains\/([^/]+)$/)
+  if (cmp) {
+    await remove(ref(db(), `${ROOT}/complaints/${clientId}/${cmp[1]}`))
+    return { ok: true }
+  }
+
+  if (p === '/api/chat/messages') {
+    await remove(chatRef(clientId))
+    return { ok: true }
+  }
+  const msg = p.match(/^\/api\/chat\/messages\/([^/]+)$/)
+  if (msg) {
+    await remove(ref(db(), `${ROOT}/chat/${clientId}/${msg[1]}`))
+    return { ok: true }
+  }
+
+  throw new Error('Unknown path: ' + p)
 }
 
-/* Photos seedha 5-10 MB ke hote hain; base64 me +33% aur hota hai.
-   Upload se pehle browser me hi resize/compress kar dete hain — phone se
-   bhejne me ye sabse bada speed-up hai. */
-const IMAGE_MAX_DIM = 1600
-const IMAGE_QUALITY = 0.82
-const IMAGE_COMPRESS_ABOVE = 350 * 1024 // 350 KB se chhoti images waise hi bhej do
+/* ------------------------------------------------------------------ */
+/* Attachments (base64, compressed in the browser)                    */
+/* ------------------------------------------------------------------ */
+
+const IMAGE_MAX_DIM = 1200
+const IMAGE_QUALITY = 0.72
+const IMAGE_COMPRESS_ABOVE = 150 * 1024
 
 async function compressImage(file) {
   try {
     if (!file || !/^image\//i.test(file.type || '')) return file
-    if (/(gif|heic|heif|svg)/i.test(file.type || '')) return file // canvas inhe theek se nahi kholta
-    if (file.size <= IMAGE_COMPRESS_ABOVE) return file
+    if (/(gif|heic|heif|svg)/i.test(file.type || '')) return file
     if (typeof document === 'undefined' || typeof createImageBitmap !== 'function') return file
 
     const bitmap = await createImageBitmap(file)
@@ -174,39 +293,35 @@ async function compressImage(file) {
 }
 
 /**
- * Upload one File to the backend and get back
- * { id, name, type, size, url } — files never travel inside the JSON body.
+ * "Upload" a file: browser me compress karke base64 data URL banate hain
+ * (Firebase Realtime DB me alag storage nahi chahiye).
+ * Returns { id, name, type, size, url }.
  */
 export async function uploadFile(original) {
   if (!original) throw new Error('No file selected')
+  if (!hasApi()) throw new Error('no-api')
 
   const file = await compressImage(original)
 
-  if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
+  if (file.size > MAX_STORED_FILE_BYTES) {
     throw new Error(
-      `File too large for Drive: ${file.name} (max ${Math.round(MAX_DRIVE_UPLOAD_BYTES / 1024 / 1024)} MB)`
+      `File too large: ${file.name} — ${Math.round(file.size / 1024)} KB. ` +
+        `Firebase mode me ${Math.round(MAX_STORED_FILE_BYTES / 1024)} KB tak hi store hota hai ` +
+        `(photo chuno to compress ho jayegi).`
     )
   }
-  if (!hasApi()) throw new Error('no-api')
 
-  // Apps Script multipart/FormData nahi leta — file base64 me jaati hai.
   const dataUrl = await fileToDataUrl(file)
-  const comma = String(dataUrl).indexOf(',')
-  const base64 = comma >= 0 ? String(dataUrl).slice(comma + 1) : ''
-
-  const res = await request(
-    '/api/uploads',
-    {
-      method: 'POST',
-      json: { name: file.name, type: file.type || 'application/octet-stream', data: base64 },
-    },
-    180000
-  )
-  if (!res || !res.data) throw new Error('Upload failed')
-  return res.data
+  return {
+    id: `up_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    name: file.name,
+    type: file.type || 'application/octet-stream',
+    size: file.size,
+    url: dataUrl,
+  }
 }
 
-/** Read a File as a data URL (local/offline fallback only). */
+/** Read a File as a data URL. */
 export function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -216,24 +331,38 @@ export function fileToDataUrl(file) {
   })
 }
 
-let warmedUp = false
+/* ------------------------------------------------------------------ */
+/* Health / warm-up                                                   */
+/* ------------------------------------------------------------------ */
 
-/**
- * Apps Script ko pehle hi "jaga" do (cold start 2-8s le sakta hai).
- * App load pe ek chhoti health call bhejne se pehli complaint fast ho jaati hai.
- */
-export function warmUp() {
-  if (warmedUp || !API_BASE) return Promise.resolve()
-  warmedUp = true
-  return request('/api/health', { method: 'GET' }, 15000).catch(() => {})
+function healthPayload() {
+  return {
+    ok: true,
+    service: 'parimatch-support-firebase',
+    version: '3.0.0-rtdb',
+    storage: 'firebase-rtdb',
+    db: hasApi() ? 'connected' : 'not-configured',
+    db_driver: 'firebase',
+    db_persistent: true,
+    admin_scope_enabled: false,
+  }
 }
 
 export async function healthCheck() {
+  if (!hasApi()) return { ok: false, reason: 'no-api-config' }
   try {
-    if (!API_BASE) return { ok: false, reason: 'no-api-config' }
-    const data = await request('/api/health', { method: 'GET' }, 8000)
-    return { ok: true, data }
-  } catch (e) {
-    return { ok: false, error: e.message }
+    await get(ref(db(), ROOT))
+    return { ok: true, data: healthPayload() }
+  } catch (err) {
+    return { ok: false, error: err && err.message ? err.message : 'Firebase read failed' }
   }
+}
+
+/** Firebase me warm-up ki zarurat nahi — koi cold start nahi hota. */
+export function warmUp() {
+  return Promise.resolve()
+}
+
+export function getAdminToken() {
+  return ''
 }

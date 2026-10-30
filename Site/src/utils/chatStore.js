@@ -97,6 +97,18 @@ export async function getMessagesAsync() {
   return getMessages()
 }
 
+/** Real-time chat — Firebase se live update, warna localStorage. */
+export function subscribeMessages(onChange) {
+  if (!hasApi()) {
+    onChange(getMessages())
+    return () => {}
+  }
+  return subscribeMessagesRaw((rows) => {
+    const list = (rows || []).map(normalizeChatRow).filter(Boolean)
+    onChange(list)
+  })
+}
+
 /* ------------------------------------------------------------------ */
 /* Writes                                                             */
 /* ------------------------------------------------------------------ */
@@ -123,7 +135,7 @@ async function prepareFile(file, useBackend) {
 
   if (file.raw.size > LOCAL_FILE_MAX) {
     throw new Error(
-      `Offline mode: ${file.raw.name} is too large. Connect the backend (VITE_API_URL) for larger files.`
+      `File too big: ${file.raw.name}. Firebase mode me 400 KB tak hi file jati hai — chhoti file chuno.`
     )
   }
 

@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import { withBase } from '../utils/base'
 import {
   getComplainsAsync,
+  subscribeComplains,
   clearComplains,
   deleteComplain,
   normalizeComplainRow,
@@ -13,6 +14,7 @@ import {
   formatFileSize,
   formatDate,
 } from '../utils/complainStore'
+import { isFirebaseConfigured } from '../firebase-config'
 
 export default function AllComplains() {
   const [complains, setComplains] = useState([])
@@ -30,10 +32,18 @@ export default function AllComplains() {
 
   useEffect(() => {
     load()
+
+    // Firebase real-time: naya/edited complaint turant screen pe.
+    const unsubscribe = subscribeComplains((rows) => {
+      setComplains((rows || []).map(normalizeComplainRow).filter(Boolean))
+      setLoading(false)
+    })
+
     const handler = () => load()
     window.addEventListener('complains-updated', handler)
     window.addEventListener('storage', handler)
     return () => {
+      unsubscribe()
       window.removeEventListener('complains-updated', handler)
       window.removeEventListener('storage', handler)
     }
@@ -76,6 +86,17 @@ export default function AllComplains() {
             )}
           </div>
         </div>
+
+        {!isFirebaseConfigured() && (
+          <div className="card" style={{ borderLeft: '4px solid #d97706', padding: '14px 16px' }}>
+            <strong>Firebase configure nahi hai.</strong>{' '}
+            <span style={{ fontSize: '14px' }}>
+              Abhi complaints sirf isi browser me save ho rahi hain. Real-time ke liye{' '}
+              <code>Site/src/firebase-config.js</code> me config daalo — steps:{' '}
+              <code>FIREBASE-SETUP.md</code>.
+            </span>
+          </div>
+        )}
 
         {loading && complains.length === 0 ? (
           <div className="card empty-state">

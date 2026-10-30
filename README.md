@@ -1,7 +1,8 @@
 # P2 — Parimatch Support (React frontend)
 
 Support portal: marketing landing page + support center with 7 complaint flows
-and live chat. **No server, no database** — the app is a pure static frontend.
+and live chat. **No server** — data goes straight from the browser to
+**Firebase Realtime Database**, so everything is live (no refresh, no polling).
 
 ```
 P2-/
@@ -16,28 +17,34 @@ P2-/
 
 ---
 
-## Data storage — Google Drive (Apps Script web app)
+## Data storage — Firebase Realtime Database
 
-Sara data browser se seedha **Google Drive** me jayega, ek **Google Apps Script
-web app** ke through. Koi PHP / Wasmer / MySQL / SQLite nahi.
+Browser seedha Firebase se baat karta hai. Koi server, Drive, Apps Script,
+PHP ya MySQL nahi. Isliye data **turant** aata hai (`onValue` push, ~0.2–1 s).
 
 ```
-Browser (Site)  ──fetch──▶  Apps Script Web App  ──▶  Drive file (JSON) / Sheet
+Site (React)  ──▶  Firebase Realtime Database  ──onValue (live)──▶  Site + check page
 ```
 
 | | |
 |---|---|
-| Backend code | [`apps-script/Code.gs`](apps-script/Code.gs) — ready, tested |
-| Setup guide | [`apps-script/README.md`](apps-script/README.md) |
-| Endpoint | `VITE_API_URL` (Apps Script `/exec` URL) |
-| Abhi | `VITE_API_URL` khaali hai → app **localStorage-only** mode me chalta hai |
+| Config file | [`Site/src/firebase-config.js`](Site/src/firebase-config.js) ← apni values paste karo |
+| Setup guide | [`FIREBASE-SETUP.md`](FIREBASE-SETUP.md) |
+| Jab config khaali hai | app **localStorage mode** me chalta hai (crash nahi, sab buttons kaam karte hain) |
+| Free plan | Spark: 1 GB storage, 10 GB/month download, ₹0 |
 
-Setup: `script.new` → Code.gs paste → Deploy as Web app (Anyone) → `/exec` URL
-→ Vercel me `VITE_API_URL` → Redeploy.
+Data path:
 
-> Apps Script CORS preflight ka jawab nahi deta, isliye `Site/src/utils/api.js`
-> sab writes `POST` + `Content-Type: text/plain` me bhejta hai (method body ke
-> andar). Reads `GET ?path=…&client_id=…` se hote hain.
+```
+parimatch/complaints/<clientId>/<complaintId>
+parimatch/chat/<clientId>/<messageId>
+```
+
+Har browser ka apna `parimatch_client_id` (localStorage) hota hai, isliye
+complaints usi browser me dikhti hain jahan se bheji gayi.
+
+> Pehle Drive + Apps Script tha, ab **poora hata diya** (`apps-script/` deleted).
+> Purana PHP/Wasmer + MySQL backend bhi gaya.
 
 ---
 
@@ -46,9 +53,10 @@ Setup: `script.new` → Code.gs paste → Deploy as Web app (Anyone) → `/exec`
 `check/index.html` — ek chhota single-file page (koi build nahi). Vercel pe
 **Root Directory = `check`** se deploy karo.
 
-- Apps Script `/exec` URL + `ADMIN_PASSWORD` daalo → **Data check karo**
-- Dikhata hai: connected hai ya nahi, kitni complaints hain, naam ki list, raw JSON
-- **Test complaint bhejo** button se ek sample complaint Drive me daal ke verify kar sakte ho
+- Wahi `firebaseConfig` block paste karo → **Connect** (ek hi baar, browser yaad rakhta hai)
+- 🟢 **LIVE** badge, total complaints, naam ki list, raw JSON — sab **real-time**
+- Website se complaint bhejo → bina refresh usi second yahan dikhegi
+- **Test complaint bhejo** button se write bhi verify ho jata hai
 
 Details: [`check/README.md`](check/README.md)
 
@@ -82,20 +90,15 @@ Details: [`check/README.md`](check/README.md)
 
 ## Environment
 
+**Firebase config env se nahi aata** — `Site/src/firebase-config.js` file me
+paste hota hai (dekho [`FIREBASE-SETUP.md`](FIREBASE-SETUP.md)).
+
 ```bash
-# Site/.env  (optional — khaali chhodo to localStorage-only mode)
-VITE_API_URL=
-# VITE_API_URL=https://script.google.com/macros/s/XXXXXXXX/exec
-
-# root .env (same variable; VITE_BASE_PATH=/site is set in vite.config.js)
-VITE_API_URL=
-
-# Blog/.env (optional)
+# Blog/.env (optional — landing se support center ka link)
 VITE_SITE_URL=https://parimatch-senter-center.vercel.app
 ```
 
-No trailing slash on `VITE_API_URL`. Env change ke baad **redeploy** (Vite env
-build-time hota hai).
+Config ya env change ke baad **redeploy** karo (values build ke time bake hoti hain).
 
 ---
 
@@ -121,7 +124,7 @@ npm install && npm run dev        # http://localhost:5173
 | Folder | Vercel Project | URL | Root Directory | Env |
 |--------|----------------|-----|----------------|-----|
 | `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` | `VITE_SITE_URL` (optional) |
-| `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` | `VITE_API_URL` (Apps Script URL) |
+| `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` | `Site/src/firebase-config.js` (env nahi) |
 
 Dono `vercel.json` saare paths `/` pe rewrite karte hain, isliye refresh pe
 client-side routing kaam karta hai.
@@ -131,12 +134,12 @@ client-side routing kaam karta hai.
 ## Tech
 
 - Vite 5 + React 18 + React Router 6
-- State/storage: `localStorage` (+ optional Apps Script → Google Drive)
+- Storage: Firebase Realtime Database (+ localStorage fallback)
 - Styling: plain CSS modules/`*.css` per page
 
 ---
 
 ## Not built yet
 
-**Admin Panel** — intentionally not recreated. Jab chaho, Apps Script side pe
-admin listing bana ke jod sakte hain.
+**Admin Panel** — intentionally not recreated. Jab chaho, naya fresh panel
+banayenge (Firebase data padh ke).

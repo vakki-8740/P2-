@@ -14,5 +14,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 
-// Apps Script ko jaldi jaga do — pehli complaint fast submit hogi.
+// Firebase connection shuru kar do — pehli complaint fast submit hogi.
 warmUp()

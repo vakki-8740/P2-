@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../../components/Header'
-import { getMessages, getMessagesAsync, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, chatFileSrc, formatTime, formatDateChat } from '../../utils/chatStore'
+import { getMessages, getMessagesAsync, subscribeMessages, saveMessage, updateMessage, deleteMessage, clearMessages, generateChatId, chatFileSrc, formatTime, formatDateChat } from '../../utils/chatStore'
 import { MAX_UPLOAD_BYTES } from '../../utils/api'
 import { withBase } from '../../utils/base'
 
@@ -35,10 +35,17 @@ export default function ChatPage(){
   const load = async ()=>{ try{ const d=await getMessagesAsync(); setMessages(d) }catch{ setMessages(getMessages()) } }
   useEffect(()=>{
     load()
+
+    // Firebase real-time: naya message turant dikhe (kisi bhi tab/device se).
+    const unsubscribe = subscribeMessages((rows)=>{ setMessages(rows || []) })
+
     const h = ()=> load()
     window.addEventListener('chat-updated', h)
     window.addEventListener('storage', h)
-    return ()=>{ window.removeEventListener('chat-updated', h); window.removeEventListener('storage', h)}
+    return ()=>{
+      unsubscribe()
+      window.removeEventListener('chat-updated', h); window.removeEventListener('storage', h)
+    }
   },[])
 
   useEffect(()=>{

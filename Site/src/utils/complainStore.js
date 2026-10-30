@@ -1,5 +1,5 @@
 // complainStore.js — complaints data layer.
-// Remote store (Apps Script -> Google Drive) first, localStorage fallback
+// Remote store (Firebase Realtime Database) first, localStorage fallback
 // offline. Both shapes are normalised to one structure before rendering:
 //
 //   { id, type, title, status, createdAt, hasPassword,
@@ -8,6 +8,7 @@
 //
 import {
   hasApi,
+  subscribeComplains as subscribeComplainsRaw,
   apiGet,
   apiPost,
   apiDelete,
@@ -163,6 +164,18 @@ export async function getComplainsAsync() {
   return getComplains()
 }
 
+/** Real-time list — Firebase se live update, warna localStorage. */
+export function subscribeComplains(onChange) {
+  if (!hasApi()) {
+    onChange(getComplains())
+    return () => {}
+  }
+  return subscribeComplainsRaw((rows) => {
+    const list = (rows || []).map(normalizeComplainRow).filter(Boolean)
+    onChange(list)
+  })
+}
+
 /* ------------------------------------------------------------------ */
 /* Writes                                                             */
 /* ------------------------------------------------------------------ */
@@ -175,7 +188,7 @@ async function prepareFiles(files, useBackend) {
   let localTotal = 0
 
   // Saare files EK SAATH upload karo (pehle ek-ek karke hota tha, isliye
-  // 2 files = 2 baar Apps Script ka chakkar).
+  // 2 files = 2 baar network ka chakkar).
   const pairs = await Promise.all(
     entries.map(async ([key, file]) => {
       // Already prepared (re-save of a loaded row).
@@ -201,7 +214,8 @@ async function prepareFiles(files, useBackend) {
 
       if (file.size > LOCAL_FILE_MAX) {
         throw new Error(
-          `Offline mode: ${file.name} is too large. Connect the backend (VITE_API_URL) to send files up to 100 MB.`
+          `File too big: ${file.name} (${Math.round(file.size / 1024 / 1024)} MB). Firebase mode me ` +
+            `browser compress karta hai, phir bhi 400 KB tak hi jata hai — chhoti photo/file chuno.`
         )
       }
       localTotal += file.size
