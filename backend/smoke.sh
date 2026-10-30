@@ -8,12 +8,24 @@
 # Exit code 0 = all checks passed.
 set -uo pipefail
 
-BASE="${1:-https://parimatch-backend.wasmer.app}"
-BASE="${BASE%/}"
+BASE="https://parimatch-backend.wasmer.app"
 KEEP=0
-for arg in "$@"; do [ "$arg" = "--keep" ] && KEEP=1; done
-
-CID="smoke-$(date +%s)-$$"
+LIST_ONLY=0
+CID=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --keep)      KEEP=1 ;;
+    --list-only) LIST_ONLY=1 ;;
+    --client-id) shift; CID="${1:-}" ;;
+    http*)       BASE="$1" ;;
+    -h|--help)
+      echo "usage: bash backend/smoke.sh [BASE_URL] [--keep] [--list-only] [--client-id ID]"
+      exit 0 ;;
+  esac
+  shift
+done
+BASE="${BASE%/}"
+[ -n "$CID" ] || CID="smoke-$(date +%s)-$$"
 pass=0
 fail=0
 ok()   { printf '\033[32m  ✓ %s\033[0m\n' "$1"; pass=$((pass + 1)); }
@@ -27,6 +39,18 @@ compact() { tr -d ' \t\r\n'; }
 json() { # json <key>  (first match, string or bare token)
   sed -n "s/.*\"$1\":\"\([^\"]*\)\".*/\1/p" | head -1
 }
+
+# --list-only: sirf is client-id ke records dikhao (persistence check ke liye).
+if [ "$LIST_ONLY" -eq 1 ]; then
+  echo "Base: $BASE"
+  echo "Client-Id: $CID"
+  body="$(curl -s -m 20 "$BASE/api/complains?limit=20" -H "X-Client-Id: $CID" | compact || true)"
+  case "$body" in
+    *'"data":[]'*) echo "Khaali — is client-id ke liye koi record nahi."; exit 1 ;;
+    *'"ok":true'*) echo "Records mil gaye ✓"; echo "$body" | head -c 600; echo; exit 0 ;;
+    *) echo "Unexpected: ${body:0:200}"; exit 1 ;;
+  esac
+fi
 
 echo "Base: $BASE"
 echo "Client-Id: $CID"
