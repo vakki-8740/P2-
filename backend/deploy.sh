@@ -54,6 +54,20 @@ fi
 [ "$fail" -ne 0 ] && { red "Preflight failed — fix the items above."; exit 1; }
 green "Preflight OK"
 
+# Which code is actually being packaged? A stale checkout silently redeploys old PHP.
+if git -C .. rev-parse --git-dir >/dev/null 2>&1; then
+  COMMIT="$(git -C .. rev-parse --short HEAD 2>/dev/null)"
+  BRANCH="$(git -C .. rev-parse --abbrev-ref HEAD 2>/dev/null)"
+  green "  repo: ${BRANCH} @ ${COMMIT}"
+  BEHIND="$(git -C .. rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)"
+  if [ "${BEHIND:-0}" -gt 0 ] 2>/dev/null; then
+    yellow "  ⚠ local checkout origin/${BRANCH} se ${BEHIND} commit peeche hai"
+    yellow "    deploy se pehle: git -C .. pull"
+    info "    (ya ignore karo: --allow-stale)"
+    case " $* " in *" --allow-stale "*) : ;; *) exit 1 ;; esac
+  fi
+fi
+
 [ "$MODE" = "--check" ] && exit 0
 
 # Portable log file: Termux/Android me /tmp nahi hota.
@@ -166,7 +180,11 @@ if [ "$status" -ne 0 ]; then
   exit "$status"
 fi
 
-green "Deployed ✓"
+if [ -n "${COMMIT:-}" ]; then
+  green "Deployed ✓  (${BRANCH} @ ${COMMIT})"
+else
+  green "Deployed ✓"
+fi
 if [ -n "${URL:-}" ]; then
   echo "URL: $URL"
   info "Health check:"
