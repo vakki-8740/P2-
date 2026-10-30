@@ -64,22 +64,38 @@ fi
 green "  wasmer $(wasmer --version 2>/dev/null | head -1)"
 
 info "3/4  Auth"
+
+# Auth probe: not every CLI build has `whoami`, so fall back to `app list`.
+auth_ok() {
+  wasmer whoami >/dev/null 2>&1 && return 0
+  wasmer app list >/dev/null 2>&1 && return 0
+  return 1
+}
+
 if [ -n "${WASMER_TOKEN:-}" ]; then
   export WASMER_TOKEN
   green "  using WASMER_TOKEN from environment (no browser login)"
-elif ! wasmer whoami >/dev/null 2>&1; then
+elif ! auth_ok; then
   info "  not logged in -> opening browser login"
   info "  (ya: WASMER_TOKEN=xxx bash backend/deploy.sh)"
   wasmer login || { red "  login failed"; exit 1; }
 fi
-USER_NAME="$(wasmer whoami 2>/dev/null | head -1)"
-green "  logged in as: ${USER_NAME:-unknown}"
 
+# Best-effort namespace detection (optional, never blocks the deploy).
+USER_NAME="$(wasmer whoami 2>/dev/null | head -1 | tr -d '\r')"
+if [ -z "${USER_NAME:-}" ]; then
+  USER_NAME="$(wasmer app info 2>/dev/null | sed -n 's/.*Owner: *//p' | head -1)"
+fi
 OWNER="$(grep -m1 '^owner:' app.yaml | awk '{print $2}')"
-if [ -n "${OWNER:-}" ] && [ -n "${USER_NAME:-}" ] && [ "$OWNER" != "$USER_NAME" ]; then
-  red "  ✗ app.yaml owner ($OWNER) != logged-in namespace ($USER_NAME)"
-  info "    fix: app.yaml me owner hata do, ya '$USER_NAME' kar do"
-  exit 1
+if [ -n "${USER_NAME:-}" ]; then
+  green "  namespace: ${USER_NAME}"
+  if [ -n "${OWNER:-}" ] && [ "$OWNER" != "$USER_NAME" ]; then
+    red "  ✗ app.yaml owner ($OWNER) != namespace ($USER_NAME)"
+    info "    fix: app.yaml me owner hata do, ya '$USER_NAME' kar do"
+    exit 1
+  fi
+else
+  info "  namespace detect nahi hua — owner check skip (deploy phir bhi chalega)"
 fi
 
 info "4/4  Deploy"

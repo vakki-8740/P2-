@@ -115,7 +115,8 @@ Full API docs, env vars, security notes and the Wasmer deploy guide live in
 Order: deploy `backend/` to Wasmer → copy its URL into `Site/.env`
 (`VITE_API_URL`) → redeploy `Site` on Vercel.
 Full settings (root directories, secrets, MySQL, troubleshooting):
-[`DEPLOY.md`](DEPLOY.md). Both `vercel.json` files rewrite
+[`DEPLOY.md`](DEPLOY.md). Phone se deploy karna ho to
+[`DEPLOY-TERMUX.md`](DEPLOY-TERMUX.md). Both `vercel.json` files rewrite
 all paths to `/` so client-side routing works on refresh.
 
 ---
