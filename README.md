@@ -8,7 +8,8 @@ and live chat. **No server** — data goes straight from the browser to
 P2-/
 ├── Blog/          # 1. Landing (outer project)      → parimatch-blog.vercel.app
 ├── Site/          # 2. Support Center + shared code → parimatch-senter-center.vercel.app
-└── root src/      # 3. Combined local build: "/" landing + "/site" support center
+├── P2-A/          # 3. Admin panel (mobile only)    → apna alag Vercel project
+└── root src/      # 4. Combined local build: "/" landing + "/site" support center
 ```
 
 > The root project has no copy of the Site. It imports `Site/src/*` with
@@ -57,7 +58,8 @@ complaints usi browser me dikhti hain jahan se bheji gayi.
 |---|---------|--------|-----|--------|
 | 1 | **Blog / Landing** | `Blog/` | `npm run dev -- --port 5175` | `/` (everything else redirects to `/`) |
 | 2 | **Support Center** | `Site/` | `npm run dev -- --port 5174` | `/`, `/about`, `/terms`, `/all-complains`, `/deposit-complain`, `/withdrawal-complain`, `/bonus-complain`, `/bank-statement-complain`, `/unlock-withdrawal-complain`, `/kyc-complain`, `/live-chat` (+ legacy `.html` redirects) |
-| 3 | **Root combined** | `src/` + `public/` | `npm run dev -- --port 5173` | `/` landing + `/site/*` support center |
+| 3 | **Admin panel (P2-A)** | `P2-A/` | `npm run dev -- --port 5176` | `/`, `/all`, `/user/:id`, `/chat`, `/chat/:id`, `/activity`, `/setting` |
+| 4 | **Root combined** | `src/` + `public/` | `npm run dev -- --port 5173` | `/` landing + `/site/*` support center |
 
 ---
 
@@ -118,6 +120,7 @@ npm install && npm run dev        # http://localhost:5173
 |--------|----------------|-----|----------------|-----|
 | `Blog` | parimatch-blog | https://parimatch-blog.vercel.app | `Blog` | `VITE_SITE_URL` (optional) |
 | `Site` | parimatch-senter-center | https://parimatch-senter-center.vercel.app | `Site` | `Site/src/firebase-config.js` (env nahi) |
+| `P2-A` | admin panel (mobile) | apna naya Vercel project | `P2-A` | `P2-A/src/firebase-config.js` |
 
 Dono `vercel.json` saare paths `/` pe rewrite karte hain, isliye refresh pe
 client-side routing kaam karta hai.
