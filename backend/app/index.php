@@ -117,6 +117,9 @@ if ($uri === '/' || $uri === '/api' || $uri === '/api/health' || $uri === '/heal
             'php_post_max_size' => ini_get('post_max_size'),
         ],
         'admin_scope_enabled' => admin_token() !== '',
+        'db_path' => $driver === 'sqlite'
+            ? (string) (env_str('DB_PATH') ?: sqlite_default_path())
+            : null,
         'db_persistent' => $dbPersistent,
         'upload_persistent' => $uploadPersistent,
     ]);
