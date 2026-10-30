@@ -25,21 +25,25 @@ Drive/
 
 Admin page (saari complaints ki list) ke liye token chahiye. Sabse aasan pehla hai.
 
-### (A) Code me hi password likh do — sabse aasan ⭐
+### (A) File ki pehli line me password likh do — sabse aasan ⭐
 
-`Code.gs` me sabse upar `CONFIG` me ye line hai:
+`Code.gs` **khulte hi sabse upar** (line 5) ye dikhega:
 
 ```js
-ADMIN_TOKEN: '',
+var ADMIN_PASSWORD = '';      // <-- jaise: var ADMIN_PASSWORD = 'vakeem8740';
 ```
 
-Isko apne password se bhar do (jo chaho):
+Quotes ke andar apna password likh do — **`<` `>` mat lagao**:
 
 ```js
-ADMIN_TOKEN: 'mera-password-123',
+var ADMIN_PASSWORD = 'vakeem8740';
 ```
 
 Phir **Ctrl+S** → **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
+
+> ⚠️ Bahut zaroori: file ke top wala `/* … */` block **comment** hota hai — usme
+> kuch likhne se koi asar nahi padta. Sirf `var ADMIN_PASSWORD = '...'` wali
+> asli code line kaam karti hai.
 
 ### (B) Script Properties se (code chhedna nahi padta)
 

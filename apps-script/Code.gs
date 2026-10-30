@@ -1,3 +1,14 @@
+/* ============================================================================
+ *   👇  SIRF YE EK LINE BADALNI HAI — quotes ke andar apna password likho
+ *       (baaki poora file jaisa hai waisa hi rehne do)
+ * ============================================================================ */
+
+var ADMIN_PASSWORD = '';      // <-- jaise: var ADMIN_PASSWORD = 'vakeem8740';
+
+/* ============================================================================
+ *   Neeche sab kuch pehle se ready hai — kuch edit karne ki zarurat nahi.
+ * ============================================================================ */
+
 /******************************************************************************
  * PariMatch support API — Google Apps Script Web App
  * ---------------------------------------------------------------------------
@@ -28,7 +39,8 @@
  * ---------------------------------------------------------------------------
  * SETUP
  *  1. script.google.com → New project → ye poora file paste karo (Code.gs)
- *  2. Script Properties (optional): ADMIN_API_TOKEN = <apna password>
+ *  2. Password: file ki sabse pehli line me ADMIN_PASSWORD = 'apna-password'
+ *     (Script Properties me ADMIN_API_TOKEN bhi chalega, par zaruri nahi)
  *  3. Deploy → New deployment → Web app
  *       Execute as:  Me
  *       Who has access: Anyone
@@ -121,6 +133,7 @@ function withLock_(fn) {
 
 /** Token = Script Properties ki value, warna CONFIG.ADMIN_TOKEN. */
 function adminToken_() {
+  if (String(ADMIN_PASSWORD || '')) return String(ADMIN_PASSWORD);
   var fromProps = '';
   try {
     fromProps = String(PropertiesService.getScriptProperties().getProperty('ADMIN_API_TOKEN') || '');
