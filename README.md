@@ -31,6 +31,7 @@ Site (React)  ──▶  Firestore  ──onSnapshot (live)──▶  Site (har 
 | Collections | `complaints`, `messages` (har doc me `clientId`) |
 | Config file | [`Site/src/firebase-config.js`](Site/src/firebase-config.js) ← apni values paste karo |
 | Setup guide | [`FIREBASE-SETUP.md`](FIREBASE-SETUP.md) |
+| Security rules | [`firestore.rules`](firestore.rules) → console → Rules → paste → **Publish** |
 | Config khaali ho to | app **localStorage mode** me chalta hai (crash nahi) |
 | Free plan | Spark: 1 GiB storage, 50k reads/day, 20k writes/day, ₹0 |
 

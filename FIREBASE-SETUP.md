@@ -81,40 +81,44 @@ Kuch na dikhe to:
 - `firebase-config.js` me `apiKey` + `projectId` bhare hain ya nahi
 - Rules "test mode" me hain ya nahi
 
-## Step 6 — Rules (security)
+## Step 6 — Rules lagao (production mode) ⚠️ ZAROORI
 
-Firestore → **Rules** tab. Test mode ki jagah ye lagao:
+Aapne database **production mode** me rakha hai. Production mode ka matlab:
+**sab band** — bina rules ke app kuch bhi save/read nahi kar payega.
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /complaints/{id} {
-      allow read, write: if true;
-    }
-    match /messages/{id} {
-      allow read, write: if true;
-    }
-  }
-}
-```
+Rules repo me file me hain: [`firestore.rules`](firestore.rules)
 
-Ye "open" rules hain — URL jiske paas hai wo padh/likh sakta hai. Har browser ka
-apna `clientId` hai isliye app me data alag dikhta hai, par technically sab
-accessible hai.
+**Ek baar (aur har update ke baad) yahi karna hai:**
 
-**Aage strong karna ho** to Firebase **Authentication → Anonymous** on karke:
+1. File kholo: `firestore.rules`
+2. Firebase console → **Firestore Database** → **Rules** tab
+3. Jo wahan pehle se likha hai wo **poora delete** karo
+4. `firestore.rules` ka **poora content paste** karo
+5. **Publish** dabao (10-20 second me live ho jata hai)
 
-```
-match /complaints/{id} {
-  allow read, write: if request.auth != null
-                       && request.resource.data.clientId == request.auth.uid;
-}
-```
+Bas — ab app kaam karega. Aage jab bhi rules badalne hon: file update → wahi
+paste → Publish.
 
-Uske liye code me thoda change chahiye — bolo to kar dunga.
+**Ye rules kya check karte hain**
+
+| Check | Kyun |
+|---|---|
+| `clientId` 8–64 chars | har browser ka apna id |
+| `status` sirf `pending` (naya complaint) | app isi se banata hai |
+| `details` max 12 fields, `files` max 4 | bada junk data na aaye |
+| password field **reject** | password kabhi Firestore me nahi jata |
+| chat `text` max 2000 chars | spam/bade message se bachne ke liye |
+| message edit me sirf `text`/`edited`/`updatedAt` | baaki fields chhedi nahi ja sakti |
+| baaki saare paths | band (`false`) |
+
+> ⚠️ Login (Firebase Auth) abhi nahi hai, isliye ye rules **data ka shape**
+> check karte hain, **malik (owner)** ka nahi. Jiske paas project ka config hai
+> wo data padh sakta hai. Har user ka apna data ho, ye chahiye to
+> `firestore.rules` me neeche **"AUTH WALE STRONG RULES"** section ready hai —
+> usme `request.auth.uid` se har user sirf apna data dekhega.
 
 ---
+
 
 ## Free limits (Spark plan)
 

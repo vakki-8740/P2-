@@ -1,0 +1,112 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Parimatch Support — Firestore Rules
+//
+// Lagane ka tareeka (har update ke baad yahi):
+//   1. Firebase console → Firestore Database → **Rules** tab
+//   2. Jo likha hai wo poora delete karo, ye poori file paste kar do
+//   3. **Publish** dabao
+//
+// App kya kya karta hai (isi hisaab se rules hain):
+//   complaints → create (naya complaint), read (All Complains), delete
+//   messages   → create (chat), read, update (message edit), delete
+//
+// ⚠️ App me abhi login (Firebase Auth) nahi hai. Isliye ye rules data ka
+//    shape/size check karte hain, malik (owner) ka nahi — matlab jiske paas
+//    project ka config hai wo data padh sakta hai. Bada project ho to neeche
+//    "AUTH WALE STRONG RULES" section use karo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Chhota helper: string hai aur length range me hai
+    function isStr(v, minLen, maxLen) {
+      return v is string && v.size() >= minLen && v.size() <= maxLen;
+    }
+
+    // Har browser ka apna clientId (localStorage) — 8 se 64 characters
+    function hasClientId() {
+      return isStr(request.resource.data.clientId, 8, 64);
+    }
+
+    // ── complaints/{id} ────────────────────────────────────────────────────
+    match /complaints/{id} {
+      allow read: if true;
+
+      // Naya complaint: sahi shape ho, pending ho, password na ho
+      allow create: if hasClientId()
+        && request.resource.data.keys().hasAll(
+             ['id', 'clientId', 'type', 'title', 'status',
+              'createdAt', 'updatedAt', 'details', 'hasPassword', 'files'])
+        && isStr(request.resource.data.id, 1, 80)
+        && isStr(request.resource.data.type, 1, 40)
+        && isStr(request.resource.data.title, 1, 80)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.details is map
+        && request.resource.data.files is map
+        && request.resource.data.details.keys().size() <= 12
+        && request.resource.data.files.keys().size() <= 4
+        && !request.resource.data.details.keys().hasAny(['password']);
+
+      // Status/updatedAt badalna (future admin panel ke liye) — clientId same rehna chahiye
+      allow update: if request.resource.data.clientId == resource.data.clientId;
+
+      allow delete: if true;
+    }
+
+    // ── messages/{id} (Live Chat) ──────────────────────────────────────────
+    match /messages/{id} {
+      allow read: if true;
+
+      allow create: if hasClientId()
+        && request.resource.data.keys().hasAll(
+             ['id', 'clientId', 'sender', 'text', 'createdAt', 'updatedAt'])
+        && isStr(request.resource.data.id, 1, 80)
+        && request.resource.data.sender in ['user', 'support', 'admin']
+        && isStr(request.resource.data.text, 0, 2000);
+
+      // Sirf text edit ho sakta hai (jo app karta hai), baaki fields same
+      allow update: if request.resource.data.clientId == resource.data.clientId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['text', 'edited', 'updatedAt'])
+        && isStr(request.resource.data.text, 0, 2000);
+
+      allow delete: if true;
+    }
+
+    // Baaki koi bhi path — band
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH WALE STRONG RULES (baad me, jab login lage)
+//
+// Step 1: Firebase console → Authentication → Sign-in method → **Anonymous** on
+// Step 2: app me signInAnonymously() add karo, aur clientId ki jagah uid use karo
+// Step 3: upar ke do match blocks isse replace karo:
+//
+//   match /complaints/{id} {
+//     allow read: if request.auth != null
+//                 && resource.data.clientId == request.auth.uid;
+//     allow create: if request.auth != null
+//                 && request.resource.data.clientId == request.auth.uid;
+//     allow update, delete: if request.auth != null
+//                 && resource.data.clientId == request.auth.uid;
+//   }
+//
+//   match /messages/{id} {
+//     allow read: if request.auth != null
+//                 && resource.data.clientId == request.auth.uid;
+//     allow create: if request.auth != null
+//                 && request.resource.data.clientId == request.auth.uid;
+//     allow update, delete: if request.auth != null
+//                 && resource.data.clientId == request.auth.uid;
+//   }
+//
+// Uske baad har user sirf apna data padh/likh payega.
+// ─────────────────────────────────────────────────────────────────────────────
