@@ -36,6 +36,11 @@ pkg install -y proot-distro git curl openssl
 termux-wake-lock          # phone ko sone se roko (deploy beech me na ruke)
 ```
 
+> **Termux me pehle se wasmer install ho gaya hai?** Use hata do (wo kabhi nahi chalega):
+> ```bash
+> rm -rf ~/.wasmer
+> ```
+
 ### Step 2 — Debian install karo
 
 ```bash
@@ -142,6 +147,8 @@ cd ~/P2- && git pull && cd backend && bash deploy.sh
 
 | Problem | Fix |
 |---|---|
+| `wasmer: cannot execute: required file not found` | Ye **glibc vs Android bionic** issue hai. Wasmer CLI Termux me kabhi nahi chalega. Termux me `rm -rf ~/.wasmer` karo, phir `proot-distro login debian` ke andar install karo (Step 2-4) |
+| `tee: /tmp/...: Permission denied` | Termux me `/tmp` nahi hota. Ab `deploy.sh` khud `$TMPDIR`/local path chunta hai — `git pull` karke latest script use karo |
 | `wasmer: cannot execute binary file` / `not found` | Aap Termux ke andar direct install kar rahe ho → `proot-distro login debian` ke andar karo (Step 2) |
 | `curl: command not found` | `apt install -y curl` (Debian ke andar) |
 | `pkg: command not found` | Termux nahi, koi aur terminal hai — F-Droid se Termux install karo |

@@ -55,11 +55,57 @@ green "Preflight OK"
 
 [ "$MODE" = "--check" ] && exit 0
 
+# Portable log file: Termux/Android me /tmp nahi hota.
+LOG=""
+for candidate in "${TMPDIR:-}" /tmp "$PWD"; do
+  [ -n "$candidate" ] || continue
+  if [ -d "$candidate" ] && [ -w "$candidate" ]; then
+    LOG="$candidate/wasmer-deploy.log"
+    if : > "$LOG" 2>/dev/null; then break; fi
+    LOG=""
+  fi
+done
+[ -n "$LOG" ] || { red "No writable directory for the deploy log"; exit 1; }
+info "  deploy log: $LOG"
+
 info "2/4  Wasmer CLI"
+
+# Termux (Android) me Wasmer CLI nahi chalta: wasmer glibc binary hai,
+# Android bionic libc use karta hai -> "cannot execute: required file not found".
+IN_TERMUX=0
+if [ -n "${PREFIX:-}" ] && printf '%s' "$PREFIX" | grep -q 'com.termux'; then
+  IN_TERMUX=1
+fi
+
 if ! command -v wasmer >/dev/null 2>&1; then
+  if [ "$IN_TERMUX" -eq 1 ]; then
+    red "  ✗ Termux detected — Wasmer CLI yahan install nahi hoga."
+    info "    Termux ke andar chalao:"
+    info "      proot-distro install debian"
+    info "      proot-distro login debian"
+    info "    phir Debian ke andar ye script dobara chalao."
+    exit 1
+  fi
   info "  installing (curl https://get.wasmer.io -sSfL | sh)"
   curl https://get.wasmer.io -sSfL | sh || { red "  CLI install failed"; exit 1; }
   export PATH="$HOME/.wasmer/bin:$PATH"
+fi
+
+# Binary present hona kaafi nahi — actually run hona chahiye.
+if ! wasmer --version >/dev/null 2>&1; then
+  red "  ✗ wasmer mila par chal nahi raha: $(command -v wasmer)"
+  if [ "$IN_TERMUX" -eq 1 ]; then
+    red "    Wajah: Termux/Android (bionic libc) vs Wasmer (glibc) mismatch."
+    info "    Fix — Debian ke andar karo:"
+    info "      pkg install -y proot-distro && proot-distro install debian"
+    info "      proot-distro login debian"
+    info "      apt update && apt install -y curl git ca-certificates unzip"
+    info "      curl https://get.wasmer.io -sSfL | sh && export PATH=\$HOME/.wasmer/bin:\$PATH"
+    info "    Termux wala broken install hata do: rm -rf ~/.wasmer"
+  else
+    info "    'file $(command -v wasmer)' se arch check karo; ya reinstall: rm -rf ~/.wasmer"
+  fi
+  exit 1
 fi
 green "  wasmer $(wasmer --version 2>/dev/null | head -1)"
 
@@ -99,15 +145,15 @@ else
 fi
 
 info "4/4  Deploy"
-wasmer deploy 2>&1 | tee /tmp/wasmer-deploy.log
+wasmer deploy 2>&1 | tee "$LOG"
 status=${PIPESTATUS[0]}
 
-URL="$(grep -oE 'https://[a-z0-9-]+\.wasmer\.app' /tmp/wasmer-deploy.log | tail -1)"
+URL="$(grep -oE 'https://[a-z0-9-]+\.wasmer\.app' "$LOG" | tail -1)"
 echo
 if [ "$status" -ne 0 ]; then
   red "Deployment failed. Log tail:"
-  tail -25 /tmp/wasmer-deploy.log
-  red "Full log: /tmp/wasmer-deploy.log  — iska last 25 lines bhej do."
+  tail -25 "$LOG"
+  red "Full log: $LOG  — iska last 25 lines bhej do."
   exit "$status"
 fi
 
