@@ -12,14 +12,16 @@ BASE="https://parimatch-backend.wasmer.app"
 KEEP=0
 LIST_ONLY=0
 CID=""
+ADMIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --keep)      KEEP=1 ;;
     --list-only) LIST_ONLY=1 ;;
     --client-id) shift; CID="${1:-}" ;;
+    --admin-token) shift; ADMIN="${1:-}" ;;
     http*)       BASE="$1" ;;
     -h|--help)
-      echo "usage: bash backend/smoke.sh [BASE_URL] [--keep] [--list-only] [--client-id ID]"
+      echo "usage: bash backend/smoke.sh [BASE_URL] [--keep] [--list-only] [--client-id ID] [--admin-token TOKEN]"
       exit 0 ;;
   esac
   shift
@@ -44,7 +46,13 @@ json() { # json <key>  (first match, string or bare token)
 if [ "$LIST_ONLY" -eq 1 ]; then
   echo "Base: $BASE"
   echo "Client-Id: $CID"
-  body="$(curl -s -m 20 "$BASE/api/complains?limit=20" -H "X-Client-Id: $CID" | compact || true)"
+  if [ -n "$ADMIN" ]; then
+    body="$(curl -s -m 20 "$BASE/api/complains?scope=all&limit=50" \
+      -H "X-Admin-Token: $ADMIN" | compact || true)"
+    echo "(scope=all — sab browsers ke records)"
+  else
+    body="$(curl -s -m 20 "$BASE/api/complains?limit=20" -H "X-Client-Id: $CID" | compact || true)"
+  fi
   case "$body" in
     *'"data":[]'*) echo "Khaali — is client-id ke liye koi record nahi."; exit 1 ;;
     *'"ok":true'*) echo "Records mil gaye ✓"; echo "$body" | head -c 600; echo; exit 0 ;;
