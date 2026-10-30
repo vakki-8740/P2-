@@ -1,9 +1,5 @@
 /**
- * api.js — data layer, backed by **Firebase Firestore**.
- *
- * Pehle ye file PHP/Wasmer backend se baat karti thi, phir Apps Script/Drive se,
- * phir Realtime Database se. Ab **Firestore** hai. Stores/pages ko chhedna
- * nahi pada — sab functions wahi naam ke saath hain.
+ * api.js — data layer (Firebase Firestore).
  *
  * Real-time: `subscribeComplains()` / `subscribeMessages()` — Firestore
  * `onSnapshot` se data badalte hi browser ko turant mil jata hai (koi polling,
@@ -27,7 +23,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  limit,
   onSnapshot,
   query,
   setDoc,
@@ -43,9 +38,9 @@ const CLIENT_KEY = 'parimatch_client_id'
 // Aap kitni badi file chun sakte ho (uske baad browser me compress hoti hai)
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 // Ek file Firestore me jane ke baad kitni badi ho sakti hai (base64 se ~33% bada)
-export const MAX_STORED_FILE_BYTES = 250 * 1024
+const MAX_STORED_FILE_BYTES = 250 * 1024
 // Saari files milakar (Firestore document limit 1 MB hai — usse neeche rehna hai)
-export const MAX_TOTAL_STORED_BYTES = 450 * 1024
+const MAX_TOTAL_STORED_BYTES = 450 * 1024
 const DOC_SAFE_BYTES = 900 * 1024
 
 /* ------------------------------------------------------------------ */
@@ -56,7 +51,7 @@ export function hasApi() {
   return isFirebaseReady()
 }
 
-export function getClientId() {
+function getClientId() {
   try {
     let id = localStorage.getItem(CLIENT_KEY)
     if (!id || !/^[A-Za-z0-9._-]{8,64}$/.test(id)) {
@@ -74,11 +69,6 @@ function newClientId() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   } catch {}
   return `c_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`
-}
-
-/** Stored path already absolute (base64 data:) hota hai. */
-export function resolveApiUrl(path) {
-  return path || ''
 }
 
 function db() {
@@ -151,7 +141,6 @@ export function subscribeMessages(onData) {
 
 export async function apiGet(path) {
   const p = String(path).split('?')[0]
-  if (p === '/api/health') return healthPayload()
   if (!hasApi()) throw new Error('no-api')
 
   if (p === '/api/complains') {
@@ -364,37 +353,11 @@ export function fileToDataUrl(file) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Health / warm-up                                                   */
+/* Warm-up                                                            */
 /* ------------------------------------------------------------------ */
-
-function healthPayload() {
-  return {
-    ok: true,
-    service: 'parimatch-support-firestore',
-    version: '4.0.0-firestore',
-    storage: 'firestore',
-    db: hasApi() ? 'connected' : 'not-configured',
-    db_driver: 'firestore',
-    db_persistent: true,
-    admin_scope_enabled: false,
-  }
-}
-
-export async function healthCheck() {
-  if (!hasApi()) return { ok: false, reason: 'no-api-config' }
-  try {
-    await getDocs(query(collection(db(), COMPLAINTS), limit(1)))
-    return { ok: true, data: healthPayload() }
-  } catch (err) {
-    return { ok: false, error: err && err.message ? err.message : 'Firestore read failed' }
-  }
-}
 
 /** Firestore me warm-up ki zarurat nahi — koi cold start nahi hota. */
 export function warmUp() {
   return Promise.resolve()
 }
 
-export function getAdminToken() {
-  return ''
-}

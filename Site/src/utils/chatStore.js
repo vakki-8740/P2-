@@ -10,7 +10,6 @@ import {
   apiDelete,
   uploadFile,
   fileToDataUrl,
-  resolveApiUrl,
   MAX_UPLOAD_BYTES,
 } from './api.js'
 
@@ -56,7 +55,7 @@ function normalizeFile(file) {
   }
 }
 
-export function normalizeChatRow(row) {
+function normalizeChatRow(row) {
   if (!row || typeof row !== 'object') return null
   return {
     id: String(row.id || generateChatId()),
@@ -245,7 +244,7 @@ export async function clearMessages() {
 /** Usable src/href for a chat attachment. */
 export function chatFileSrc(file) {
   if (!file) return ''
-  if (file.url) return resolveApiUrl(file.url)
+  if (file.url) return file.url
   return file.data || ''
 }
 

@@ -11,17 +11,3 @@ export function withBase(path = '/') {
   return `${BASE_PATH}${clean}` === '' ? '/' : `${BASE_PATH}${clean}`
 }
 
-/** Router paths used across the app (single place to change them). */
-export const ROUTES = {
-  home: withBase('/'),
-  about: withBase('/about'),
-  terms: withBase('/terms'),
-  allComplains: withBase('/all-complains'),
-  liveChat: withBase('/live-chat'),
-  deposit: withBase('/deposit-complain'),
-  withdrawal: withBase('/withdrawal-complain'),
-  bonus: withBase('/bonus-complain'),
-  bankStatement: withBase('/bank-statement-complain'),
-  unlockWithdrawal: withBase('/unlock-withdrawal-complain'),
-  kyc: withBase('/kyc-complain'),
-}

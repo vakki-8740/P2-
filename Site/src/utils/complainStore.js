@@ -14,7 +14,6 @@ import {
   apiDelete,
   uploadFile,
   fileToDataUrl,
-  resolveApiUrl,
   MAX_UPLOAD_BYTES,
 } from './api.js'
 
@@ -142,7 +141,7 @@ function stripPassword(entry) {
 /* ------------------------------------------------------------------ */
 
 /** Instant (local) list, used for the first paint. */
-export function getComplains() {
+function getComplains() {
   return getLocal()
     .map(normalizeComplainRow)
     .filter(Boolean)
@@ -310,7 +309,7 @@ export async function clearComplains() {
 /** Usable src/href for a stored attachment (backend URL or inline data). */
 export function fileSrc(file) {
   if (!file) return ''
-  if (file.url) return resolveApiUrl(file.url)
+  if (file.url) return file.url
   return file.data || ''
 }
 

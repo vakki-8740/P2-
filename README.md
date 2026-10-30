@@ -133,6 +133,8 @@ client-side routing kaam karta hai.
 ## Tech
 
 - Vite 5 + React 18 + React Router 6
+- Saaton complaint forms ek shared `Site/src/components/ComplainForm.jsx` se
+  bante hain (har page sirf apni config deta hai)
 - Storage: Firebase **Firestore** (+ localStorage fallback)
 - Styling: plain CSS modules/`*.css` per page
 
