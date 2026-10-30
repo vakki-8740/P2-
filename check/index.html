@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data check — complaints</title>
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:#f3f5f9;color:#111}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  h1{font-size:18px;margin:0 0 4px}
+  p.sub{margin:0 0 14px;color:#666;font-size:13.5px}
+  .box{background:#fff;border:1px solid #dde2ec;border-radius:12px;padding:14px;margin-bottom:12px}
+  label{display:block;font-size:12.5px;color:#555;margin:10px 0 5px}
+  input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd3e0;border-radius:9px;font-size:14px}
+  button{padding:11px 16px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;margin-top:12px;cursor:pointer}
+  button:disabled{opacity:.6}
+  button.grey{background:#e7ebf3;color:#111;font-weight:500}
+  #status{margin-top:12px;font-size:14px;line-height:1.5}
+  .ok{color:#0a7d43}.bad{color:#c62828}.warn{color:#a15c00}
+  .big{font-size:34px;font-weight:700;margin:4px 0}
+  pre{background:#0d1117;color:#d7e2f0;padding:12px;border-radius:9px;overflow:auto;max-height:340px;font-size:12px;line-height:1.5}
+  ul{padding-left:18px;margin:8px 0;font-size:14px}
+  li{margin:4px 0}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .muted{color:#777;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Data check page</h1>
+  <p class="sub">Bas itna dekhna hai ki Apps Script se data aa raha hai ya nahi.</p>
+
+  <div class="box">
+    <label>Apps Script Web App URL (<code>…/exec</code>)</label>
+    <input id="api" type="url" placeholder="https://script.google.com/macros/s/AKfy.../exec" />
+
+    <label>Admin password (<code>ADMIN_PASSWORD</code>)</label>
+    <input id="token" type="text" placeholder="jo Code.gs me likha hai" />
+
+    <div class="row">
+      <button id="load">Data check karo</button>
+      <button id="sample" class="grey">Test complaint bhejo</button>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <div class="box" id="result" style="display:none">
+    <div class="muted">Total complaints</div>
+    <div class="big" id="count">0</div>
+    <div id="names"></div>
+    <details style="margin-top:12px">
+      <summary class="muted" style="cursor:pointer">Raw JSON dekho</summary>
+      <pre id="raw"></pre>
+    </details>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var LS_API = 'check_api', LS_TOKEN = 'check_token';
+
+  function say(text, cls) {
+    var el = $('status');
+    el.textContent = text || '';
+    el.className = cls || '';
+  }
+
+  function url(path, params) {
+    var base = $('api').value.trim();
+    var sep = base.indexOf('?') >= 0 ? '&' : '?';
+    var qs = 'path=' + encodeURIComponent(path);
+    var p = params || {};
+    Object.keys(p).forEach(function (k) {
+      if (p[k] === undefined || p[k] === null || p[k] === '') return;
+      qs += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(p[k]);
+    });
+    return base + sep + qs;
+  }
+
+  function getJson(target) {
+    return fetch(target, { method: 'GET', redirect: 'follow' }).then(function (res) {
+      return res.text().then(function (t) {
+        var data = null;
+        try { data = t ? JSON.parse(t) : null; } catch (e) { data = null; }
+        if (!data) throw new Error('JSON nahi aaya — URL galat hai ya "Anyone" access nahi hai');
+        if (data.ok === false) throw new Error(data.error || 'Server error');
+        return data;
+      });
+    });
+  }
+
+  function postJson(body) {
+    var base = $('api').value.trim();
+    return fetch(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        path: '/api/complains',
+        method: 'POST',
+        clientId: 'check-page',
+        adminToken: $('token').value.trim(),
+        body: body
+      })
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var d = null;
+        try { d = JSON.parse(t); } catch (e) { d = null; }
+        if (!d) throw new Error('JSON nahi aaya');
+        if (d.ok === false) throw new Error(d.error || 'Server error');
+        return d;
+      });
+    });
+  }
+
+  function load() {
+    if (!$('api').value.trim()) { say('Pehle URL daalo.', 'bad'); return; }
+    localStorage.setItem(LS_API, $('api').value.trim());
+    localStorage.setItem(LS_TOKEN, $('token').value.trim());
+
+    say('Check ho raha hai…', 'warn');
+    $('load').disabled = true;
+
+    getJson(url('/api/complains', { scope: 'all', limit: 500, admin_token: $('token').value.trim() }))
+      .then(function (d) {
+        var items = Array.isArray(d.data) ? d.data : [];
+        $('result').style.display = 'block';
+        $('count').textContent = items.length;
+        $('raw').textContent = JSON.stringify(items, null, 2);
+
+        if (!items.length) {
+          say('✅ Connected — par abhi koi complaint nahi hai (data khaali).', 'ok');
+          $('names').innerHTML = '<div class="muted">Website se ek complaint bhejo, phir dobara check karo.</div>';
+          return;
+        }
+
+        say('✅ Connected — ' + items.length + ' complaint mil gayi. Data aa raha hai!', 'ok');
+        $('names').innerHTML = '<ul>' + items.slice(0, 20).map(function (c) {
+          var d = c.details || {};
+          var who = d.userName || d.user_name || '(no name)';
+          return '<li><b>' + esc(c.type || 'complain') + '</b> — ' + esc(who) +
+                 ' — ' + esc(d.mobile || '') + ' <span class="muted">' + esc(String(c.createdAt || '').slice(0, 16)) + '</span></li>';
+        }).join('') + '</ul>' + (items.length > 20 ? '<div class="muted">… aur ' + (items.length - 20) + ' zyada</div>' : '');
+      })
+      .catch(function (err) {
+        var m = String(err && err.message || err);
+        var hint = '';
+        if (/Admin token required/i.test(m)) hint = ' — password galat hai, ya Code.gs me ADMIN_PASSWORD set nahi hai.';
+        else if (/Failed to fetch|Cannot reach|NetworkError/i.test(m)) hint = ' — URL galat hai, ya Apps Script "Anyone" pe deploy nahi hai.';
+        say('❌ ' + m + hint, 'bad');
+      })
+      .then(function () { $('load').disabled = false; });
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  $('load').addEventListener('click', load);
+
+  $('sample').addEventListener('click', function () {
+    if (!$('api').value.trim()) { say('Pehle URL daalo.', 'bad'); return; }
+    say('Test complaint bhej raha hoon…', 'warn');
+    postJson({
+      id: 'check_' + Date.now(),
+      type: 'deposit',
+      title: 'Test complaint (check page)',
+      createdAt: new Date().toISOString(),
+      details: {
+        userName: 'Test User',
+        mobile: '9999999999',
+        email: 'test@example.com',
+        depositAmount: '100',
+        message: 'Ye complaint check page se bheji gayi hai ' + new Date().toLocaleString()
+      },
+      files: {}
+    })
+      .then(function () { say('✅ Bhej di. Ab "Data check karo" dabao — list me dikhni chahiye.', 'ok'); })
+      .catch(function (err) { say('❌ ' + (err.message || err), 'bad'); });
+  });
+
+  try {
+    $('api').value = localStorage.getItem(LS_API) || '';
+    $('token').value = localStorage.getItem(LS_TOKEN) || '';
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

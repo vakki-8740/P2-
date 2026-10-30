@@ -41,17 +41,16 @@ Setup: `script.new` → Code.gs paste → Deploy as Web app (Anyone) → `/exec`
 
 ---
 
-## Admin page (saari complaints)
+## Data check page (test ke liye)
 
-`admin/index.html` — ek single-file page, koi build nahi. Vercel pe
-**Root Directory = `admin`** se deploy karo.
+`check/index.html` — ek chhota single-file page (koi build nahi). Vercel pe
+**Root Directory = `check`** se deploy karo.
 
-- Saari complaints (har browser ki), search + type/status filter
-- Attachments inline (images) / links (PDF, DOC)
-- Auto-refresh + Export JSON
-- Setup: page kholne pe Apps Script `/exec` URL + `ADMIN_API_TOKEN` daalo (browser me save)
+- Apps Script `/exec` URL + `ADMIN_PASSWORD` daalo → **Data check karo**
+- Dikhata hai: connected hai ya nahi, kitni complaints hain, naam ki list, raw JSON
+- **Test complaint bhejo** button se ek sample complaint Drive me daal ke verify kar sakte ho
 
-Details: [`admin/README.md`](admin/README.md)
+Details: [`check/README.md`](check/README.md)
 
 ## Projects
 
