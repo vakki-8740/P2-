@@ -505,15 +505,39 @@ body.intro-active { overflow: hidden; }
 
 /* ---------- All Complains - stored items ---------- */
 .complain-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 20px;
 }
+
+/* Status pill — card ke top-right corner pe (upper side) */
+.complain-status {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 6px 16px;
+  border-radius: 0 var(--radius) 0 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.complain-status.warning { background: var(--warn); color: #1a1205; }
+.complain-status.success { background: var(--yes); color: #fff; }
+.complain-status.danger { background: var(--no); color: #fff; }
 .complain-item-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  /* corner status pill se takra na jaye */
+  padding-right: 96px;
+  min-height: 22px;
 }
 .complain-item-date {
   font-size: 0.78rem;
@@ -565,45 +589,112 @@ body.intro-active { overflow: hidden; }
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.complain-files-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+.complain-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.complain-file {
+.complain-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   border: 1px solid var(--border);
   background: #1e2128;
   border-radius: var(--radius);
-  padding: 10px;
+  padding: 10px 12px;
+}
+.complain-file-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.complain-file-icon svg { width: 17px; height: 17px; }
+.complain-file-meta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: center;
-  text-align: center;
-}
-.complain-file-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-.complain-file-thumb {
-  width: 100%;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-}
-.complain-file-link {
-  font-size: 0.85rem;
-  color: var(--accent);
-  word-break: break-all;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 .complain-file-name {
-  font-size: 0.7rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.complain-file-sub {
+  font-size: 0.72rem;
   color: var(--muted);
   word-break: break-all;
 }
+.complain-file-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.complain-file-btn svg { width: 15px; height: 15px; }
+
+/* ---------- File viewer (attachment popup) ---------- */
+.file-viewer {
+  width: min(760px, 94vw);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  padding: 14px;
+  transform: scale(0.96) translateY(10px);
+  transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.05);
+}
+.overlay.open .file-viewer { transform: scale(1) translateY(0); }
+.file-viewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.file-viewer-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-viewer-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background: #0d0f14;
+  border-radius: var(--radius);
+  overflow: auto;
+  padding: 8px;
+}
+.file-viewer-body img {
+  display: block;
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.file-viewer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.file-viewer-foot .btn { text-decoration: none; }
+
 .complain-item-foot {
   display: flex;
   justify-content: space-between;

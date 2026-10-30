@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" fill="#000"/><rect x="12" y="12" width="488" height="488" rx="56" fill="none" stroke="#FFE600" stroke-width="8"/><g transform="translate(0,-4)">
-<rect x="196" y="112" width="170" height="80" rx="24" fill="#FFE600"/><rect x="150" y="156" width="270" height="230" rx="36" fill="#000" stroke="#000" stroke-width="14" stroke-linejoin="round"/><rect x="150" y="156" width="270" height="230" rx="36" fill="#FFE600"/><rect x="360" y="226" width="92" height="74" rx="28" fill="#000" stroke="#000" stroke-width="16" stroke-linejoin="round"/><rect x="360" y="226" width="92" height="74" rx="28" fill="#FFE600"/><circle cx="406" cy="263" r="11" fill="#000"/>
-<circle cx="172" cy="332" r="112" fill="#000"/>
-<circle cx="172" cy="332" r="98" fill="#FFE600"/>
-<rect x="154" y="264" width="36" height="56" rx="6" fill="#000"/>
-<polygon points="120,312 224,312 172,368" fill="#000" stroke="#000" stroke-width="6" stroke-linejoin="round"/>
-<rect x="128" y="388" width="88" height="12" rx="6" fill="#000"/>
-<circle cx="292" cy="408" r="54" fill="#000"/><circle cx="292" cy="408" r="44" fill="#FFE600"/><rect x="287.2" y="382.5" width="9.7" height="29.0" rx="4.8" fill="#000"/><circle cx="292" cy="425.6" r="5.5" fill="#000"/></g></svg>

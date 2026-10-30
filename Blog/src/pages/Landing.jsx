@@ -1,6 +1,8 @@
 import Header from '../components/Header'
 import IntroOverlay from '../components/IntroOverlay'
 
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://parimatch-senter-center.vercel.app').replace(/\/+$/, '')
+
 export default function Landing() {
   return (
     <>
@@ -24,7 +26,7 @@ export default function Landing() {
         </div>
 
         <section className="panel content">
-          <h1>Were Here to Help You</h1>
+          <h1>We’re Here to Help You</h1>
 
           <ul className="feature-list">
             <li>
@@ -59,12 +61,12 @@ export default function Landing() {
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </span>
-              <span>Fast response were just a click away</span>
+              <span>Fast response — we’re just a click away</span>
             </li>
           </ul>
 
           <div className="actions">
-            <a className="btn primary" href="https://parimatch-senter-center.vercel.app" target="_blank" rel="noopener">
+            <a className="btn primary" href={SITE_URL} target="_blank" rel="noopener">
               Support Center
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
@@ -81,7 +83,7 @@ export default function Landing() {
             <span className="sep">·</span>
             <a href="https://parimatch-senter-center.vercel.app/terms" target="_blank" rel="noopener">Terms</a>
             <span className="sep">·</span>
-            <a href="https://parimatch-senter-center.vercel.app" target="_blank" rel="noopener">Support</a>
+            <a href={SITE_URL} target="_blank" rel="noopener">Support</a>
           </nav>
         </div>
       </footer>

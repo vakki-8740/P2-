@@ -36,7 +36,7 @@ export default function IntroOverlay() {
 
   return (
     <div id="introOverlay" className={fade ? 'fade-out' : ''}>
-      <iframe src="/opening/Intro-Animation.html" title="Parimatch Intro" allowTransparency="true" />
+      <iframe src="/opening/Intro-Animation.html" title="Parimatch Intro" />
     </div>
   )
 }

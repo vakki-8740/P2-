@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import { withBase } from '../utils/base'
 
 const problems = [
   { title: 'Deposit Problem', icon: '/icons-options/deposit.svg', to: '/deposit-complain' },
@@ -11,22 +12,24 @@ const problems = [
   { title: 'Live Chat', icon: '/icons-options/live-chat.svg', to: '/live-chat' },
 ]
 
+const BANNER = withBase('/banner/file_00000000c5c08211a860dc7a22339a1f.png')
+
 export default function SupportHome() {
   return (
     <>
       <Header showMenu />
       <main className="container site">
         <div className="card banner-wrapper">
-          <img src="/banner/file_00000000c5c08211a860dc7a22339a1f.png" alt="Parimatch Support banner" />
+          <img src={BANNER} alt="Parimatch Support banner" />
         </div>
 
         <div className="problem-heading">Select Your Problem</div>
 
         {problems.map((p) => (
           <div key={p.title} className="card problem-card">
-            <img className="problem-icon" src={p.icon} alt={p.title} />
+            <img className="problem-icon" src={withBase(p.icon)} alt={p.title} />
             <div className="problem-title">{p.title}</div>
-            <Link className="btn primary" to={p.to}>{p.title === "Live Chat" ? "Live Chat" : "Complain Now"}</Link>
+            <Link className="btn primary" to={withBase(p.to)}>{p.title === "Live Chat" ? "Live Chat" : "Complain Now"}</Link>
           </div>
         ))}
       </main>
@@ -34,11 +37,11 @@ export default function SupportHome() {
             <footer>        <div className="footer-main">
           <p>&copy; 2026 Parimatch Support. All rights reserved.</p>
           <nav className="footer-nav">
-            <Link to="/about">About</Link>
+            <Link to={withBase('/about')}>About</Link>
             <span className="sep">·</span>
-            <Link to="/terms">Terms</Link>
+            <Link to={withBase('/terms')}>Terms</Link>
             <span className="sep">·</span>
-            <Link to="/all-complains">My Complains</Link>
+            <Link to={withBase('/all-complains')}>My Complains</Link>
           </nav>
         </div>
       </footer>

@@ -10,11 +10,11 @@ import BonusComplain from './pages/complains/BonusComplain'
 import DepositComplain from './pages/complains/DepositComplain'
 import BankStatementComplain from './pages/complains/BankStatementComplain'
 import UnlockWithdrawalComplain from './pages/complains/UnlockWithdrawalComplain'
-import ChatPage from './pages/chat-page/ChatPage'
 import KycComplain from './pages/complains/KycComplain'
+import ChatPage from './pages/chat-page/ChatPage'
+import { withBase } from './utils/base'
 
-
-function RouteLoader() {
+export function RouteLoader() {
   const location = useLocation()
   const [initial, setInitial] = useState(true)
   const [routeLoading, setRouteLoading] = useState(false)
@@ -36,39 +36,55 @@ function RouteLoader() {
   return null
 }
 
+const legacyRedirects = [
+  ['/index.html', '/'],
+  ['/about.html', '/about'],
+  ['/terms.html', '/terms'],
+  ['/all-complains.html', '/all-complains'],
+  ['/deposit-complain.html', '/deposit-complain'],
+  ['/withdrawal-complain.html', '/withdrawal-complain'],
+  ['/bonus-complain.html', '/bonus-complain'],
+  ['/bank-statement-complain.html', '/bank-statement-complain'],
+  ['/unlock-withdrawal-complain.html', '/unlock-withdrawal-complain'],
+  ['/kyc-complain.html', '/kyc-complain'],
+  ['/live-chat.html', '/live-chat'],
+]
+
+/**
+ * All support-center routes (an array, so it can be spread inside <Routes>).
+ * Paths are prefixed with BASE_PATH so the same code powers both the Site
+ * deployment (root) and the combined root project (/site).
+ */
+export function siteRoutes() {
+  return [
+    <Route key="home" path={withBase('/')} element={<SupportHome />} />,
+    <Route key="about" path={withBase('/about')} element={<About />} />,
+    <Route key="terms" path={withBase('/terms')} element={<Terms />} />,
+    <Route key="all-complains" path={withBase('/all-complains')} element={<AllComplains />} />,
+
+    // Complain pages — one page per problem
+    <Route key="deposit" path={withBase('/deposit-complain')} element={<DepositComplain />} />,
+    <Route key="withdrawal" path={withBase('/withdrawal-complain')} element={<WithdrawalComplain />} />,
+    <Route key="bonus" path={withBase('/bonus-complain')} element={<BonusComplain />} />,
+    <Route key="bank-statement" path={withBase('/bank-statement-complain')} element={<BankStatementComplain />} />,
+    <Route key="unlock" path={withBase('/unlock-withdrawal-complain')} element={<UnlockWithdrawalComplain />} />,
+    <Route key="kyc" path={withBase('/kyc-complain')} element={<KycComplain />} />,
+    <Route key="live-chat" path={withBase('/live-chat')} element={<ChatPage />} />,
+
+    // legacy .html links kept alive for old shared URLs
+    ...legacyRedirects.map(([from, to]) => (
+      <Route key={from} path={withBase(from)} element={<Navigate to={withBase(to)} replace />} />
+    )),
+  ]
+}
+
 export default function App() {
   return (
     <>
       <RouteLoader />
       <Routes>
-      <Route path="/" element={<SupportHome />} />
-      <Route path="/index.html" element={<Navigate to="/" replace />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/about.html" element={<Navigate to="/about" replace />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/terms.html" element={<Navigate to="/terms" replace />} />
-      <Route path="/all-complains" element={<AllComplains />} />
-      <Route path="/all-complains.html" element={<Navigate to="/all-complains" replace />} />
-
-      {/* Complain pages — each problem ke liye alag file */}
-      <Route path="/withdrawal-complain" element={<WithdrawalComplain />} />
-      <Route path="/bonus-complain" element={<BonusComplain />} />
-      <Route path="/deposit-complain" element={<DepositComplain />} />
-      <Route path="/bank-statement-complain" element={<BankStatementComplain />} />
-      <Route path="/unlock-withdrawal-complain" element={<UnlockWithdrawalComplain />} />
-      <Route path="/kyc-complain" element={<KycComplain />} />
-      <Route path="/live-chat" element={<ChatPage />} />
-
-      {/* legacy .html redirects for complain pages */}
-      <Route path="/deposit-complain.html" element={<Navigate to="/deposit-complain" replace />} />
-      <Route path="/withdrawal-complain.html" element={<Navigate to="/withdrawal-complain" replace />} />
-      <Route path="/bonus-complain.html" element={<Navigate to="/bonus-complain" replace />} />
-      <Route path="/bank-statement-complain.html" element={<Navigate to="/bank-statement-complain" replace />} />
-      <Route path="/unlock-withdrawal-complain.html" element={<Navigate to="/unlock-withdrawal-complain" replace />} />
-      <Route path="/kyc-complain.html" element={<Navigate to="/kyc-complain" replace />} />
-      <Route path="/live-chat.html" element={<Navigate to="/live-chat" replace />} />
-
-      <Route path="*" element={<Navigate to="/" replace />} />
+        {siteRoutes()}
+        <Route path="*" element={<Navigate to={withBase('/')} replace />} />
       </Routes>
     </>
   )
