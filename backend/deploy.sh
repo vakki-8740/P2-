@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # One-command Wasmer deploy for the Parimatch backend.
 #
-#   bash backend/deploy.sh            # full deploy + health check
-#   bash backend/deploy.sh --check    # local preflight only (no network)
+#   bash backend/deploy.sh                       # browser login + deploy
+#   WASMER_TOKEN=xxx bash backend/deploy.sh      # token se deploy (CI style)
+#   bash backend/deploy.sh --check               # local preflight only (no network)
+#
+# Token yahan se banao: https://wasmer.io/settings/access-tokens
 #
 set -uo pipefail
 
@@ -60,9 +63,13 @@ if ! command -v wasmer >/dev/null 2>&1; then
 fi
 green "  wasmer $(wasmer --version 2>/dev/null | head -1)"
 
-info "3/4  Login"
-if ! wasmer whoami >/dev/null 2>&1; then
+info "3/4  Auth"
+if [ -n "${WASMER_TOKEN:-}" ]; then
+  export WASMER_TOKEN
+  green "  using WASMER_TOKEN from environment (no browser login)"
+elif ! wasmer whoami >/dev/null 2>&1; then
   info "  not logged in -> opening browser login"
+  info "  (ya: WASMER_TOKEN=xxx bash backend/deploy.sh)"
   wasmer login || { red "  login failed"; exit 1; }
 fi
 USER_NAME="$(wasmer whoami 2>/dev/null | head -1)"
