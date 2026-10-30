@@ -1,5 +1,8 @@
 # Deploy backend from phone (Termux) — full commands
 
+> ✅ **Ho gaya (30 Oct 2026):** <https://parimatch-backend.wasmer.app> live hai.
+> Ye guide dobara deploy / naye phone se setup ke liye hai.
+
 Backend `backend/` folder se Wasmer Edge pe deploy hota hai.
 Do raaste hain: **Plan A** (Termux ki zarurat nahi, browser-only) aur
 **Plan B** (Termux + Debian, poore commands neeche).

@@ -1,5 +1,8 @@
 # Deploy Guide — Wasmer (backend) + Vercel (frontend)
 
+**Status: backend LIVE ✓** — <https://parimatch-backend.wasmer.app>
+(health: `ok:true`, PHP 8.3.4, `db_driver:sqlite` — MySQL pending, dekho §5)
+
 Sab kuch ready hai. Do deployments hain: **backend → Wasmer Edge**, aur
 **frontend → Vercel** (Site + Blog). Neeche exact settings di hain.
 
@@ -63,7 +66,7 @@ Success pe aisa output aayega:
 
 ```
 App parimatch-backend (vakki-8740) was successfully deployed 🚀
-https://parimatch-backend-vakki-8740.wasmer.app      <-- YAHI URL copy karo
+https://parimatch-backend.wasmer.app      <-- YAHI URL copy karo
 ```
 
 Wasmer URL ka rule: `https://<app-name>.wasmer.app` agar free hai, warna
@@ -160,7 +163,7 @@ Do alag projects (monorepo se do apps):
 Vercel → Project → **Settings → Environment Variables**:
 
 ```
-VITE_API_URL = https://parimatch-backend-vakki-8740.wasmer.app
+VITE_API_URL = https://parimatch-backend.wasmer.app
 ```
 
 Rules:

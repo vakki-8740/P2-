@@ -17,6 +17,19 @@ P2-/
 
 ---
 
+## Live backend (deployed)
+
+| | |
+|---|---|
+| API | <https://parimatch-backend.wasmer.app> |
+| Health | <https://parimatch-backend.wasmer.app/api/health> |
+| Dashboard | <https://wasmer.io/apps/vakki-8740/parimatch-backend> |
+
+`GET /api/health` → `{"ok":true,"php":"8.3.4","db":"connected","db_driver":"sqlite", ...}`
+
+> ⚠️ Abhi **SQLite** chal raha hai (`/tmp`) — redeploy pe data wipe ho jayega.
+> MySQL secrets set karte hi `db_driver` `mysql` ho jayega (DEPLOY.md §1).
+
 ## Projects
 
 | # | Project | Folder | Dev | Routes |
@@ -52,11 +65,11 @@ P2-/
 
 ```bash
 # Site/.env  (required for the backend connection)
-VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
+VITE_API_URL=https://parimatch-backend.wasmer.app
 # empty = localStorage only
 
 # root .env (same variable; VITE_BASE_PATH=/site is set in vite.config.js)
-VITE_API_URL=https://parimatch-backend-vakki-8740.wasmer.app
+VITE_API_URL=https://parimatch-backend.wasmer.app
 
 # Blog/.env (optional)
 VITE_SITE_URL=https://parimatch-senter-center.vercel.app

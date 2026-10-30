@@ -18,6 +18,7 @@ MODE="${1:-deploy}"
 green() { printf '\033[32m%s\033[0m\n' "$1"; }
 red()   { printf '\033[31m%s\033[0m\n' "$1"; }
 info()  { printf '\033[36m%s\033[0m\n' "$1"; }
+yellow(){ printf '\033[33m%s\033[0m\n' "$1"; }
 
 fail=0
 check() {
@@ -169,10 +170,32 @@ green "Deployed ✓"
 if [ -n "${URL:-}" ]; then
   echo "URL: $URL"
   info "Health check:"
-  curl -s -m 20 "$URL/api/health" | head -c 600; echo
+  HEALTH="$(curl -s -m 20 "$URL/api/health" || true)"
+  printf '%s\n' "$HEALTH" | head -c 600; echo
   echo
-  green "Frontend env (Vercel -> Site -> Settings -> Environment Variables):"
+  green "Frontend env (Vercel -> Settings -> Environment Variables):"
   echo "  VITE_API_URL=$URL"
+  echo "  (dono Vercel projects: Site root=Site, Blog root=Blog -> Redeploy)"
+  echo
+
+  case "$HEALTH" in
+    *'"db_driver":"sqlite"'*)
+      yellow "  ⚠  SQLite chal raha hai — redeploy pe data wipe ho jayega."
+      info "     Production ke liye MySQL secrets set karo, phir dobara deploy:"
+      info "       wasmer secret create DB_HOST --value=<host>"
+      info "       wasmer secret create DB_NAME --value=<db>"
+      info "       wasmer secret create DB_USER --value=<user>"
+      info "       wasmer secret create DB_PASS --value=<pass>"
+      info "       wasmer secret create APP_KEY  --value=\$(openssl rand -hex 32)"
+      info "       wasmer secret create ADMIN_API_TOKEN --value=\$(openssl rand -hex 24)"
+      info "       wasmer deploy"
+      ;;
+  esac
+  case "$HEALTH" in
+    *'"admin_scope_enabled":false'*)
+      info "  admin API band hai — ADMIN_API_TOKEN secret set karke deploy karo (upar dekho)."
+      ;;
+  esac
 else
   info "URL detect nahi hua — deploy output me se manually copy karo."
 fi
