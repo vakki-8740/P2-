@@ -27,14 +27,17 @@ Browser (Site)  ──fetch──▶  Apps Script Web App  ──▶  Drive file
 
 | | |
 |---|---|
+| Backend code | [`apps-script/Code.gs`](apps-script/Code.gs) — ready, tested |
+| Setup guide | [`apps-script/README.md`](apps-script/README.md) |
 | Endpoint | `VITE_API_URL` (Apps Script `/exec` URL) |
 | Abhi | `VITE_API_URL` khaali hai → app **localStorage-only** mode me chalta hai |
-| Baad me | Apps Script URL daalna hai → data Drive me |
 
-> ⚠️ Apps Script ko CORS preflight pasand nahi — `POST` `Content-Type:
-> text/plain` (ya `application/x-www-form-urlencoded`) se bhejna padta hai,
-> warna browser `OPTIONS` bhej ke fail ho jata hai. `Site/src/utils/api.js`
-> isi hisaab se adjust karna hai jab URL ready ho.
+Setup: `script.new` → Code.gs paste → Deploy as Web app (Anyone) → `/exec` URL
+→ Vercel me `VITE_API_URL` → Redeploy.
+
+> Apps Script CORS preflight ka jawab nahi deta, isliye `Site/src/utils/api.js`
+> sab writes `POST` + `Content-Type: text/plain` me bhejta hai (method body ke
+> andar). Reads `GET ?path=…&client_id=…` se hote hain.
 
 ---
 

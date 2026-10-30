@@ -6,7 +6,8 @@
 const RAW_BASE = import.meta.env.VITE_API_URL || ''
 export const API_BASE = RAW_BASE.replace(/\/+$/, '')
 export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024 // 100 MB client ceiling
-// NOTE: Apps Script/Drive quotas are lower — keep attachments small in Drive mode.
+export const MAX_DRIVE_UPLOAD_BYTES = 15 * 1024 * 1024 // Apps Script POST limit (base64 ~+33%)
+// NOTE: Drive mode me file base64 hoke Apps Script ko jaati hai — bade files slow.
 
 const CLIENT_KEY = 'parimatch_client_id'
 
@@ -42,30 +43,58 @@ export function resolveApiUrl(path) {
   return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
 }
 
-async function errorMessage(res) {
+const ADMIN_TOKEN_KEY = 'parimatch_admin_token'
+
+/** Optional admin token (Drive mode me ?scope=all ke liye). */
+export function getAdminToken() {
   try {
-    const data = await res.json()
-    if (data && data.error) return data.error
-  } catch {}
-  return `Request failed (HTTP ${res.status})`
+    return import.meta.env.VITE_ADMIN_TOKEN || localStorage.getItem(ADMIN_TOKEN_KEY) || ''
+  } catch {
+    return ''
+  }
 }
 
+/**
+ * All traffic goes to ONE Google Apps Script /exec URL.
+ *
+ * Apps Script CORS preflight (OPTIONS) ka jawab nahi de sakta, isliye:
+ *  - GET  : sab kuch query params me (client_id bhi)
+ *  - POST : Content-Type text/plain (simple request = koi preflight nahi) aur
+ *           asli method + payload body ke andar JSON me
+ */
 async function request(path, options = {}, timeoutMs = 25000) {
   if (!API_BASE) throw new Error('no-api')
+
+  const method = (options.method || 'GET').toUpperCase()
+  const clientId = getClientId()
+
+  let target
+  let init
+
+  if (method === 'GET') {
+    const sep = path.indexOf('?') >= 0 ? '&' : '?'
+    target = `${API_BASE}${path}${sep}client_id=${encodeURIComponent(clientId)}`
+    init = { method: 'GET' }
+  } else {
+    target = API_BASE
+    init = {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        path,
+        method,
+        clientId,
+        adminToken: getAdminToken(),
+        body: options.json === undefined ? {} : options.json,
+      }),
+    }
+  }
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   let res
   try {
-    res = await fetch(API_BASE + path, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        'X-Client-Id': getClientId(),
-        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-        ...(options.headers || {}),
-      },
-    })
+    res = await fetch(target, { ...init, signal: controller.signal })
   } catch (err) {
     clearTimeout(timer)
     if (err && err.name === 'AbortError') throw new Error('Server took too long to respond')
@@ -73,11 +102,23 @@ async function request(path, options = {}, timeoutMs = 25000) {
   }
   clearTimeout(timer)
 
-  if (!res.ok) throw new Error(await errorMessage(res))
+  const text = await res.text()
+  let data = null
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch {
+    data = null
+  }
 
-  const type = res.headers.get('content-type') || ''
-  if (type.includes('application/json')) return res.json()
-  return res.text()
+  if (!res.ok) {
+    throw new Error((data && data.error) || `Request failed (HTTP ${res.status})`)
+  }
+  // Apps Script hamesha HTTP 200 deta hai — error JSON ke andar aata hai.
+  if (data && data.ok === false) {
+    throw new Error(data.error || 'Request failed')
+  }
+
+  return data === null ? text : data
 }
 
 export async function apiGet(path) {
@@ -85,11 +126,11 @@ export async function apiGet(path) {
 }
 
 export async function apiPost(path, body) {
-  return request(path, { method: 'POST', body: JSON.stringify(body) })
+  return request(path, { method: 'POST', json: body })
 }
 
 export async function apiPut(path, body) {
-  return request(path, { method: 'PUT', body: JSON.stringify(body) })
+  return request(path, { method: 'PUT', json: body })
 }
 
 export async function apiDelete(path) {
@@ -102,15 +143,26 @@ export async function apiDelete(path) {
  */
 export async function uploadFile(file) {
   if (!file) throw new Error('No file selected')
-  if (file.size > MAX_UPLOAD_BYTES) {
-    throw new Error(`File too large: ${file.name} (max ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB)`)
+  if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
+    throw new Error(
+      `File too large for Drive: ${file.name} (max ${Math.round(MAX_DRIVE_UPLOAD_BYTES / 1024 / 1024)} MB)`
+    )
   }
   if (!hasApi()) throw new Error('no-api')
 
-  const form = new FormData()
-  form.append('file', file, file.name)
+  // Apps Script multipart/FormData nahi leta — file base64 me jaati hai.
+  const dataUrl = await fileToDataUrl(file)
+  const comma = String(dataUrl).indexOf(',')
+  const base64 = comma >= 0 ? String(dataUrl).slice(comma + 1) : ''
 
-  const res = await request('/api/uploads', { method: 'POST', body: form }, 180000)
+  const res = await request(
+    '/api/uploads',
+    {
+      method: 'POST',
+      json: { name: file.name, type: file.type || 'application/octet-stream', data: base64 },
+    },
+    180000
+  )
   if (!res || !res.data) throw new Error('Upload failed')
   return res.data
 }
