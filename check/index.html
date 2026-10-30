@@ -38,11 +38,17 @@
     <input id="token" type="text" placeholder="jo Code.gs me likha hai" />
 
     <div class="row">
-      <button id="load">Data check karo</button>
+      <button id="load">Ab check karo</button>
       <button id="sample" class="grey">Test complaint bhejo</button>
     </div>
 
+    <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:#555">
+      <input id="auto" type="checkbox" checked style="width:auto;margin:0" />
+      Real-time (har 10 second me apne aap refresh)
+    </label>
+
     <div id="status"></div>
+    <div id="updated" class="muted" style="margin-top:4px"></div>
   </div>
 
   <div class="box" id="result" style="display:none">
@@ -115,12 +121,21 @@
     });
   }
 
-  function load() {
-    if (!$('api').value.trim()) { say('Pehle URL daalo.', 'bad'); return; }
+  var busy = false;
+  var timer = null;
+  // test/debug ke liye window.__AUTO_MS__ se override ho sakta hai
+  var AUTO_MS = (typeof window.__AUTO_MS__ === 'number') ? window.__AUTO_MS__ : 10000;
+
+  function load(opts) {
+    var silent = !!(opts && opts.silent);
+    if (!$('api').value.trim()) { say('Pehle URL daalo.', 'bad'); return Promise.resolve(); }
+    if (busy) return Promise.resolve();
+
+    busy = true;
     localStorage.setItem(LS_API, $('api').value.trim());
     localStorage.setItem(LS_TOKEN, $('token').value.trim());
 
-    say('Check ho raha hai…', 'warn');
+    if (!silent) say('Load ho raha hai…', 'warn');
     $('load').disabled = true;
 
     getJson(url('/api/complains', { scope: 'all', limit: 500, admin_token: $('token').value.trim() }))
@@ -151,14 +166,34 @@
         else if (/Failed to fetch|Cannot reach|NetworkError/i.test(m)) hint = ' — URL galat hai, ya Apps Script "Anyone" pe deploy nahi hai.';
         say('❌ ' + m + hint, 'bad');
       })
-      .then(function () { $('load').disabled = false; });
+      .then(function () {
+        $('load').disabled = false;
+        busy = false;
+        $('updated').textContent = 'Last update: ' + new Date().toLocaleTimeString('en-IN');
+      });
+    return Promise.resolve();
+  }
+
+  function startAuto() {
+    if (timer) clearInterval(timer);
+    timer = null;
+    if (!$('auto').checked) return;
+    timer = setInterval(function () {
+      if (document.hidden) return;      // tab background me hai to chhod do
+      if (!$('api').value.trim()) return;
+      load({ silent: true });
+    }, AUTO_MS);
   }
 
   function esc(v) {
     return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  $('load').addEventListener('click', load);
+  $('load').addEventListener('click', function () { load(); });
+  $('auto').addEventListener('change', function () {
+    try { localStorage.setItem('check_auto', $('auto').checked ? '1' : '0'); } catch (e) {}
+    startAuto();
+  });
 
   $('sample').addEventListener('click', function () {
     if (!$('api').value.trim()) { say('Pehle URL daalo.', 'bad'); return; }
@@ -184,7 +219,17 @@
   try {
     $('api').value = localStorage.getItem(LS_API) || '';
     $('token').value = localStorage.getItem(LS_TOKEN) || '';
+    var autoPref = localStorage.getItem('check_auto');
+    if (autoPref === '0') $('auto').checked = false;
   } catch (e) {}
+
+  // Page khulte hi data apne aap aa jaye — button dabane ki zarurat nahi.
+  if ($('api').value.trim()) load();
+
+  startAuto();
+
+  // debug/test hook
+  window.__check = { load: load, startAuto: startAuto, isBusy: function () { return busy; } };
 })();
 </script>
 </body>

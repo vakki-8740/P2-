@@ -18,8 +18,12 @@ Page kholne pe do field:
 | Web App URL | Apps Script ka `…/exec` link |
 | Admin password | `Code.gs` ki pehli line `ADMIN_PASSWORD` me jo likha |
 
-- **Data check karo** → batayega: connected / kitni complaints / naam ki list / raw JSON
-- **Test complaint bhejo** → ek sample complaint Drive me daal dega; phir dobara "Data check karo" dabao, list me dikhni chahiye
+- Page khulte hi data **apne aap load** ho jata hai (button dabane ki zarurat nahi)
+- **Real-time** checkbox ON (default) → har **10 second** me khud refresh hota hai,
+  nayi complaint apne aap list me aa jati hai
+- **"Ab check karo"** button = manual refresh
+- **"Test complaint bhejo"** → ek sample complaint Drive me daal ke verify kar sakte ho
+- Neeche **Last update** ki time dikhti hai (pata chale refresh chal raha hai)
 
 ## Error ka matlab
 
