@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Live check — Firebase</title>
+<title>Live check — Firestore</title>
 <style>
   body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:#f3f5f9;color:#111}
   .wrap{max-width:820px;margin:0 auto;padding:16px}
@@ -12,7 +12,6 @@
   .box{background:#fff;border:1px solid #dde2ec;border-radius:12px;padding:14px;margin-bottom:12px}
   label{display:block;font-size:12.5px;color:#555;margin:10px 0 5px}
   textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd3e0;border-radius:9px;font:12.5px/1.5 ui-monospace,Menlo,monospace;min-height:150px}
-  input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd3e0;border-radius:9px;font-size:14px}
   button{padding:11px 16px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;margin-top:12px;cursor:pointer}
   button:disabled{opacity:.6}
   button.grey{background:#e7ebf3;color:#111;font-weight:500}
@@ -33,7 +32,7 @@
 <body>
 <div class="wrap">
   <h1>Live data check</h1>
-  <p class="sub">Firebase Realtime Database se seedha — koi refresh nahi, data aate hi screen pe.</p>
+  <p class="sub">Firestore se seedha — koi refresh nahi, data aate hi screen pe.</p>
 
   <!-- ---------- setup ---------- -->
   <section class="box" id="setup">
@@ -41,7 +40,6 @@
     <textarea id="cfg" placeholder='const firebaseConfig = {
   apiKey: "AIza...",
   authDomain: "your-project.firebaseapp.com",
-  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
   projectId: "your-project",
   storageBucket: "your-project.appspot.com",
   messagingSenderId: "1234567890",
@@ -80,18 +78,17 @@
 
 <!-- Firebase compat SDK (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var LS_CFG = 'check_fb_config';
-  var ROOT = 'parimatch';
+  var COMPLAINTS = 'complaints';
 
   var app = null;
   var unsubscribe = null;
-  var lastData = [];
 
   function say(text, cls, el) {
     var node = $(el || 'status');
@@ -104,17 +101,15 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /** firebaseConfig text se values nikaalo (paste ki hui string se). */
+  /** firebaseConfig text se values nikaalo. */
   function parseConfig(text) {
     function pick(key) {
-      var re = new RegExp(key + '\\s*:\\s*["\']([^"\']+)["\']');
-      var m = String(text || '').match(re);
+      var m = String(text || '').match(new RegExp(key + '\\s*:\\s*["\']([^"\']+)["\']'));
       return m ? m[1] : '';
     }
     return {
       apiKey: pick('apiKey'),
       authDomain: pick('authDomain'),
-      databaseURL: pick('databaseURL'),
       projectId: pick('projectId'),
       storageBucket: pick('storageBucket'),
       messagingSenderId: pick('messagingSenderId'),
@@ -122,33 +117,27 @@
     };
   }
 
-  /** parimatch/complaints/{client}/{id} → flat array */
-  function flatten(val) {
-    var out = [];
-    if (!val || typeof val !== 'object') return out;
-    Object.keys(val).forEach(function (client) {
-      var bucket = val[client];
-      if (!bucket || typeof bucket !== 'object') return;
-      Object.keys(bucket).forEach(function (id) {
-        var row = bucket[id] || {};
-        out.push({
-          id: String(row.id || id),
-          client: String(client).slice(0, 8),
-          type: row.type || 'complain',
-          title: row.title || '',
-          status: row.status || 'pending',
-          createdAt: row.createdAt || '',
-          details: row.details || {},
-          files: row.files || {},
-        });
+  /** Firestore snapshot docs → list */
+  function docsToRows(snapshot) {
+    var rows = [];
+    if (!snapshot || !snapshot.docs) return rows;
+    snapshot.docs.forEach(function (d) {
+      var row = d.data() || {};
+      rows.push({
+        id: d.id,
+        client: String(row.clientId || '(no client)').slice(0, 8),
+        type: row.type || 'complain',
+        status: row.status || 'pending',
+        createdAt: row.createdAt || '',
+        details: row.details || {},
+        files: row.files || {},
       });
     });
-    out.sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
-    return out;
+    rows.sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
+    return rows;
   }
 
   function render(items) {
-    lastData = items;
     $('count').textContent = items.length;
     $('raw').textContent = JSON.stringify(items, null, 2);
     $('updated').textContent = 'Last update: ' + new Date().toLocaleTimeString('en-IN');
@@ -173,8 +162,8 @@
     if (!text) { say('Pehle firebaseConfig paste karo.', 'bad'); return; }
 
     var cfg = parseConfig(text);
-    if (!cfg.databaseURL) {
-      say('config me "databaseURL" nahi mila — Realtime Database banao, phir config dobara copy karo.', 'bad');
+    if (!cfg.projectId || !cfg.apiKey) {
+      say('config me "projectId" / "apiKey" nahi mila — poora block copy karo.', 'bad');
       return;
     }
     if (typeof firebase === 'undefined' || !firebase.initializeApp) {
@@ -193,18 +182,26 @@
     try { localStorage.setItem(LS_CFG, text); } catch (e) {}
     say('Connect ho raha hai…', 'warn');
 
-    var db = app.database();
-    var ref = db.ref(ROOT + '/complaints');
+    try {
+      var db = app.firestore();
+      // Kuch networks/proxies me websocket block hota hai — ye auto fallback deta hai.
+      db.settings({ experimentalAutoDetectLongPolling: true });
 
-    if (unsubscribe) { try { unsubscribe(); } catch (e) {} }
-    unsubscribe = ref.on('value', function (snap) {
-      $('setup').classList.add('hidden');
-      $('panel').classList.remove('hidden');
-      say('', 'ok');
-      render(flatten(snap.val()));
-    }, function (err) {
-      say('Read fail: ' + (err.message || err) + ' — Realtime DB rules "test mode" me hone chahiye.', 'bad');
-    });
+      if (unsubscribe) { try { unsubscribe(); } catch (e) {} }
+      unsubscribe = db.collection(COMPLAINTS)
+        .orderBy('createdAt', 'desc')
+        .limit(200)
+        .onSnapshot(function (snap) {
+          $('setup').classList.add('hidden');
+          $('panel').classList.remove('hidden');
+          say('', 'ok');
+          render(docsToRows(snap));
+        }, function (err) {
+          say('Read fail: ' + (err.message || err) + ' — Firestore rules "test mode" me hone chahiye.', 'bad');
+        });
+    } catch (err) {
+      say('Firestore open nahi hua: ' + (err.message || err), 'bad');
+    }
   }
 
   function disconnect() {
@@ -218,13 +215,13 @@
   /** Is page se ek test complaint likho (write path check). */
   function sendSample() {
     if (!app) { say('Pehle connect karo.', 'bad', 'status2'); return; }
-    var db = app.database();
-    var client = 'check-page';
+    var db = app.firestore();
     var id = 'chk_' + Date.now();
     var now = new Date().toISOString();
 
-    db.ref(ROOT + '/complaints/' + client + '/' + id).set({
+    db.collection(COMPLAINTS).doc(id).set({
       id: id,
+      clientId: 'check-page',
       type: 'deposit',
       title: 'Test complaint (check page)',
       status: 'pending',
@@ -256,7 +253,7 @@
   } catch (e) {}
 
   // test hook
-  window.__check = { connect: connect, render: render, parseConfig: parseConfig, flatten: flatten };
+  window.__check = { connect: connect, render: render, parseConfig: parseConfig, docsToRows: docsToRows };
 })();
 </script>
 </body>

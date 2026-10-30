@@ -1,7 +1,7 @@
-# Live data check — Firebase
+# Live data check — Firestore
 
-Ek single-file page (koi build nahi). Ye **Firebase Realtime Database** se data
-live padhta hai — refresh button nahi, data aate hi screen pe.
+Ek single-file page (koi build nahi). Ye **Firebase Firestore** se data live
+padhta hai — refresh button nahi, data aate hi screen pe.
 
 Deploy: Vercel pe naya project → **Root Directory = `check`** → Framework preset
 **Other** → Deploy.
@@ -20,8 +20,8 @@ jata hai. Disconnect karna ho to **Disconnect** dabao.
 
 | Cheez | Matlab |
 |---|---|
-| 🟢 LIVE | Firebase se connection chal raha hai |
-| Total complaints | Sabhi browsers (sab client id) ki complaints |
+| 🟢 LIVE | Firestore se connection chal raha hai |
+| Total complaints | Sabhi browsers (sab clientId) ki complaints, newest pehle |
 | Naam + type + time | Deposit / withdrawal / bonus / kyc … |
 | Raw JSON | Poora data, copy-paste ke liye |
 | Last update | Aakhri change ka time |
@@ -37,8 +37,9 @@ jata hai. Disconnect karna ho to **Disconnect** dabao.
 
 | Message | Matlab |
 |---|---|
-| `databaseURL` nahi mila | Realtime Database banao (Firebase setup Step 2), phir config dobara copy karo |
+| `projectId` / `apiKey` nahi mila | config poora copy nahi hua — dobara copy karo |
 | `Firebase SDK load nahi hua` | internet/CDN block — page reload karke try karo |
-| `Read fail: permission_denied` | Realtime Database → Rules → test mode ya `FIREBASE-SETUP.md` ke rules lagao |
+| `Read fail: permission-denied` | Firestore → Rules → test mode ya `FIREBASE-SETUP.md` ke rules lagao |
+| `Connect ho raha hai…` pe atka | Firestore database create nahi hua (Step 2) |
 
 Full setup: [`../FIREBASE-SETUP.md`](../FIREBASE-SETUP.md)

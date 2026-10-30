@@ -2,28 +2,26 @@
  * Firebase config — YAHAN apni values paste karo.
  * ---------------------------------------------------------------------------
  * Kahan se milega:
- *   1. https://console.firebase.google.com  → apna project
- *   2. Left me "Build" ke neeche **Realtime Database** → Create Database
- *      (location: Asia-southeast1 / us-central1 — jo bhi de, chalega)
- *      Start in **Test mode** (rules baad me badal sakte ho)
- *   3. Project settings (⚙️ upar) → "Your apps" → Web app (</>) add karo
+ *   1. https://console.firebase.google.com → apna project
+ *   2. Left me "Build" → **Firestore Database** → Create Database
+ *      → location chuno → **Start in test mode** → Create
+ *   3. ⚙️ Project settings → "Your apps" → Web app (</>) add karo
  *      → wahan "firebaseConfig" ka block milega, uski values neeche copy karo
  *
- * ⚠️ `databaseURL` sabse zaroori hai — uske bina app localStorage mode me chalega.
- *    Realtime Database banao to wo apne aap config me aa jata hai.
+ * ⚠️ `apiKey` aur `projectId` zaroori hain — inke bina app localStorage mode me
+ *    chalega (crash nahi karega, bas data sirf usi browser me rahega).
  */
 
 export const firebaseConfig = {
-  apiKey: '',            // "AIza..."
-  authDomain: '',        // "your-project.firebaseapp.com"
-  databaseURL: '',       // "https://your-project-default-rtdb.firebaseio.com"  ← ZAROORI
-  projectId: '',         // "your-project"
-  storageBucket: '',
+  apiKey: '',          // "AIza..."
+  authDomain: '',      // "your-project.firebaseapp.com"
+  projectId: '',       // "your-project"           ← ZAROORI
+  storageBucket: '',   // "your-project.appspot.com"
   messagingSenderId: '',
-  appId: '',
+  appId: '',           // "1:123:web:abc"
 }
 
 /** Firebase ready hai ya nahi (config bhara hai ya nahi). */
 export function isFirebaseConfigured() {
-  return Boolean(firebaseConfig.databaseURL && firebaseConfig.projectId)
+  return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId)
 }

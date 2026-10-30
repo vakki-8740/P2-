@@ -9,6 +9,16 @@ export default defineConfig({
   define: {
     'import.meta.env.VITE_BASE_PATH': JSON.stringify('/site'),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Firebase alag chunk me — pehla page load chhota rehta hai.
+        manualChunks(id) {
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'firebase'
+        },
+      },
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

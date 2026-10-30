@@ -1,5 +1,5 @@
 // complainStore.js — complaints data layer.
-// Remote store (Firebase Realtime Database) first, localStorage fallback
+// Remote store (Firebase Firestore) first, localStorage fallback
 // offline. Both shapes are normalised to one structure before rendering:
 //
 //   { id, type, title, status, createdAt, hasPassword,

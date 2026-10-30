@@ -1,10 +1,10 @@
-# Firebase setup — 10 minute, ek baar
+# Firebase Firestore setup — 10 minute, ek baar
 
-Ab koi server, Drive, Apps Script ya database nahi. Data **Firebase Realtime
-Database** me jata hai — isliye data **turant** (real-time) dikhta hai.
+Ab koi server, Drive, Apps Script ya SQL nahi. Data **Firebase Firestore** me
+jata hai — isliye data **turant** (real-time) dikhta hai, bina refresh.
 
 ```
-Website  ──▶  Firebase Realtime Database  ──(live)──▶  Website / check page
+Website  ──▶  Firestore  ──(live push)──▶  Website / check page
 ```
 
 ---
@@ -13,22 +13,22 @@ Website  ──▶  Firebase Realtime Database  ──(live)──▶  Website /
 
 1. Kholo: **https://console.firebase.google.com**
 2. **Add project** → naam do (e.g. `parimatch-support`) → Continue
-3. Google Analytics **off** kar do (zarurat nahi) → **Create project**
+3. Google Analytics **off** (zarurat nahi) → **Create project**
 
-## Step 2 — Realtime Database on karo
+## Step 2 — Firestore Database on karo
 
-1. Left sidebar me **Build** → **Realtime Database**
-2. **Create Database**
-3. Location: jo bhi default aaye (`asia-southeast1` / `us-central1`) → **Next**
-4. **Start in test mode** → **Enable**
+1. Left sidebar **Build** → **Firestore Database**
+2. **Create database**
+3. Location chuno (`asia-south1` / `asia-southeast1`) → **Next**
+4. **Start in test mode** → **Create**
 
-> Test mode = 30 din tak sab open. Rules neeche Step 6 me hai — permanent
-> chalane ke liye wo laga lena.
+> Bas — koi collection banane ki zarurat nahi. Website pehli complaint bhejegi
+> to `complaints` collection apne aap ban jayegi.
 
 ## Step 3 — Config copy karo
 
-1. Upar left **⚙️ Project settings**
-2. Neeche **Your apps** → **`</>` (Web)** icon dabao
+1. **⚙️ Project settings** (upar left)
+2. Neeche **Your apps** → **`</>` (Web)** icon
 3. App nickname: `web` → **Register app**
 4. Ye block dikhega — **poora copy** karo:
 
@@ -36,7 +36,6 @@ Website  ──▶  Firebase Realtime Database  ──(live)──▶  Website /
 const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "parimatch-support.firebaseapp.com",
-  databaseURL: "https://parimatch-support-default-rtdb.firebaseio.com",
   projectId: "parimatch-support",
   storageBucket: "parimatch-support.appspot.com",
   messagingSenderId: "1234567890",
@@ -44,20 +43,19 @@ const firebaseConfig = {
 };
 ```
 
-> ⚠️ **`databaseURL` sabse zaroori hai.** Agar Realtime Database Step 2 me nahi banaya,
-> to ye line config me nahi aayegi — pehle wo banao.
+> Firestore ke liye `databaseURL` ki zarurat **nahi** hai (wo Realtime Database
+> ka hota hai). Sirf `apiKey` + `projectId` chahiye — baaki optional hai.
 
 ## Step 4 — App me config daalo
 
 File kholo: **`Site/src/firebase-config.js`**
 
-`firebaseConfig` object me apni values paste karo:
+`firebaseConfig` object me apni values daalo:
 
 ```js
 export const firebaseConfig = {
   apiKey: 'AIzaSy...',
   authDomain: 'parimatch-support.firebaseapp.com',
-  databaseURL: 'https://parimatch-support-default-rtdb.firebaseio.com',
   projectId: 'parimatch-support',
   storageBucket: 'parimatch-support.appspot.com',
   messagingSenderId: '1234567890',
@@ -65,58 +63,51 @@ export const firebaseConfig = {
 }
 ```
 
-Phir commit + Vercel redeploy (ya `git push` karo, Vercel khud uthayega).
+Phir commit + push karo → Vercel **Redeploy**.
 
-**Kuch nahi bhara ho to app crash nahi karta** — bas localStorage mode me chalta hai.
+**Config khaali ho to app crash nahi karta** — bas localStorage mode me chalta
+hai (data sirf usi browser me), aur All Complains page pe peela banner dikhta hai.
 
 ## Step 5 — Check page
 
-`check/index.html` wala page kholo → wahan **wahi `firebaseConfig` block paste** karo → **Connect**.
+`check/index.html` kholo → wahan **wahi `firebaseConfig` block paste** karo → **Connect**.
 
-- 🟢 **LIVE** badge + total complaints dikhega
-- Website se nayi complaint bhejo → **bina refresh** usi second list me aa jayegi
-- **Test complaint bhejo** button se bhi verify kar sakte ho
+- 🟢 **LIVE** badge + total complaints
+- Website se nayi complaint bhejo → **bina refresh** usi second list me
+- **Test complaint bhejo** button se write bhi verify ho jata hai
 
 ## Step 6 — Rules (security)
 
-Realtime Database → **Rules** tab. Test mode ki jagah ye lagao:
+Firestore → **Rules** tab. Test mode ki jagah ye lagao:
 
-```json
-{
-  "rules": {
-    "parimatch": {
-      ".read": true,
-      ".write": true,
-      "$client": {
-        "$id": {
-          ".validate": "newData.hasChildren(['id','type','createdAt'])"
-        }
-      }
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /complaints/{id} {
+      allow read, write: if true;
+    }
+    match /messages/{id} {
+      allow read, write: if true;
     }
   }
 }
 ```
 
-Ye "open" rules hain — URL jiske paas hai wo padh/likh sakta hai (client id se
-data alag-alag dikhta hai, par technically sab accessible hai).
+Ye "open" rules hain — URL jiske paas hai wo padh/likh sakta hai. Har browser ka
+apna `clientId` hai isliye app me data alag dikhta hai, par technically sab
+accessible hai.
 
-**Aage chaho to** (recommended, jab time ho): Firebase **Authentication → Anonymous**
-on karke aise rules lagao:
+**Aage strong karna ho** to Firebase **Authentication → Anonymous** on karke:
 
-```json
-{
-  "rules": {
-    "parimatch": {
-      "$client": {
-        ".read": "auth != null && $client === auth.uid",
-        ".write": "auth != null && $client === auth.uid"
-      }
-    }
-  }
+```
+match /complaints/{id} {
+  allow read, write: if request.auth != null
+                       && request.resource.data.clientId == request.auth.uid;
 }
 ```
 
-Uske liye code me thoda change chahiye — bolo to main kar dunga.
+Uske liye code me thoda change chahiye — bolo to kar dunga.
 
 ---
 
@@ -124,29 +115,44 @@ Uske liye code me thoda change chahiye — bolo to main kar dunga.
 
 | Cheez | Free limit |
 |---|---|
-| Storage | 1 GB |
-| Download | 10 GB / month |
-| Simultaneous connections | 100 |
+| Storage | 1 GiB |
+| Document reads | 50,000 / day |
+| Writes | 20,000 / day |
+| Deletes | 20,000 / day |
 | Cost | ₹0 |
 
-Attachments base64 me store hote hain aur browser me compress hote hain
-(max **400 KB** per file), isliye 1 GB me ~2500 files aa jayengi.
+Realtime listeners har change pe sirf badle hue documents padhte hain, isliye
+normal use me ye limit bohot zyada hai.
 
-## Data kahan hai
+## Data kahan hai (Firestore console)
 
 ```
-parimatch/complaints/<clientId>/<complaintId>
-parimatch/chat/<clientId>/<messageId>
+complaints/{id}   → id, clientId, type, title, status, createdAt, updatedAt,
+                    details{ userName, mobile, email, amount, message, … },
+                    hasPassword, files{ … }
+
+messages/{id}     → id, clientId, sender, text, file, edited, createdAt, updatedAt
 ```
 
-Firebase console → Realtime Database → **Data** tab me sab live dikhta hai.
+Firebase console → Firestore Database → **Data** tab me sab live dikhta hai.
+
+## Attachments
+
+Firestore document ka limit **1 MB** hai, isliye:
+
+- Photo browser me compress hoti hai (max 1200 px, JPEG 0.72)
+- Ek file max **250 KB**, saari files milakar max **450 KB**
+- Store base64 data URL ke roop me hota hai (alag Storage bucket ki zarurat nahi)
+
+Badi file chahiye to Firebase **Storage** alag se on karna padega — bolo to kar denge.
 
 ---
 
-## Purana setup (hata diya gaya)
+## Purana setup (hataa diya)
 
 | Pehle | Ab |
 |---|---|
 | PHP + MySQL (Wasmer) | ❌ hata diya |
 | Google Apps Script + Drive JSON | ❌ hata diya |
-| Firebase Realtime Database | ✅ isko use kar rahe hain |
+| Realtime Database | ❌ nahi use kar rahe |
+| **Firestore** | ✅ yahi chal raha hai |

@@ -2,7 +2,7 @@
 
 Support portal: marketing landing page + support center with 7 complaint flows
 and live chat. **No server** — data goes straight from the browser to
-**Firebase Realtime Database**, so everything is live (no refresh, no polling).
+**Firebase Firestore**, so everything is live (no refresh, no polling).
 
 ```
 P2-/
@@ -17,34 +17,33 @@ P2-/
 
 ---
 
-## Data storage — Firebase Realtime Database
+## Data storage — Firebase Firestore
 
-Browser seedha Firebase se baat karta hai. Koi server, Drive, Apps Script,
-PHP ya MySQL nahi. Isliye data **turant** aata hai (`onValue` push, ~0.2–1 s).
+Browser seedha Firestore se baat karta hai. Koi server, Drive, Apps Script,
+PHP ya MySQL nahi. Isliye data **turant** aata hai (`onSnapshot` push, <1 s).
 
 ```
-Site (React)  ──▶  Firebase Realtime Database  ──onValue (live)──▶  Site + check page
+Site (React)  ──▶  Firestore  ──onSnapshot (live)──▶  Site + check page
 ```
 
 | | |
 |---|---|
+| Collections | `complaints`, `messages` (har doc me `clientId`) |
 | Config file | [`Site/src/firebase-config.js`](Site/src/firebase-config.js) ← apni values paste karo |
 | Setup guide | [`FIREBASE-SETUP.md`](FIREBASE-SETUP.md) |
-| Jab config khaali hai | app **localStorage mode** me chalta hai (crash nahi, sab buttons kaam karte hain) |
-| Free plan | Spark: 1 GB storage, 10 GB/month download, ₹0 |
+| Config khaali ho to | app **localStorage mode** me chalta hai (crash nahi) |
+| Free plan | Spark: 1 GiB storage, 50k reads/day, 20k writes/day, ₹0 |
 
-Data path:
-
-```
-parimatch/complaints/<clientId>/<complaintId>
-parimatch/chat/<clientId>/<messageId>
+```js
+complaints/{id} → { id, clientId, type, title, status, createdAt, updatedAt,
+                    details, hasPassword, files }
+messages/{id}   → { id, clientId, sender, text, file, edited, createdAt, updatedAt }
 ```
 
 Har browser ka apna `parimatch_client_id` (localStorage) hota hai, isliye
 complaints usi browser me dikhti hain jahan se bheji gayi.
 
-> Pehle Drive + Apps Script tha, ab **poora hata diya** (`apps-script/` deleted).
-> Purana PHP/Wasmer + MySQL backend bhi gaya.
+> Pehle Drive + Apps Script tha, usse pehle PHP/Wasmer + MySQL — sab **hata diya**.
 
 ---
 
@@ -134,7 +133,7 @@ client-side routing kaam karta hai.
 ## Tech
 
 - Vite 5 + React 18 + React Router 6
-- Storage: Firebase Realtime Database (+ localStorage fallback)
+- Storage: Firebase **Firestore** (+ localStorage fallback)
 - Styling: plain CSS modules/`*.css` per page
 
 ---
