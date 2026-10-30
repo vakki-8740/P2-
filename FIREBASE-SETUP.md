@@ -150,5 +150,3 @@ Firestore document ka limit **1 MB** hai, isliye:
 - Store base64 data URL ke roop me hota hai (alag Storage bucket ki zarurat nahi)
 
 Badi file chahiye to Firebase **Storage** alag se on karna padega — bolo to kar denge.
-
----
