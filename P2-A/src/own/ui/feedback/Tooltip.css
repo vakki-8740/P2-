@@ -1,0 +1,26 @@
+.own-tooltip-wrap { position: relative; display: inline-flex; }
+.own-tooltip-trigger {
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+  font: inherit; font-size: var(--fs-sm); font-weight: 600;
+  padding: 8px 14px; border-radius: var(--radius); cursor: pointer;
+}
+.own-tooltip {
+  position: absolute; left: 50%; transform: translateX(-50%) translateY(4px);
+  background: var(--text); color: var(--bg);
+  font-size: var(--fs-xs); font-weight: 600; white-space: nowrap;
+  padding: 6px 10px; border-radius: var(--radius-xs);
+  opacity: 0; pointer-events: none; transition: opacity var(--t-fast), transform var(--t-fast);
+  z-index: var(--z-tooltip);
+}
+.own-tooltip.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.own-tooltip--top { bottom: calc(100% + 8px); }
+.own-tooltip--top::after, .own-tooltip--bottom::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent;
+}
+.own-tooltip--top::after { top: 100%; border-top-color: var(--text); }
+.own-tooltip--bottom { top: calc(100% + 8px); }
+.own-tooltip--bottom::after { bottom: 100%; border-bottom-color: var(--text); }
+.own-tooltip--left, .own-tooltip--right { top: 50%; transform: translateY(-50%); }
+.own-tooltip--left { right: calc(100% + 8px); left: auto; }
+.own-tooltip--right { left: calc(100% + 8px); }

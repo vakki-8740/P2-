@@ -1,0 +1,13 @@
+.own-pagination { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.own-pagination__btn {
+  min-width: 34px; height: 34px; padding: 0 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--card); color: var(--muted);
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.own-pagination__btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.own-pagination__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.own-pagination__num.is-active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.own-pagination__ellipsis { color: var(--muted); padding: 0 3px; }

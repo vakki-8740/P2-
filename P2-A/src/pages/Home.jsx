@@ -1,49 +1,51 @@
-import Layout from '../components/Layout.jsx'
+import { useMemo } from 'react'
+import AppShell from '../components/AppShell.jsx'
 import UserRow from '../components/UserRow.jsx'
-import { Empty } from '../components/ui.jsx'
-import { IconList } from '../components/Icons.jsx'
+import { StatCardGrid } from '../own/ui/data/StatCard.jsx'
+import EmptyState from '../own/ui/feedback/EmptyState.jsx'
+import { Skeleton } from '../own/ui/feedback/Loaders.jsx'
 import { useData } from '../App.jsx'
-import { todayUsers } from '../lib/data.js'
+import { groupUsers, todayUsers } from '../lib/data.js'
 
 export default function Home() {
-  const { complaints, loading, ready } = useData()
-  const users = todayUsers(complaints)
-  const todayCount = users.reduce((sum, u) => sum + u.todayCount, 0)
+  const { complaints, messages, loading } = useData()
+
+  const todays = useMemo(() => todayUsers(complaints), [complaints])
+  const users = useMemo(() => groupUsers(complaints), [complaints])
+  const todayCount = todays.reduce((n, u) => n + u.todayCount, 0)
+
+  const stats = [
+    { id: 'today', label: 'Aaj ki complaints', value: todayCount, delta: 'Today', up: true, icon: 'bell' },
+    { id: 'users', label: 'Total users', value: users.length, delta: 'Live', up: true, icon: 'user' },
+    { id: 'all', label: 'Total complaints', value: complaints.length, delta: 'All', up: true, icon: 'grid' },
+    { id: 'chat', label: 'Chat messages', value: messages.length, delta: 'Live', up: true, icon: 'message' },
+  ]
 
   return (
-    <Layout title="Home" subtitle="Aaj ke users" right={<span className="live-dot" title="Live" />}>
-      {!ready ? (
-        <div className="notice">Firebase configure nahi hai — `src/firebase-config.js` check karo.</div>
-      ) : null}
+    <AppShell title="Aaj ke users" subtitle="Sirf aaj ki complaints">
+      <section className="pa-section">
+        <StatCardGrid stats={stats} />
+      </section>
 
-      <div className="stats">
-        <div className="stat">
-          <span className="stat-value">{users.length}</span>
-          <span className="stat-label">Users today</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{todayCount}</span>
-          <span className="stat-label">Complaints today</span>
-        </div>
-      </div>
+      <section className="pa-section">
+        <h2 className="pa-section__title">Aaj ke users ({todays.length})</h2>
 
-      <h2 className="section-title">Today · users</h2>
-
-      {loading ? (
-        <div className="loading">Load ho raha hai…</div>
-      ) : users.length === 0 ? (
-        <Empty
-          title="Aaj koi complaint nahi"
-          text="Jab aaj koi user complaint bhejega, wo turant yahan dikhega."
-          icon={<IconList width="22" height="22" />}
-        />
-      ) : (
-        <div className="list">
-          {users.map((u) => (
-            <UserRow key={u.clientId} user={u} to={`/user/${u.clientId}`} badge={u.todayCount} />
-          ))}
-        </div>
-      )}
-    </Layout>
+        {loading ? (
+          <div className="own-card pa-card"><Skeleton lines={3} /></div>
+        ) : todays.length === 0 ? (
+          <EmptyState
+            icon="user"
+            title="Aaj koi complaint nahi"
+            text="Aaj ke din abhi koi user complaint nahi aayi. Nayi complaint aate hi yahan turant dikhegi."
+          />
+        ) : (
+          <div className="own-list pa-list">
+            {todays.map((u) => (
+              <UserRow key={u.clientId} user={u} to={`/user/${u.clientId}`} badge={u.todayCount} />
+            ))}
+          </div>
+        )}
+      </section>
+    </AppShell>
   )
 }

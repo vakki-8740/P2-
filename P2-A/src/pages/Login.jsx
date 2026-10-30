@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import Input from '../own/ui/input/Input.jsx'
+import Button from '../own/ui/button/Button.jsx'
+import { Alert } from '../own/ui/feedback/Alert.jsx'
 import { isLoggedIn, login } from '../lib/auth.js'
-import { APP_NAME } from '../config.js'
+import { APP_NAME, DEFAULT_PASSWORD } from '../config.js'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -21,32 +24,39 @@ export default function Login() {
   }
 
   return (
-    <div className="app login-screen">
-      <div className="login-card">
-        <div className="login-logo">
-          <span className="brand-dot" />
-          {APP_NAME}
+    <div className="pa-app pa-app--no-nav">
+      <div className="pa-login">
+        <div className="pa-center pa-stack" style={{ alignItems: 'center', gap: 10 }}>
+          <span className="pa-brand" style={{ fontSize: 24 }}>
+            <span className="pa-brand__dot" />
+            {APP_NAME}
+          </span>
+          <p className="pa-muted">Support admin panel · mobile only</p>
         </div>
-        <h2>Admin login</h2>
-        <p className="muted">Password daalo aur andar aao.</p>
 
-        <form onSubmit={submit}>
-          <input
-            className="input"
+        <form className="own-card pa-card" onSubmit={submit}>
+          <h2 className="pa-section__title">Admin login</h2>
+          <Input
+            id="login-pass"
+            label="Password"
             type="password"
-            inputMode="text"
+            allowPasswordToggle
+            icon="lock"
             placeholder="Password"
             value={value}
             onChange={(e) => { setValue(e.target.value); setError('') }}
             autoFocus
+            autoComplete="current-password"
+            error={error}
           />
-          {error ? <p className="error">{error}</p> : null}
-          <button className="btn primary full" type="submit" disabled={!value}>Login</button>
-        </form>
+          <Button type="submit" fullWidth icon="arrow-right" disabled={!value} loading={false}>Login</Button>
 
-        <p className="login-hint">
-          Pehli baar? default password <code>p2a@2026</code> — Setting page se badal sakte ho.
-        </p>
+          <p className="pa-muted">
+            Pehli baar? default password <code>{DEFAULT_PASSWORD}</code> — Setting page se badal sakte ho.
+          </p>
+
+          {error ? <Alert tone="danger" title="Login fail">{error}</Alert> : null}
+        </form>
       </div>
     </div>
   )

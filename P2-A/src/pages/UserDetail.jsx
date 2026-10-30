@@ -1,9 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import Layout from '../components/Layout.jsx'
+import AppShell from '../components/AppShell.jsx'
 import FileViewer from '../components/FileViewer.jsx'
-import { Avatar, Empty, Field, prettyLabel, StatusPill, statusLabel } from '../components/ui.jsx'
-import { IconChat, IconEye, IconFile, IconList } from '../components/Icons.jsx'
+import { prettyLabel, statusLabel, statusTone, initialsOf } from '../components/status.js'
+import { Avatar } from '../own/ui/data/Avatar.jsx'
+import KeyValue from '../own/ui/data/KeyValue.jsx'
+import Button from '../own/ui/button/Button.jsx'
+import { Badge, Chip } from '../own/ui/feedback/Alert.jsx'
+import EmptyState from '../own/ui/feedback/EmptyState.jsx'
+import { Spinner } from '../own/ui/feedback/Loaders.jsx'
+import { Icon } from '../own/ui/icons/Icons.jsx'
 import { useData } from '../App.jsx'
 import { complaintsOf, fileSrc, formatDateTime, formatFileSize, isImageFile, userNameOf } from '../lib/data.js'
 import { updateComplaintStatus } from '../lib/actions.js'
@@ -18,8 +24,8 @@ export default function UserDetail() {
 
   const rows = useMemo(() => complaintsOf(complaints, clientId), [complaints, clientId])
   const name = rows.length ? userNameOf(rows[0]) : `User ${String(clientId || '').slice(0, 6)}`
-  const mobile = (rows[0] && rows[0].details && rows[0].details.mobile) || ''
-  const email = (rows[0] && rows[0].details && rows[0].details.email) || ''
+  const mobile = (rows[0]?.details?.mobile) || ''
+  const email = (rows[0]?.details?.email) || ''
   const chatCount = messages.filter((m) => m.clientId === clientId).length
 
   const changeStatus = async (id, status) => {
@@ -27,94 +33,92 @@ export default function UserDetail() {
     try {
       await updateComplaintStatus(id, status)
     } catch (err) {
-      alert(err && err.message ? err.message : 'Status update fail')
+      alert(err?.message || 'Status update fail')
     } finally {
       setSavingId('')
     }
   }
 
   return (
-    <Layout title={name} subtitle={`${rows.length} complaint${rows.length === 1 ? '' : 's'}`} back>
-      <div className="card user-card">
-        <Avatar size={48} />
-        <div className="user-card-text">
-          <strong>{name}</strong>
-          <span className="muted">{mobile || 'Mobile nahi diya'}</span>
-          {email ? <span className="muted">{email}</span> : null}
+    <AppShell
+      title={name}
+      subtitle={`${rows.length} complaint${rows.length === 1 ? '' : 's'}`}
+      back
+      nav={false}
+    >
+      <section className="own-card pa-card">
+        <div className="pa-row">
+          <Avatar initials={initialsOf(name)} size="lg" tone="accent" />
+          <div className="own-list__meta">
+            <strong>{name}</strong>
+            <span>{mobile || 'Mobile nahi diya'}</span>
+            {email ? <span>{email}</span> : null}
+            <span className="pa-muted">ID: {String(clientId || '').slice(0, 8)}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="quick-actions">
-        <Link className="btn ghost sm" to={`/chat/${clientId}`}>
-          <IconChat width="16" height="16" />
-          Chat {chatCount ? `(${chatCount})` : ''}
-        </Link>
-      </div>
+        <div className="pa-row">
+          <Link className="own-btn own-btn--ghost own-btn--sm" to={`/chat/${clientId}`}>
+            <Icon name="message" size={15} />
+            <span>Chat{chatCount ? ` (${chatCount})` : ''}</span>
+          </Link>
+        </div>
+      </section>
 
       {loading ? (
-        <div className="loading">Load ho raha hai…</div>
+        <div className="own-card pa-card pa-center"><Spinner label="Load ho raha hai" /></div>
       ) : rows.length === 0 ? (
-        <Empty title="Koi complaint nahi" text="Is user ki koi complaint nahi mili." icon={<IconList width="22" height="22" />} />
+        <EmptyState icon="grid" title="Koi complaint nahi" text="Is user ki koi complaint nahi mili." />
       ) : (
         rows.map((c) => {
           const files = Object.entries(c.files || {}).filter(([, f]) => f && (f.name || fileSrc(f)))
           const details = Object.entries(c.details || {}).filter(
             ([k]) => !['userName', 'user_name', 'password'].includes(k)
           )
+          const kv = details.map(([k, v]) => ({ k: prettyLabel(k), v: String(v) }))
+          if (c.hasPassword) kv.push({ k: 'Password', v: '•••••••• (secured)' })
 
           return (
-            <article key={c.id} className="card complain-card">
-              <div className="complain-card-head">
-                <span className="type-chip">{c.type || 'Complain'}</span>
-                <StatusPill status={c.status} />
+            <article key={c.id} className="own-card pa-card">
+              <div className="pa-card__head">
+                <span className="pa-card__title">{c.title || `${c.type || 'Complain'} complaint`}</span>
+                <div className="pa-badges">
+                  <Badge tone="accent">{c.type || 'Complain'}</Badge>
+                  <Badge tone={statusTone(c.status)}>{statusLabel(c.status)}</Badge>
+                </div>
               </div>
 
-              <h3 className="complain-card-title">{c.title || `${c.type || 'Complain'} Complain`}</h3>
-              <p className="muted small">{formatDateTime(c.createdAt)}</p>
+              <p className="pa-muted">{formatDateTime(c.createdAt)}</p>
 
-              <div className="details">
-                {details.length === 0 ? (
-                  <Field label="Details" value="-" />
-                ) : (
-                  details.map(([label, value]) => (
-                    <Field key={label} label={prettyLabel(label)} value={String(value)} />
-                  ))
-                )}
-                {c.hasPassword ? <Field label="Password" value="•••••••• (secured)" /> : null}
-              </div>
+              <KeyValue rows={kv.length ? kv : [{ k: 'Details', v: '-' }]} />
 
               {files.length > 0 && (
-                <div className="files">
-                  <span className="files-title">Attachments</span>
+                <div className="pa-stack">
+                  <span className="pa-section__title">Attachments</span>
                   {files.map(([key, f]) => {
                     const src = fileSrc(f)
                     const label = prettyLabel(key)
                     return (
-                      <div key={key} className="file-row">
-                        <span className="file-icon"><IconFile width="16" height="16" /></span>
-                        <span className="file-meta">
-                          <span className="file-name">{label}</span>
-                          <span className="file-sub">
+                      <div key={key} className="pa-file">
+                        <span className="pa-file__icon"><Icon name="folder" size={15} /></span>
+                        <span className="pa-file__meta">
+                          <span className="pa-file__name">{label}</span>
+                          <span className="pa-file__sub">
                             {f.name}{f.size ? ` • ${formatFileSize(f.size)}` : ''}
                           </span>
                         </span>
                         {src ? (
                           isImageFile(f) ? (
-                            <button
-                              type="button"
-                              className="btn ghost sm"
-                              onClick={() => setViewer({ src, name: f.name || label })}
-                            >
-                              <IconEye width="15" height="15" />
+                            <Button size="sm" variant="ghost" icon="eye" onClick={() => setViewer({ src, name: f.name || label })}>
                               View
-                            </button>
+                            </Button>
                           ) : (
-                            <a className="btn ghost sm" href={src} download={f.name} target="_blank" rel="noopener">
+                            <a className="own-btn own-btn--ghost own-btn--sm" href={src} download={f.name} target="_blank" rel="noopener">
                               Open
                             </a>
                           )
                         ) : (
-                          <span className="muted small">N/A</span>
+                          <span className="pa-muted">N/A</span>
                         )}
                       </div>
                     )
@@ -122,31 +126,26 @@ export default function UserDetail() {
                 </div>
               )}
 
-              <div className="status-actions">
-                <span className="muted small">Status:</span>
-                {STATUS_OPTIONS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className={`chip ${String(c.status || 'pending').toLowerCase() === s ? 'active' : ''}`}
-                    disabled={savingId === c.id}
-                    onClick={() => changeStatus(c.id, s)}
-                  >
-                    {statusLabel(s)}
-                  </button>
-                ))}
+              <div className="pa-stack">
+                <span className="pa-section__title">Status</span>
+                <div className="pa-chip-row">
+                  {STATUS_OPTIONS.map((s) => (
+                    <Chip
+                      key={s}
+                      label={statusLabel(s)}
+                      selected={String(c.status || 'pending').toLowerCase() === s}
+                      onClick={() => savingId !== c.id && changeStatus(c.id, s)}
+                    />
+                  ))}
+                </div>
+                {savingId === c.id ? <span className="pa-muted">Save ho raha hai…</span> : null}
               </div>
             </article>
           )
         })
       )}
 
-      <FileViewer
-        open={Boolean(viewer)}
-        src={viewer?.src}
-        name={viewer?.name}
-        onClose={() => setViewer(null)}
-      />
-    </Layout>
+      <FileViewer open={Boolean(viewer)} src={viewer?.src} name={viewer?.name} onClose={() => setViewer(null)} />
+    </AppShell>
   )
 }

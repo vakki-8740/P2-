@@ -1,0 +1,10 @@
+.own-rating { display: flex; flex-direction: column; gap: 6px; }
+.own-rating__label { font-size: var(--fs-sm); font-weight: 600; }
+.own-rating__stars { display: inline-flex; gap: 4px; }
+.own-rating__star {
+  border: 0; background: transparent; padding: 2px; cursor: pointer;
+  color: var(--track-off); transition: color var(--t-fast), transform var(--t-fast);
+}
+.own-rating__star:hover { transform: scale(1.12); }
+.own-rating__star.is-on { color: var(--warn); }
+.own-rating__text { font-size: var(--fs-xs); color: var(--muted); }

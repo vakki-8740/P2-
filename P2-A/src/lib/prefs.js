@@ -15,3 +15,21 @@ export function getVibrate() {
 export function setVibrate(on) {
   try { localStorage.setItem(KEY_VIBRATE, on ? '1' : '0') } catch {}
 }
+
+/* ---------------- theme (OWN Library themes) ---------------- */
+const KEY_THEME = 'p2a_theme'
+export const DEFAULT_PANEL_THEME = 'dark'
+
+export function getTheme() {
+  try { return localStorage.getItem(KEY_THEME) || DEFAULT_PANEL_THEME } catch { return DEFAULT_PANEL_THEME }
+}
+
+/** <html data-theme="…"> set karta hai — saare own tokens badal jaate hain */
+export function applyTheme(id) {
+  const theme = id || DEFAULT_PANEL_THEME
+  try {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(KEY_THEME, theme)
+  } catch {}
+  return theme
+}

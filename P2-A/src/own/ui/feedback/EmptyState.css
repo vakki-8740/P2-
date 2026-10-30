@@ -1,0 +1,13 @@
+.own-empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 8px; padding: 44px 24px;
+  border: 1px dashed var(--border); border-radius: var(--radius-lg);
+  background: var(--card); max-width: 460px;
+}
+.own-empty__icon {
+  width: 58px; height: 58px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;
+}
+.own-empty__title { font-size: var(--fs-lg); }
+.own-empty__text { color: var(--muted); font-size: var(--fs-sm); max-width: 320px; margin-bottom: 8px; }

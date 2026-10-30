@@ -1,0 +1,30 @@
+.own-table-wrap {
+  width: 100%; border: 1px solid var(--border); border-radius: var(--radius-lg);
+  overflow: auto; background: var(--card);
+}
+.own-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); min-width: 520px; }
+.own-table th {
+  text-align: left; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); padding: 12px 15px; border-bottom: 1px solid var(--border);
+}
+.own-table td { padding: 12px 15px; border-bottom: 1px solid var(--border); color: var(--text); }
+.own-table tbody tr:last-child td { border-bottom: 0; }
+.own-table tbody tr:hover { background: var(--bg); }
+.own-table__num { text-align: right; font-weight: 600; }
+.own-table__member { display: flex; align-items: center; gap: 10px; }
+.own-table__member strong { display: block; font-size: var(--fs-sm); }
+.own-table__email { display: block; font-size: var(--fs-xs); color: var(--muted); }
+.own-table__avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--accent-soft); color: var(--accent);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--fs-xs); font-weight: 700;
+}
+@media (max-width: 600px) {
+  .own-table thead { display: none; }
+  .own-table, .own-table tbody, .own-table tr, .own-table td { display: block; width: 100%; }
+  .own-table tr { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .own-table td { border: 0; padding: 6px 15px; text-align: right; display: flex; justify-content: space-between; gap: 14px; }
+  .own-table td::before { content: attr(data-label); font-weight: 700; color: var(--muted); font-size: var(--fs-xs); }
+  .own-table__num::before { content: 'Spend'; font-weight: 700; color: var(--muted); font-size: var(--fs-xs); }
+}

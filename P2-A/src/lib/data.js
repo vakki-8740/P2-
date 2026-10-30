@@ -213,7 +213,11 @@ export function fileSrc(file) {
 }
 
 export function isImageFile(file) {
-  return String((file && file.type) || '').startsWith('image/')
+  if (!file) return false
+  if (String(file.type || '').startsWith('image/')) return true
+  if (/^data:image\//i.test(fileSrc(file))) return true
+  // kai purani complaints me `type` save nahi hua — naam se pakad lo
+  return /\.(png|jpe?g|gif|webp|bmp|avif|svg)$/i.test(String(file.name || ''))
 }
 
 export function formatFileSize(bytes) {

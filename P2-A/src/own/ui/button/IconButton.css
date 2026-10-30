@@ -1,0 +1,34 @@
+.own-iconbtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast), transform var(--t-fast);
+}
+.own-iconbtn:active:not(:disabled) { transform: scale(0.96); }
+.own-iconbtn--sm { width: 32px; height: 32px; }
+.own-iconbtn--md { width: 40px; height: 40px; }
+.own-iconbtn--lg { width: 46px; height: 46px; }
+
+.own-iconbtn--plain:hover { border-color: var(--accent); color: var(--accent); }
+.own-iconbtn--filled { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.own-iconbtn--filled:hover { filter: brightness(1.05); }
+.own-iconbtn--soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.own-iconbtn--soft:hover { border-color: var(--accent); }
+.own-iconbtn--ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.own-iconbtn--ghost:hover { background: var(--accent-soft); color: var(--accent); }
+
+.own-iconbtn__badge {
+  position: absolute; top: -5px; right: -5px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--no); color: var(--on-accent);
+  font-size: 0.64rem; font-weight: 700;
+  border: 2px solid var(--card);
+}

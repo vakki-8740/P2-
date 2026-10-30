@@ -1,0 +1,42 @@
+.own-choice { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-size: var(--fs-base); color: var(--text); }
+.own-choice.is-disabled { opacity: 0.55; cursor: not-allowed; }
+.own-choice__input:focus-visible + .own-check,
+.own-choice__input:focus-visible + .own-radio,
+.own-choice__input:focus-visible + .own-switch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.own-check {
+  width: 19px; height: 19px; border-radius: var(--radius-xs);
+  border: 1.5px solid var(--track-off); background: var(--card);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--on-accent); transition: background var(--t-fast), border-color var(--t-fast);
+  flex: 0 0 auto;
+}
+.own-choice__input:checked + .own-check { background: var(--accent); border-color: var(--accent); }
+.own-check__dash { width: 10px; height: 2px; border-radius: 2px; background: var(--on-accent); }
+.own-choice__input:indeterminate + .own-check { background: var(--accent); border-color: var(--accent); }
+
+.own-radio {
+  width: 19px; height: 19px; border-radius: 50%;
+  border: 1.5px solid var(--track-off); background: var(--card);
+  position: relative; flex: 0 0 auto;
+  transition: border-color var(--t-fast);
+}
+.own-choice__input:checked + .own-radio { border-color: var(--accent); }
+.own-choice__input:checked + .own-radio::after {
+  content: ''; position: absolute; inset: 4px; border-radius: 50%; background: var(--accent);
+}
+
+.own-switch {
+  width: 42px; height: 23px; border-radius: var(--radius-pill);
+  background: var(--track-off); position: relative; flex: 0 0 auto;
+  transition: background var(--t-fast);
+}
+.own-switch__knob {
+  position: absolute; top: 3px; left: 3px; width: 17px; height: 17px;
+  border-radius: 50%; background: var(--card); box-shadow: var(--shadow-sm);
+  transition: left var(--t-fast);
+}
+.own-choice__input:checked + .own-switch { background: var(--accent); }
+.own-choice__input:checked + .own-switch .own-switch__knob { left: 22px; }
+
+.own-choice__label { user-select: none; }

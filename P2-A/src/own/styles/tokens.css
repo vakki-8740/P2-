@@ -1,0 +1,303 @@
+/* ============================================================
+   OWN Library — Design Tokens
+   Single source of truth: colors, type scale, spacing, radius,
+   shadows, z-index. Every component consumes these variables so
+   adding a theme = adding one [data-theme] block here.
+   ============================================================ */
+
+:root {
+  /* Typography scale */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-xs: 0.72rem;
+  --fs-sm: 0.8rem;
+  --fs-base: 0.92rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.15rem;
+  --fs-xl: 1.4rem;
+  --fs-2xl: 1.9rem;
+  --lh-tight: 1.2;
+  --lh-normal: 1.55;
+
+  /* Spacing scale (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* Component sizing */
+  --control-h-sm: 30px;
+  --control-h-md: 38px;
+  --control-h-lg: 46px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 26px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.16);
+
+  /* z-index layers */
+  --z-sticky: 40;
+  --z-drawer: 55;
+  --z-topbar: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+  --z-tooltip: 90;
+
+  /* Motion */
+  --t-fast: 0.15s ease;
+  --t-base: 0.25s ease;
+
+  /* Code surface (shared across themes) */
+  --code-bg: #14161d;
+  --code-line: #232733;
+  --code-text: #d6dae3;
+}
+
+/* ---------- Original Light (default, design identity preserved) ---------- */
+:root,
+[data-theme='light'] {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #4f6bed;
+  --accent-strong: #3d57d8;
+  --accent-soft: rgba(79, 107, 237, 0.1);
+  --on-accent: #ffffff;
+  --yes: #22a06b;
+  --yes-soft: rgba(34, 160, 107, 0.12);
+  --no: #e5484d;
+  --no-soft: rgba(229, 72, 77, 0.1);
+  --warn: #c2740a;
+  --warn-soft: rgba(194, 116, 10, 0.12);
+  --track-off: #d8dce3;
+  color-scheme: light;
+}
+
+/* ---------- Permanent Dark (original values preserved) ---------- */
+[data-theme='dark'] {
+  --bg: #12141a;
+  --card: #1c1f28;
+  --text: #eceef3;
+  --muted: #9aa1b2;
+  --border: #2a2e3a;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.55);
+  --accent: #7b92ff;
+  --accent-strong: #96a8ff;
+  --accent-soft: rgba(123, 146, 255, 0.14);
+  --on-accent: #0e1220;
+  --yes: #35c488;
+  --yes-soft: rgba(53, 196, 136, 0.16);
+  --no: #ff6b6f;
+  --no-soft: rgba(255, 107, 111, 0.14);
+  --warn: #f0b543;
+  --warn-soft: rgba(240, 181, 67, 0.16);
+  --track-off: #3a4050;
+  --code-bg: #0d0f14;
+  --code-line: #1e2230;
+  --code-text: #c9cdd8;
+  color-scheme: dark;
+}
+
+/* ---------- Blue ---------- */
+[data-theme='blue'] {
+  --bg: #f2f6ff;
+  --card: #ffffff;
+  --text: #16233b;
+  --muted: #5b6b86;
+  --border: #dbe5f7;
+  --accent: #1d6fe0;
+  --accent-strong: #1559b8;
+  --accent-soft: rgba(29, 111, 224, 0.1);
+  --on-accent: #ffffff;
+  --yes: #1f9d6b; --yes-soft: rgba(31, 157, 107, 0.12);
+  --no: #e0393e; --no-soft: rgba(224, 57, 62, 0.1);
+  --warn: #c0740f; --warn-soft: rgba(192, 116, 15, 0.12);
+  --track-off: #cfdcef;
+  color-scheme: light;
+}
+
+/* ---------- Sky Blue ---------- */
+[data-theme='sky'] {
+  --bg: #f0f9ff;
+  --card: #ffffff;
+  --text: #0c2c3d;
+  --muted: #55768a;
+  --border: #d4ebf7;
+  --accent: #0284c7;
+  --accent-strong: #0369a1;
+  --accent-soft: rgba(2, 132, 199, 0.1);
+  --on-accent: #ffffff;
+  --yes: #0f9d76; --yes-soft: rgba(15, 157, 118, 0.12);
+  --no: #e14855; --no-soft: rgba(225, 72, 85, 0.1);
+  --warn: #c77d12; --warn-soft: rgba(199, 125, 18, 0.12);
+  --track-off: #cbe6f4;
+  color-scheme: light;
+}
+
+/* ---------- Green ---------- */
+[data-theme='green'] {
+  --bg: #f1faf4;
+  --card: #ffffff;
+  --text: #13301f;
+  --muted: #5c7768;
+  --border: #d8ede0;
+  --accent: #16a34a;
+  --accent-strong: #128a3d;
+  --accent-soft: rgba(22, 163, 74, 0.1);
+  --on-accent: #ffffff;
+  --yes: #15803d; --yes-soft: rgba(21, 128, 61, 0.12);
+  --no: #dc3a3e; --no-soft: rgba(220, 58, 62, 0.1);
+  --warn: #b9740c; --warn-soft: rgba(185, 116, 12, 0.12);
+  --track-off: #cde8d7;
+  color-scheme: light;
+}
+
+/* ---------- Purple ---------- */
+[data-theme='purple'] {
+  --bg: #f7f4ff;
+  --card: #ffffff;
+  --text: #241a3d;
+  --muted: #6b6086;
+  --border: #e6ddfa;
+  --accent: #7c3aed;
+  --accent-strong: #6528c9;
+  --accent-soft: rgba(124, 58, 237, 0.1);
+  --on-accent: #ffffff;
+  --yes: #1f9d6b; --yes-soft: rgba(31, 157, 107, 0.12);
+  --no: #e23d52; --no-soft: rgba(226, 61, 82, 0.1);
+  --warn: #c07a0e; --warn-soft: rgba(192, 122, 14, 0.12);
+  --track-off: #ddd2f6;
+  color-scheme: light;
+}
+
+/* ---------- Pink ---------- */
+[data-theme='pink'] {
+  --bg: #fff3f8;
+  --card: #ffffff;
+  --text: #3d1629;
+  --muted: #856074;
+  --border: #fad9ea;
+  --accent: #db2777;
+  --accent-strong: #b81c62;
+  --accent-soft: rgba(219, 39, 119, 0.1);
+  --on-accent: #ffffff;
+  --yes: #1f9d6b; --yes-soft: rgba(31, 157, 107, 0.12);
+  --no: #e0373c; --no-soft: rgba(224, 55, 60, 0.1);
+  --warn: #c0740f; --warn-soft: rgba(192, 116, 15, 0.12);
+  --track-off: #f6d2e4;
+  color-scheme: light;
+}
+
+/* ---------- Orange ---------- */
+[data-theme='orange'] {
+  --bg: #fff7ef;
+  --card: #ffffff;
+  --text: #3c2410;
+  --muted: #84684d;
+  --border: #f6e2cb;
+  --accent: #ea580c;
+  --accent-strong: #c24808;
+  --accent-soft: rgba(234, 88, 12, 0.1);
+  --on-accent: #ffffff;
+  --yes: #1f9d6b; --yes-soft: rgba(31, 157, 107, 0.12);
+  --no: #dc3a3e; --no-soft: rgba(220, 58, 62, 0.1);
+  --warn: #b45309; --warn-soft: rgba(180, 83, 9, 0.14);
+  --track-off: #f3ddc6;
+  color-scheme: light;
+}
+
+/* ---------- Red ---------- */
+[data-theme='red'] {
+  --bg: #fff3f3;
+  --card: #ffffff;
+  --text: #3b1518;
+  --muted: #856064;
+  --border: #fadada;
+  --accent: #dc2626;
+  --accent-strong: #b71d1d;
+  --accent-soft: rgba(220, 38, 38, 0.09);
+  --on-accent: #ffffff;
+  --yes: #1f9d6b; --yes-soft: rgba(31, 157, 107, 0.12);
+  --no: #c81e1e; --no-soft: rgba(200, 30, 30, 0.1);
+  --warn: #c0740f; --warn-soft: rgba(192, 116, 15, 0.12);
+  --track-off: #f4d2d2;
+  color-scheme: light;
+}
+
+/* ---------- Teal ---------- */
+[data-theme='teal'] {
+  --bg: #effaf8;
+  --card: #ffffff;
+  --text: #0d322e;
+  --muted: #587b76;
+  --border: #d2ede9;
+  --accent: #0d9488;
+  --accent-strong: #0b7a70;
+  --accent-soft: rgba(13, 148, 136, 0.1);
+  --on-accent: #ffffff;
+  --yes: #15803d; --yes-soft: rgba(21, 128, 61, 0.12);
+  --no: #dd3f44; --no-soft: rgba(221, 63, 68, 0.1);
+  --warn: #b9740c; --warn-soft: rgba(185, 116, 12, 0.12);
+  --track-off: #c8e7e3;
+  color-scheme: light;
+}
+
+/* ---------- Black (monochrome dark) ---------- */
+[data-theme='black'] {
+  --bg: #000000;
+  --card: #0d0d0f;
+  --text: #f5f5f5;
+  --muted: #9a9aa3;
+  --border: #26262b;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.7);
+  --accent: #f5f5f5;
+  --accent-strong: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --on-accent: #0a0a0a;
+  --yes: #4ade80; --yes-soft: rgba(74, 222, 128, 0.14);
+  --no: #f87171; --no-soft: rgba(248, 113, 113, 0.14);
+  --warn: #fbbf24; --warn-soft: rgba(251, 191, 36, 0.14);
+  --track-off: #34343a;
+  --code-bg: #050505;
+  --code-line: #1c1c20;
+  --code-text: #d6d6dc;
+  color-scheme: dark;
+}
+
+/* ---------- White (monochrome light) ---------- */
+[data-theme='white'] {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --text: #111111;
+  --muted: #6f6f6f;
+  --border: #e8e8e8;
+  --accent: #111111;
+  --accent-strong: #000000;
+  --accent-soft: rgba(17, 17, 17, 0.06);
+  --on-accent: #ffffff;
+  --yes: #15803d; --yes-soft: rgba(21, 128, 61, 0.12);
+  --no: #c81e1e; --no-soft: rgba(200, 30, 30, 0.1);
+  --warn: #b45309; --warn-soft: rgba(180, 83, 9, 0.12);
+  --track-off: #e2e2e2;
+  color-scheme: light;
+}

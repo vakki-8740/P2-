@@ -1,0 +1,19 @@
+.own-stepper { list-style: none; margin: 0; padding: 0; display: flex; width: 100%; max-width: 560px; }
+.own-stepper__item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; gap: 7px; }
+.own-stepper__dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px solid var(--track-off); background: var(--card);
+  color: var(--muted); font-size: var(--fs-sm); font-weight: 700;
+  display: flex; align-items: center; justify-content: center; z-index: 1;
+}
+.own-stepper__label { font-size: var(--fs-xs); font-weight: 600; color: var(--muted); }
+.own-stepper__bar { position: absolute; top: 15px; left: calc(50% + 19px); right: calc(-50% + 19px); height: 2px; background: var(--track-off); z-index: 0; }
+.own-stepper__item:last-child .own-stepper__bar { display: none; }
+.own-stepper__item.is-done .own-stepper__dot { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.own-stepper__item.is-done .own-stepper__bar { background: var(--accent); }
+.own-stepper__item.is-active .own-stepper__dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.own-stepper__item.is-active .own-stepper__label { color: var(--text); }
+
+.own-stepper--vertical { flex-direction: column; gap: 4px; max-width: 260px; }
+.own-stepper--vertical .own-stepper__item { flex-direction: row; justify-content: flex-start; gap: 12px; padding: 6px 0; }
+.own-stepper--vertical .own-stepper__bar { position: absolute; left: 14px; top: 34px; bottom: -10px; right: auto; width: 2px; height: auto; }
