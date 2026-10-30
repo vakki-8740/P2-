@@ -43,6 +43,24 @@ var CONFIG = {
   UPLOADS_FILE: 'uploads.json',
   VERSION: '2.0.0-drive',
   MAX_PAGE: 500,
+
+  /* -----------------------------------------------------------------
+   * ADMIN — do me se koi ek tarika chuno:
+   *
+   *  (A) sabse aasan: neeche ADMIN_TOKEN me apna password likh do
+   *      ADMIN_TOKEN: 'mera-password-123',
+   *      aur Deploy → Manage deployments → ✏️ Edit → New version → Deploy
+   *
+   *  (B) Script Properties se: Project Settings → Script Properties →
+   *      ADMIN_API_TOKEN = mera-password-123   (code me kuch badalne ki
+   *      zarurat nahi, par deploy ke baad bhi "New version" karna hota hai)
+   *
+   *  (C) Token hi nahi chahiye? ALLOW_PUBLIC_LIST: true kar do —
+   *      tab admin page bina token ke saari complaints dikha dega
+   *      (⚠️ URL jiske paas hai wo sab padh lega).
+   * ----------------------------------------------------------------- */
+  ADMIN_TOKEN: '',
+  ALLOW_PUBLIC_LIST: false,
   // Attachments Drive me public link se serve hote hain, isliye folder share
   // karne ki zarurat nahi — script file ko "anyone with link" kar deta hai.
   PUBLIC_LINKS: true
@@ -101,12 +119,20 @@ function withLock_(fn) {
   }
 }
 
+/** Token = Script Properties ki value, warna CONFIG.ADMIN_TOKEN. */
 function adminToken_() {
-  var props = PropertiesService.getScriptProperties();
-  return String(props.getProperty('ADMIN_API_TOKEN') || '');
+  var fromProps = '';
+  try {
+    fromProps = String(PropertiesService.getScriptProperties().getProperty('ADMIN_API_TOKEN') || '');
+  } catch (err) {
+    fromProps = '';
+  }
+  if (fromProps) return fromProps;
+  return String(CONFIG.ADMIN_TOKEN || '');
 }
 
 function isAdmin_(given) {
+  if (CONFIG.ALLOW_PUBLIC_LIST) return true;
   var expected = adminToken_();
   if (!expected) return false;
   return String(given || '') === expected;
@@ -278,7 +304,8 @@ function route_(path, method, clientId, adminToken, query, body) {
       upload_dir: CONFIG.UPLOAD_FOLDER,
       upload_persistent: true,
       counts: { complains: complains.length, chat: chat.length },
-      admin_scope_enabled: !!adminToken_()
+      admin_scope_enabled: CONFIG.ALLOW_PUBLIC_LIST || !!adminToken_(),
+      public_list: !!CONFIG.ALLOW_PUBLIC_LIST
     };
   }
 

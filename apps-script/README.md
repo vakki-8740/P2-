@@ -21,16 +21,42 @@ Drive/
 3. `Code.gs` ka poora content copy karke paste karo
 4. **Ctrl/Cmd + S** — save
 
-## 2. Admin token (optional, par recommended)
+## 2. Admin access — 3 tarike (koi ek chuno)
 
-Left sidebar → ⚙️ **Project Settings** → **Script Properties** → **Add script property**
+Admin page (saari complaints ki list) ke liye token chahiye. Sabse aasan pehla hai.
+
+### (A) Code me hi password likh do — sabse aasan ⭐
+
+`Code.gs` me sabse upar `CONFIG` me ye line hai:
+
+```js
+ADMIN_TOKEN: '',
+```
+
+Isko apne password se bhar do (jo chaho):
+
+```js
+ADMIN_TOKEN: 'mera-password-123',
+```
+
+Phir **Ctrl+S** → **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
+
+### (B) Script Properties se (code chhedna nahi padta)
+
+Editor ke **left sidebar me sabse neeche ⚙️ gear icon** → **Project Settings** →
+neeche scroll → **Script Properties** → **Add script property**:
 
 | Property | Value |
 |---|---|
-| `ADMIN_API_TOKEN` | koi lamba password (e.g. `openssl rand -hex 24` ka output) |
+| `ADMIN_API_TOKEN` | `mera-password-123` |
 
-Iske bina app normal chalega, bas **saare users ki complaints ek jagah dekhne** wala
-admin mode band rahega (`?scope=all`).
+Phir wahi: **Deploy → Manage deployments → Edit → New version → Deploy**
+(property akela kaafi nahi — naya version deploy karna padta hai).
+
+### (C) Token hi nahi chahiye
+
+`CONFIG` me `ALLOW_PUBLIC_LIST: true` kar do → admin page bina token ke saari
+complaints dikha dega. ⚠️ URL jiske paas hai wo sab padh lega.
 
 ## 3. Deploy karo (web app)
 

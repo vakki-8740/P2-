@@ -368,8 +368,12 @@
 
     fetchJson('/api/health', {}, 20000)
       .then(function (h) {
-        if (!token && h.admin_scope_enabled) {
-          setMsg('msg', 'Connected ✓ — par admin token daalo, warna saari complaints nahi dikhengi.', 'warn');
+        if (!h.admin_scope_enabled) {
+          setMsg('msg', 'Server se connect ✓ par admin access BAND hai. Apps Script me Code.gs ki top line me ADMIN_TOKEN: \'kuch-password\' kar do (ya ALLOW_PUBLIC_LIST: true), phir Deploy → Manage deployments → Edit → New version → Deploy.', 'bad');
+          return;
+        }
+        if (!token && !h.public_list) {
+          setMsg('msg', 'Connected ✓ — ab admin token daalo, warna saari complaints nahi dikhengi.', 'warn');
         } else {
           setMsg('msg', 'Connected ✓ ' + (h.storage || '') + ' ' + (h.version || ''), 'ok');
         }

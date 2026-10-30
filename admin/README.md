@@ -19,7 +19,7 @@ Do cheezein maangega, browser me yaad rah jayengi:
 | Field | Kahan se |
 |---|---|
 | **Web App URL** | Apps Script → Deploy → Web app → `…/exec` link |
-| **Admin token** | Apps Script → Project Settings → Script Properties → `ADMIN_API_TOKEN` |
+| **Admin token** | jo password aapne `Code.gs` ke `CONFIG.ADMIN_TOKEN` me likha (ya Script Properties ka `ADMIN_API_TOKEN`) |
 
 "Save & check" dabao → green "Connected ✓" aana chahiye.
 
@@ -36,9 +36,10 @@ URL milega jaise `https://p2-admin-xxxx.vercel.app` — usko phone me bookmark k
 ## Dhyan rakho
 
 - Page ko token chahiye, warna `Admin token required` error aayega.
-  Agar Script Properties me `ADMIN_API_TOKEN` set hi nahi hai, to pehle wo banao
-  ([`../apps-script/README.md`](../apps-script/README.md) step 2) aur Apps Script
-  dobara deploy karo.
+  Token set karne ke 3 tarike [`../apps-script/README.md`](../apps-script/README.md) §2
+  me hain — sabse aasan: `Code.gs` me `ADMIN_TOKEN: 'password'` likh do.
+- Code ya property badalne ke baad **Deploy → Manage deployments → Edit →
+  New version → Deploy** karna zaroori hai, warna purana version chalta rahega.
 - Apps Script deployment **"Anyone"** pe hona chahiye, warna `Failed to fetch`.
 - Ye page public URL pe hai — jiske paas link hai wo khol sakta hai. Zarurat ho to
   Vercel pe **Password Protection** (Pro plan) laga do, ya URL kisi ko na do.
