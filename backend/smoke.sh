@@ -54,7 +54,7 @@ if [ "$LIST_ONLY" -eq 1 ]; then
     body="$(curl -s -m 20 "$BASE/api/complains?limit=20" -H "X-Client-Id: $CID" | compact || true)"
   fi
   case "$body" in
-    *'"data":[]'*) echo "Khaali — is client-id ke liye koi record nahi."; exit 1 ;;
+    *'"data":[]'*) echo "Khaali — koi record nahi mila."; exit 1 ;;
     *'"ok":true'*) echo "Records mil gaye ✓"; echo "$body" | head -c 600; echo; exit 0 ;;
     *) echo "Unexpected: ${body:0:200}"; exit 1 ;;
   esac
