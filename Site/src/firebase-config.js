@@ -13,12 +13,12 @@
  */
 
 export const firebaseConfig = {
-  apiKey: '',          // "AIza..."
-  authDomain: '',      // "your-project.firebaseapp.com"
-  projectId: '',       // "your-project"           ← ZAROORI
-  storageBucket: '',   // "your-project.appspot.com"
-  messagingSenderId: '',
-  appId: '',           // "1:123:web:abc"
+  apiKey: 'AIzaSyB6QQ2VkDkvnl_sbJlBGnw0Q4thU3noP5A',
+  authDomain: 'parmatch-main.firebaseapp.com',
+  projectId: 'parmatch-main',
+  storageBucket: 'parmatch-main.firebasestorage.app',
+  messagingSenderId: '417396734605',
+  appId: '1:417396734605:web:ed307931c4af7022ad00c4',
 }
 
 /** Firebase ready hai ya nahi (config bhara hai ya nahi). */
