@@ -201,11 +201,11 @@ if [ -n "${URL:-}" ]; then
       yellow "  ⚠  DB /tmp me hai — redeploy pe data wipe ho jayega."
       info "     Fix: app.yaml me volume + DB_PATH=/data/app.db (repo me already hai)"
       info "     ya MySQL secrets:"
-      info "       wasmer secret create DB_HOST --value=<host>"
-      info "       wasmer secret create DB_NAME --value=<db>"
-      info "       wasmer secret create DB_USER --value=<user>"
-      info "       wasmer secret create DB_PASS --value=<pass>"
-      info "       wasmer secret create APP_KEY  --value=\$(openssl rand -hex 32)"
+      info '       wasmer app secrets create DB_HOST "<host>"'
+      info '       wasmer app secrets create DB_NAME "<db>"'
+      info '       wasmer app secrets create DB_USER "<user>"'
+      info '       wasmer app secrets create DB_PASS "<pass>"'
+      info '       wasmer app secrets create APP_KEY "$(openssl rand -hex 32)"'
       ;;
     *'"db_persistent":true'*)
       green "  DB persistent (volume) ✓"
@@ -213,7 +213,10 @@ if [ -n "${URL:-}" ]; then
   esac
   case "$HEALTH" in
     *'"admin_scope_enabled":false'*)
-      info "  admin API band hai — ADMIN_API_TOKEN secret set karke deploy karo (upar dekho)."
+      info "  admin API band hai. Admin token banao (value aap khud chunte ho):"
+      info '       wasmer app secrets create ADMIN_API_TOKEN "$(openssl rand -hex 24)"'
+      info "       wasmer app secrets reveal ADMIN_API_TOKEN   # value dekhne ke liye"
+      info "       bash deploy.sh                              # apply karne ke liye"
       ;;
   esac
 else

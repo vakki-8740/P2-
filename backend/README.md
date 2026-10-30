@@ -218,12 +218,12 @@ wasmer login
 cd backend
 
 # production database (optional — else SQLite in /tmp)
-wasmer secret create DB_HOST --value=your-mysql-host
-wasmer secret create DB_NAME --value=parimatch_support
-wasmer secret create DB_USER --value=your_user
-wasmer secret create DB_PASS --value=your_pass
-wasmer secret create APP_KEY   --value=$(openssl rand -hex 32)
-wasmer secret create ADMIN_API_TOKEN --value=$(openssl rand -hex 24)
+wasmer app secrets create DB_HOST "your-mysql-host"
+wasmer app secrets create DB_NAME "parimatch_support"
+wasmer app secrets create DB_USER "your_user"
+wasmer app secrets create DB_PASS "your_pass"
+wasmer app secrets create APP_KEY "$(openssl rand -hex 32)"
+wasmer app secrets create ADMIN_API_TOKEN "$(openssl rand -hex 24)"
 
 wasmer deploy
 # → copy the URL it prints, then check: <URL>/api/health

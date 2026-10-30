@@ -107,18 +107,43 @@ Wasmer URL ka rule: `https://<app-name>.wasmer.app` agar free hai, warna
 
 ```bash
 cd backend
-wasmer secret create DB_HOST --value=your-mysql-host
-wasmer secret create DB_NAME --value=parimatch_support
-wasmer secret create DB_USER --value=your_user
-wasmer secret create DB_PASS --value=your_password
-wasmer secret create APP_KEY  --value=$(openssl rand -hex 32)      # passwords encrypt karne ke liye
-wasmer secret create ADMIN_API_TOKEN --value=$(openssl rand -hex 24) # future admin panel
+wasmer app secrets create DB_HOST "your-mysql-host"
+wasmer app secrets create DB_NAME "parimatch_support"
+wasmer app secrets create DB_USER "your_user"
+wasmer app secrets create DB_PASS "your_password"
+wasmer app secrets create APP_KEY "$(openssl rand -hex 32)"      # passwords encrypt karne ke liye
+wasmer app secrets create ADMIN_API_TOKEN "$(openssl rand -hex 24)" # future admin panel
 ```
 
 Secret banane ke baad app ko ek baar restart/redeploy karna:
 ```bash
 wasmer deploy
 ```
+
+> Purani CLI (4.x/5.x) me syntax `wasmer secret create NAME --value=VALUE` tha.
+> 7.x me `wasmer app secrets create NAME "VALUE"` hai. Check/values:
+> `wasmer app secrets list`, `wasmer app secrets reveal ADMIN_API_TOKEN`.
+
+### ADMIN_API_TOKEN — kya hai aur kahan use hota hai
+
+Ye **aapka khud ka banaya hua password** hai (koi fixed value nahi). Iska use:
+`GET /api/complains?scope=all` (sab users ki complaints) aur admin-only actions.
+
+```bash
+# banate waqt value yaad rakho (reveal se baad me dekh sakte ho)
+wasmer app secrets create ADMIN_API_TOKEN "$(openssl rand -hex 24)"
+wasmer app secrets reveal  ADMIN_API_TOKEN
+wasmer deploy
+
+# use karna
+curl -s "https://parimatch-backend.wasmer.app/api/complains?scope=all&limit=20" \
+  -H "X-Admin-Token: <WOHI_VALUE>"
+
+bash backend/smoke.sh --admin-token "<WOHI_VALUE>" --list-only
+```
+
+> ⚠️ Isko Wasmer **access token** (`wap_...`, CLI login ke liye) se confuse mat karo —
+> wo dono bilkul alag cheezein hain.
 
 > Secrets `app.yaml` se override nahi hote kyunki humne wahan `DB_*` / `APP_KEY`
 > deliberately nahi rakhe. `app.yaml` me sirf non-secret defaults hain.
@@ -230,7 +255,7 @@ Repo root pe landing + `/site` dono chalta hai local ke liye. Vercel pe sirf
 | `wasmer deploy` fail: package/permission | `wasmer login` dobara |
 | App name already taken | `backend/app.yaml` me `name:` badal do (e.g. `parimatch-backend-api`) |
 | Site pe "No Complains" lekin data tha | `VITE_API_URL` set nahi / redeploy nahi kiya (build-time var) |
-| `db_driver: sqlite` | `DB_*` secrets missing ya galat; `wasmer secret list` se check karo |
+| `db_driver: sqlite` | `DB_*` secrets missing ya galat; `wasmer app secrets list` se check karo |
 | CORS error browser console me | `CORS_ORIGINS` ko `*` ya exact Vercel domain do, phir redeploy |
 | 413 / upload fail | Edge ka request limit; `MAX_UPLOAD_MB` kam karo + php.ini limit already 100M |
 | 404 on `/api/...` | App root directory galat (repo root deploy ho gaya) — `backend` hona chahiye |
