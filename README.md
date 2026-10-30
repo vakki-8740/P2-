@@ -23,7 +23,7 @@ Browser seedha Firestore se baat karta hai. Koi server, Drive, Apps Script,
 PHP ya MySQL nahi. Isliye data **turant** aata hai (`onSnapshot` push, <1 s).
 
 ```
-Site (React)  ──▶  Firestore  ──onSnapshot (live)──▶  Site + check page
+Site (React)  ──▶  Firestore  ──onSnapshot (live)──▶  Site (har tab turant update)
 ```
 
 | | |
@@ -43,21 +43,12 @@ messages/{id}   → { id, clientId, sender, text, file, edited, createdAt, updat
 Har browser ka apna `parimatch_client_id` (localStorage) hota hai, isliye
 complaints usi browser me dikhti hain jahan se bheji gayi.
 
-> Pehle Drive + Apps Script tha, usse pehle PHP/Wasmer + MySQL — sab **hata diya**.
-
 ---
 
-## Data check page (test ke liye)
+## Data kahin dekhein
 
-`check/index.html` — ek chhota single-file page (koi build nahi). Vercel pe
-**Root Directory = `check`** se deploy karo.
-
-- Wahi `firebaseConfig` block paste karo → **Connect** (ek hi baar, browser yaad rakhta hai)
-- 🟢 **LIVE** badge, total complaints, naam ki list, raw JSON — sab **real-time**
-- Website se complaint bhejo → bina refresh usi second yahan dikhegi
-- **Test complaint bhejo** button se write bhi verify ho jata hai
-
-Details: [`check/README.md`](check/README.md)
+- **Firebase console** → Firestore Database → **Data** tab → `complaints`, `messages`
+- **App me** → All Complains page (live, khud update hota hai)
 
 ## Projects
 
@@ -71,11 +62,13 @@ Details: [`check/README.md`](check/README.md)
 
 ## Features
 
-- **7 complaint forms** — Deposit, Withdrawal, Bonus, Bank Statement, KYC,
-  Unlock Withdrawal, Live Chat. 4-second in-button submitting state, popup
-  auto-closes after 3 seconds and clears the form.
-- **Attachments** — images/PDF/DOC/XLS/TXT/ZIP (client-side limits, see
-  `Site/src/utils/api.js`).
+- **6 complaint forms + Live Chat** — Deposit, Withdrawal, Bonus, Bank Statement,
+  KYC, Unlock Withdrawal (saare ek shared `ComplainForm` se), Live Chat.
+  Submit turant hota hai (koi delay nahi), popup 3 second me khud band hokar
+  form clear kar deta hai.
+- **Attachments** — photo browser me compress hoti hai, phir base64 ke roop me
+  Firestore doc me jati hai (ek file max 250 KB, total 450 KB —
+  limits `Site/src/utils/api.js` me).
 - **All Complains** — list, status badge, date, details grid, file previews,
   per-complaint delete and "Clear".
 - **Live Chat** — send / edit / delete / copy, attachments with preview,

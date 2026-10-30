@@ -4,7 +4,7 @@ Ab koi server, Drive, Apps Script ya SQL nahi. Data **Firebase Firestore** me
 jata hai — isliye data **turant** (real-time) dikhta hai, bina refresh.
 
 ```
-Website  ──▶  Firestore  ──(live push)──▶  Website / check page
+Website  ──▶  Firestore  ──(live push)──▶  Website (har tab turant update)
 ```
 
 ---
@@ -68,13 +68,18 @@ Phir commit + push karo → Vercel **Redeploy**.
 **Config khaali ho to app crash nahi karta** — bas localStorage mode me chalta
 hai (data sirf usi browser me), aur All Complains page pe peela banner dikhta hai.
 
-## Step 5 — Check page
+## Step 5 — Test karo
 
-`check/index.html` kholo → wahan **wahi `firebaseConfig` block paste** karo → **Connect**.
+1. Website kholo → koi complaint submit karo
+2. **Firebase console → Firestore Database → Data** → `complaints` collection
+   me wo complaint turant dikhegi
+3. Doosre tab me **All Complains** kholo → **bina refresh** wahan bhi aa jayegi
+4. Live Chat me message bhejo → `messages` collection me turant
 
-- 🟢 **LIVE** badge + total complaints
-- Website se nayi complaint bhejo → **bina refresh** usi second list me
-- **Test complaint bhejo** button se write bhi verify ho jata hai
+Kuch na dikhe to:
+- `Firestore Database` create hua ya nahi (Step 2)
+- `firebase-config.js` me `apiKey` + `projectId` bhare hain ya nahi
+- Rules "test mode" me hain ya nahi
 
 ## Step 6 — Rules (security)
 
@@ -147,12 +152,3 @@ Firestore document ka limit **1 MB** hai, isliye:
 Badi file chahiye to Firebase **Storage** alag se on karna padega — bolo to kar denge.
 
 ---
-
-## Purana setup (hataa diya)
-
-| Pehle | Ab |
-|---|---|
-| PHP + MySQL (Wasmer) | ❌ hata diya |
-| Google Apps Script + Drive JSON | ❌ hata diya |
-| Realtime Database | ❌ nahi use kar rahe |
-| **Firestore** | ✅ yahi chal raha hai |
