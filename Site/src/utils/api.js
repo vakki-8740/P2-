@@ -1,10 +1,12 @@
-// api.js — central API client for the Parimatch backend (PHP + SQL).
+// api.js — central data client. Talks to a Google Apps Script web app
+// (VITE_API_URL) that stores everything in Google Drive. No server, no DB.
 // Configure with VITE_API_URL. When it is empty the app runs in
 // localStorage-only mode (offline) and every store falls back gracefully.
 
 const RAW_BASE = import.meta.env.VITE_API_URL || ''
 export const API_BASE = RAW_BASE.replace(/\/+$/, '')
-export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024 // 100 MB (matches php.ini)
+export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024 // 100 MB client ceiling
+// NOTE: Apps Script/Drive quotas are lower — keep attachments small in Drive mode.
 
 const CLIENT_KEY = 'parimatch_client_id'
 

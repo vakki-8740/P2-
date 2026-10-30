@@ -1,5 +1,5 @@
 // complainStore.js — complaints data layer.
-// Backend (PHP + SQL) first, localStorage fallback so the UI keeps working
+// Remote store (Apps Script -> Google Drive) first, localStorage fallback
 // offline. Both shapes are normalised to one structure before rendering:
 //
 //   { id, type, title, status, createdAt, hasPassword,
