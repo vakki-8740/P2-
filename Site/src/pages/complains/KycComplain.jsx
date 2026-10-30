@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Header from '../../components/Header'
 import SubmitSuccessPopup from '../../components/SubmitSuccessPopup'
 import FileUpload from '../../components/FileUpload'
+import { submitDelay } from '../../utils/submitDelay'
 import { saveComplain, generateId } from '../../utils/complainStore'
 import { withBase } from '../../utils/base'
 
@@ -33,7 +34,7 @@ export default function KycComplain() {
         files
       }
       await saveComplain(entry)
-      await new Promise(r => setTimeout(r, 4000))
+      await submitDelay()
       setShowSuccess(true)
     } catch (err) { alert(err && err.message ? err.message : 'Submit failed') }
  finally { setSubmitting(false) }

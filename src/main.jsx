@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import '../Site/src/own-library.css'
 import '../Site/src/index.css'
+import { warmUp } from '../Site/src/utils/api'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -12,3 +13,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 )
+
+// Apps Script ko jaldi jaga do — pehli complaint fast submit hogi.
+warmUp()

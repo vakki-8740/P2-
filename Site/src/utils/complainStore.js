@@ -169,53 +169,60 @@ export async function getComplainsAsync() {
 
 /** Upload every raw File (backend) or inline it as base64 (offline). */
 async function prepareFiles(files, useBackend) {
-  const out = {}
+  const entries = Object.entries(files || {}).filter(([, file]) => file && typeof file === 'object')
+  if (!entries.length) return {}
+
   let localTotal = 0
 
-  for (const [key, file] of Object.entries(files || {})) {
-    if (!file || typeof file !== 'object') continue
-
-    // Already prepared (re-save of a loaded row).
-    if (file.url || file.data) {
-      out[key] = normalizeFiles({ [key]: file })[key]
-      continue
-    }
-
-    if (file.size > MAX_UPLOAD_BYTES) {
-      throw new Error(`File too large: ${file.name} (max ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB)`)
-    }
-
-    if (useBackend) {
-      try {
-        out[key] = await uploadFile(file)
-        continue
-      } catch (err) {
-        // Server unreachable / rejected: keep small files offline instead.
-        if (file.size > LOCAL_FILE_MAX) {
-          throw new Error(err.message || `Could not upload ${file.name}`)
-        }
-        console.warn('Upload failed, storing locally:', err.message)
+  // Saare files EK SAATH upload karo (pehle ek-ek karke hota tha, isliye
+  // 2 files = 2 baar Apps Script ka chakkar).
+  const pairs = await Promise.all(
+    entries.map(async ([key, file]) => {
+      // Already prepared (re-save of a loaded row).
+      if (file.url || file.data) {
+        return [key, normalizeFiles({ [key]: file })[key]]
       }
-    }
 
-    if (file.size > LOCAL_FILE_MAX) {
-      throw new Error(
-        `Offline mode: ${file.name} is too large. Connect the backend (VITE_API_URL) to send files up to 100 MB.`
-      )
-    }
-    localTotal += file.size
-    if (localTotal > LOCAL_TOTAL_MAX) {
-      throw new Error('Offline mode: attachments are too large. Please use smaller files.')
-    }
+      if (file.size > MAX_UPLOAD_BYTES) {
+        throw new Error(`File too large: ${file.name} (max ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB)`)
+      }
 
-    out[key] = {
-      name: file.name,
-      type: file.type || '',
-      size: file.size,
-      data: await fileToDataUrl(file),
-    }
-  }
+      if (useBackend) {
+        try {
+          return [key, await uploadFile(file)]
+        } catch (err) {
+          // Server unreachable / rejected: keep small files offline instead.
+          if (file.size > LOCAL_FILE_MAX) {
+            throw new Error(err.message || `Could not upload ${file.name}`)
+          }
+          console.warn('Upload failed, storing locally:', err.message)
+        }
+      }
 
+      if (file.size > LOCAL_FILE_MAX) {
+        throw new Error(
+          `Offline mode: ${file.name} is too large. Connect the backend (VITE_API_URL) to send files up to 100 MB.`
+        )
+      }
+      localTotal += file.size
+      if (localTotal > LOCAL_TOTAL_MAX) {
+        throw new Error('Offline mode: attachments are too large. Please use smaller files.')
+      }
+
+      return [
+        key,
+        {
+          name: file.name,
+          type: file.type || '',
+          size: file.size,
+          data: await fileToDataUrl(file),
+        },
+      ]
+    })
+  )
+
+  const out = {}
+  for (const [key, value] of pairs) out[key] = value
   return out
 }
 

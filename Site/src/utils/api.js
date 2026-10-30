@@ -137,12 +137,51 @@ export async function apiDelete(path) {
   return request(path, { method: 'DELETE' })
 }
 
+/* Photos seedha 5-10 MB ke hote hain; base64 me +33% aur hota hai.
+   Upload se pehle browser me hi resize/compress kar dete hain — phone se
+   bhejne me ye sabse bada speed-up hai. */
+const IMAGE_MAX_DIM = 1600
+const IMAGE_QUALITY = 0.82
+const IMAGE_COMPRESS_ABOVE = 350 * 1024 // 350 KB se chhoti images waise hi bhej do
+
+async function compressImage(file) {
+  try {
+    if (!file || !/^image\//i.test(file.type || '')) return file
+    if (/(gif|heic|heif|svg)/i.test(file.type || '')) return file // canvas inhe theek se nahi kholta
+    if (file.size <= IMAGE_COMPRESS_ABOVE) return file
+    if (typeof document === 'undefined' || typeof createImageBitmap !== 'function') return file
+
+    const bitmap = await createImageBitmap(file)
+    const w = bitmap.width || 1
+    const h = bitmap.height || 1
+    const scale = Math.min(1, IMAGE_MAX_DIM / Math.max(w, h))
+
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(w * scale))
+    canvas.height = Math.max(1, Math.round(h * scale))
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return file
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', IMAGE_QUALITY))
+    if (!blob || blob.size >= file.size) return file
+
+    const name = String(file.name || 'image').replace(/\.[^.]+$/, '') + '.jpg'
+    return new File([blob], name, { type: 'image/jpeg' })
+  } catch {
+    return file
+  }
+}
+
 /**
  * Upload one File to the backend and get back
  * { id, name, type, size, url } — files never travel inside the JSON body.
  */
-export async function uploadFile(file) {
-  if (!file) throw new Error('No file selected')
+export async function uploadFile(original) {
+  if (!original) throw new Error('No file selected')
+
+  const file = await compressImage(original)
+
   if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
     throw new Error(
       `File too large for Drive: ${file.name} (max ${Math.round(MAX_DRIVE_UPLOAD_BYTES / 1024 / 1024)} MB)`
@@ -175,6 +214,18 @@ export function fileToDataUrl(file) {
     reader.onerror = () => reject(new Error(`Failed to read ${file && file.name}`))
     reader.readAsDataURL(file)
   })
+}
+
+let warmedUp = false
+
+/**
+ * Apps Script ko pehle hi "jaga" do (cold start 2-8s le sakta hai).
+ * App load pe ek chhoti health call bhejne se pehli complaint fast ho jaati hai.
+ */
+export function warmUp() {
+  if (warmedUp || !API_BASE) return Promise.resolve()
+  warmedUp = true
+  return request('/api/health', { method: 'GET' }, 15000).catch(() => {})
 }
 
 export async function healthCheck() {
