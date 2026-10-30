@@ -17,6 +17,20 @@ import {
 } from '../utils/complainStore'
 import { isFirebaseConfigured } from '../firebase-config'
 
+/** 'pending' → 'Pending', 'in review' → 'In Review' */
+function statusLabel(status) {
+  const s = String(status || 'pending').replace(/[_-]+/g, ' ').trim()
+  return s.replace(/\b\w/g, (ch) => ch.toUpperCase())
+}
+
+/** status ka colour: resolved = green, rejected = red, baaki = amber */
+function statusTone(status) {
+  const s = String(status || '').toLowerCase()
+  if (['resolved', 'done', 'closed', 'completed'].includes(s)) return 'success'
+  if (['rejected', 'cancelled', 'canceled', 'failed'].includes(s)) return 'danger'
+  return 'warning'
+}
+
 /** paymentImage → "Payment Image", aadharFront → "Aadhar Front" */
 function prettyFileLabel(key) {
   return String(key || 'File')
@@ -134,14 +148,12 @@ export default function AllComplains() {
 
             return (
               <div key={c.id} className="card complain-item">
+                {/* Status — card ke top-right corner pe (upper side) */}
+                <span className={`complain-status ${statusTone(c.status)}`}>{statusLabel(c.status)}</span>
+
                 <div className="complain-item-head">
                   <span className="badge info">{c.type || 'Complain'}</span>
-                  <div className="complain-item-head-right">
-                    <span className={`badge ${c.status === 'resolved' ? 'success' : 'warning'}`}>
-                      {c.status || 'Pending'}
-                    </span>
-                    <span className="complain-item-date">{formatDate(c.createdAt)}</span>
-                  </div>
+                  <span className="complain-item-date">{formatDate(c.createdAt)}</span>
                 </div>
                 <h3 className="complain-item-title">{c.title}</h3>
 
