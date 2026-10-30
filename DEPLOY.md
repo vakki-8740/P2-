@@ -42,6 +42,13 @@ Warna SQLite + volume poora kaam karta hai — koi DB server nahi banana padta.
 3. `https://your-site.vercel.app/all-complains` pe test karo
 4. *(Optional)* MySQL chahiye to §5 dekho — warna kuch nahi karna
 
+Baad me health + CRUD ek command me check karne ke liye:
+
+```bash
+bash backend/smoke.sh                              # live URL
+bash backend/smoke.sh https://... --keep           # record delete mat karo
+```
+
 ---
 
 ## 1. Backend — Wasmer Edge
