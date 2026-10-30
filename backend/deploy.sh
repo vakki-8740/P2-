@@ -107,7 +107,7 @@ if ! wasmer --version >/dev/null 2>&1; then
   fi
   exit 1
 fi
-green "  wasmer $(wasmer --version 2>/dev/null | head -1)"
+green "  $(wasmer --version 2>/dev/null | head -1)"
 
 info "3/4  Auth"
 
@@ -128,9 +128,17 @@ elif ! auth_ok; then
 fi
 
 # Best-effort namespace detection (optional, never blocks the deploy).
-USER_NAME="$(wasmer whoami 2>/dev/null | head -1 | tr -d '\r')"
+# `wasmer whoami` on 7.x prints: "Logged into registry wasmer.io as user <name>"
+# Older builds print the bare name. Accept only a plain namespace token.
+WHOAMI_RAW="$(wasmer whoami 2>/dev/null | tr -d '\r')"
+USER_NAME="$(printf '%s\n' "$WHOAMI_RAW" \
+  | sed -n 's/.*as user \([A-Za-z0-9._-]*\).*/\1/p' | head -1)"
 if [ -z "${USER_NAME:-}" ]; then
-  USER_NAME="$(wasmer app info 2>/dev/null | sed -n 's/.*Owner: *//p' | head -1)"
+  USER_NAME="$(printf '%s' "$WHOAMI_RAW" | tr -d '[:space:]' \
+    | grep -E '^[A-Za-z0-9._-]+$' || true)"
+fi
+if [ -z "${USER_NAME:-}" ]; then
+  USER_NAME="$(wasmer app info 2>/dev/null | sed -n 's/.*Owner: *//p' | head -1 | tr -d '\r')"
 fi
 OWNER="$(grep -m1 '^owner:' app.yaml | awk '{print $2}')"
 if [ -n "${USER_NAME:-}" ]; then
