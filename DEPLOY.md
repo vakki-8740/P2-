@@ -34,7 +34,19 @@ Sab kuch ready hai. Do deployments hain: **backend → Wasmer Edge**, aur
 Agar aap CLI ki jagah GitHub integration use karte ho, to **"App directory /
 working directory" = `backend`** set karna (monorepo root nahi).
 
-### Commands
+### Commands (ek hi script se)
+
+```bash
+bash backend/deploy.sh            # preflight + login check + deploy + health check
+bash backend/deploy.sh --check    # sirf local preflight (network nahi chahiye)
+```
+
+Script ye sab karta hai: files check → config format validate → CLI install (na ho to)
+→ login check → owner vs namespace match → deploy → URL nikaal ke `/api/health`
+hit karta hai → aapko `VITE_API_URL` print karta hai. Fail hone pe last 25 log
+lines dikhata hai (`/tmp/wasmer-deploy.log`).
+
+### Manual commands (script ke bina)
 
 ```bash
 # CLI install (ek baar)
